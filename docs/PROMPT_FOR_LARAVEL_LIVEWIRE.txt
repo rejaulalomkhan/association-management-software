@@ -1,0 +1,101 @@
+# Prompt: Build a "প্রজন্ম উন্নয়ন মিশন" Management App with Laravel Livewire (Enhanced Version)
+
+## 1. Technology Stack
+- **Backend:** Laravel
+- **Frontend:** Livewire & Alpine.js
+- **Styling:** Tailwind CSS
+- **Authentication:** Laravel Breeze or Fortify
+- **PDF Generation:** `barryvdh/laravel-dompdf`
+- **Charts:** `Chart.js` integrated with Alpine.js
+- **PWA Support:** `laravel-pwa/laravel-pwa-package`
+
+## 2. Database Schema
+
+**`users` table:**
+- `id` (Primary Key)
+- `name`, `email` (string, email for notifications)
+- `phone` (string, unique)
+- `password` (string)
+- `role` (enum: 'admin', 'accountant', 'member') - default: 'member'
+- `status` (enum: 'pending', 'active', 'inactive') - default: 'pending'
+- `position`, `profile_pic_path`, `father_name`, `dob`, `permanent_address`, `present_address`, `blood_group`, `profession`, `religion`, `nationality`
+- `joined_at` (timestamp, nullable) - Set when admin approves.
+- `remember_token`, `timestamps`
+
+**`payments` table:**
+- `id` (Primary Key)
+- `user_id` (Foreign Key to `users`)
+- `transaction_id` (string, unique, nullable) - Generated on approval.
+- `month_year` (date) - Store as the first day of the month (e.g., '2024-07-01').
+- `amount` (decimal)
+- `method` (string) - Stored from settings.
+- `description` (text, nullable)
+- `screenshot_path` (string, nullable)
+- `status` (enum: 'pending', 'approved', 'rejected') - default: 'pending'
+- `submitted_at` (timestamp)
+- `processed_at` (timestamp, nullable)
+- `processed_by` (Foreign Key to `users`, nullable) - ID of accountant/admin.
+- `timestamps`
+
+**`settings` table:**
+- `key` (string, unique, primary)
+- `value` (text, nullable)
+- *Example Keys:* `org_name`, `org_logo_path`, `org_address`, `founding_date` (YYYY-MM-DD), `monthly_fee` (e.g., 500), `payment_methods` (JSON with bank/bkash details).
+
+## 3. UI/UX - The "App-like" Feel (CRITICAL)
+- **Layout:** Create a main `layouts/app.blade.php` with a mobile-first approach.
+  - **Mobile:** Use a fixed **bottom navigation bar** for key actions (e.g., Profile, Pay, Members).
+  - **Desktop:** Use a traditional **sidebar navigation**. Use Tailwind's responsive classes (`hidden md:block`) to switch between them.
+- **Loading States:** Use `wire:loading` extensively to show spinners or skeleton loaders on buttons and data sections while Livewire is processing requests. This is key for a smooth experience.
+- **Toast Notifications:** Implement a global toast notification system using Alpine.js. Livewire components will dispatch browser events (`$this->dispatch('notify', ['message' => '...', 'type' => 'success'])`) which the Alpine component will listen for and display.
+- **PWA Setup:** After scaffolding the app, run `php artisan pwa:publish` and configure the manifest file to allow users to "Add to Home Screen".
+
+## 4. Livewire Components Breakdown
+
+### Layout
+- **`Navigation/BottomNav.php` (Mobile):** Renders the bottom navigation bar with icons.
+- **`Navigation/Sidebar.php` (Desktop):** Renders the sidebar.
+- **`NotificationToaster.php`:** An Alpine.js component in the main layout that listens for `notify` events.
+
+### Authentication
+- **`Auth/Register.php`:** Handles new member applications, saves user with `status='pending'`.
+- **`Auth/Login.php`:** Standard login logic.
+
+### Member Panel
+- **`Member/Dashboard.php`:** Shows user profile info and total paid amount.
+- **`Member/EditProfile.php`:** Allows members to update their own `present_address`, `profile_pic`, etc.
+- **`Member/SubmitPayment.php`:** Fetches `monthly_fee` and `payment_methods` from settings to display. Handles payment submission.
+- **`Member/PaymentHistory.php`:** Lists payments and includes `downloadReceipt($paymentId)` method.
+
+### Accountant Panel
+- **`Accountant/Dashboard.php`:** Lists pending payments for approval/rejection.
+- **`Accountant/AllTransactions.php`:** A searchable and filterable list of all payments.
+
+### Admin Panel
+- **`Admin/Dashboard.php` component:**
+  - Includes a `getMonthlyCollectionsChartData()` method that returns data for the last 6 months. This data is passed to an Alpine.js component that initializes `Chart.js`.
+  - All other logic from the previous prompt (filters, stats, paid/unpaid lists) remains.
+- **`Admin/PendingRegistrations.php`:** Approve/reject new members. On approval, set `status='active'` and `joined_at`.
+- **`Admin/MemberList.php`:**
+  - A list of all `active` and `inactive` members with search and filters.
+  - `edit($userId)`: A modal or separate page to edit a user's details (`name`, `role`, `position`, etc.).
+  - `toggleStatus($userId)`: A method to switch a user's status between `active` and `inactive`.
+- **`Admin/Settings.php` component:**
+  - `public` properties for each setting key (e.g., `$org_name`, `$monthly_fee`).
+  - `public $payment_methods = []` array for dynamically adding/removing payment methods.
+  - `mount()`: Load all key-value pairs from the `settings` table.
+  - `save()`: Validate and save all settings back to the database. Handles logo file upload.
+- **`Admin/Reports.php` component:**
+  - UI with date pickers to generate monthly/yearly reports or member-specific ledgers.
+  - Methods to generate and download PDFs.
+
+## 5. Core Logic & Business Rules
+- **Events & Listeners:** Use events to decouple actions. For example:
+  - `PaymentApproved` event -> `SendPaymentConfirmationNotification` listener.
+  - `UserRegistered` event -> `NotifyAdminOfNewApplication` listener.
+- **Payment Logic:** The logic for determining paid/unpaid status remains the same, but should fetch the monthly fee from the `settings` table instead of using a hardcoded value.
+- **Founding Date Usage:** The system should only track payments from the later of the two dates: the organization's `founding_date` or the member's `joined_at` date.
+- **File Storage:** Use `php artisan storage:link`. Profile pics and screenshots should be stored in `storage/app/public`.
+- **Notifications:** Use Laravel's built-in notification system (database channel is great for in-app notifications). Create a small notification icon in the header that shows an unread count.
+
+By following this enhanced prompt, a developer will be guided to build a highly interactive, mobile-first, and feature-rich application that truly feels like a modern web app.
