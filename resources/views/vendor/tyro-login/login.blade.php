@@ -32,14 +32,37 @@
                 <p>Enter your email and password below to log in</p>
             </div>
 
+            <!-- Error/Success Messages -->
+            @if(session('error'))
+            <div class="alert alert-error">
+                {{ session('error') }}
+            </div>
+            @endif
+
+            @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+            @endif
+
+            @if($errors->any() && !$errors->has('email') && !$errors->has('password') && !$errors->has('captcha_answer'))
+            <div class="alert alert-error">
+                <ul style="margin: 0; padding-left: 1.25rem;">
+                    @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
             <!-- Login Form -->
             <form method="POST" action="{{ route('tyro-login.login.submit') }}">
                 @csrf
 
-                <!-- Email Field -->
+                <!-- Email/Phone Field -->
                 <div class="form-group">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" id="email" name="email" class="form-input @error('email') is-invalid @enderror" value="{{ old('email') }}" required autocomplete="email" autofocus placeholder="email@example.com">
+                    <label for="email" class="form-label">Phone</label>
+                    <input type="text" id="email" name="email" class="form-input @error('email') is-invalid @enderror" value="{{ old('email') }}" required autocomplete="tel" autofocus placeholder="01700000000">
                     @error('email')
                     <span class="error-message">{{ $message }}</span>
                     @enderror
@@ -95,7 +118,7 @@
             <div class="form-footer">
                 <p>
                     Don't have an account?
-                    <a href="{{ route('tyro-login.register') }}" class="form-link">Sign up</a>
+                    <a href="{{ route('register') }}" class="form-link">Sign up</a>
                 </p>
             </div>
             @endif
@@ -145,6 +168,26 @@
 
     .captcha-input[type=number] {
         -moz-appearance: textfield;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    .alert-error {
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+    }
+
+    .alert-success {
+        background-color: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #166534;
     }
 </style>
 @endsection

@@ -17,7 +17,7 @@ return [
     |
     | When enabled, sensitive information is logged to help with development:
     | - OTP codes and verification tokens
-    | - Password reset links  
+    | - Password reset links
     | - Email verification URLs
     | - User authentication attempts
     |
@@ -45,7 +45,7 @@ return [
     |    Perfect for: Marketing sites, showcasing product imagery
     |
     | 'split-right'
-    |    Two-column layout: form left, background image right  
+    |    Two-column layout: form left, background image right
     |    Perfect for: Content-heavy sites, storytelling layouts
     |
     | 'fullscreen'
@@ -90,12 +90,12 @@ return [
         // Your application name shown on all auth pages
         // Defaults to APP_NAME from Laravel config, or 'Laravel' if not set
         'app_name' => env('TYRO_LOGIN_APP_NAME', env('APP_NAME', 'Laravel')),
-        
+
         // Logo URL (recommended: SVG or high-res PNG)
         // Set to null to use text-based logo with app name
         // Example: 'https://yourapp.com/logo.svg' or '/images/logo.png'
         'logo' => env('TYRO_LOGIN_LOGO', null),
-        
+
         // Logo height for proper display scaling
         // Accepts any valid CSS height value (px, rem, etc.)
         // Common values: '32px', '48px', '3rem'
@@ -127,7 +127,7 @@ return [
         'after_login' => env('TYRO_LOGIN_REDIRECT_AFTER_LOGIN', '/'),
         'after_logout' => env('TYRO_LOGIN_REDIRECT_AFTER_LOGOUT', '/login'),
         'after_register' => env('TYRO_LOGIN_REDIRECT_AFTER_REGISTER', '/'),
-        'after_email_verification' => env('TYRO_LOGIN_REDIRECT_AFTER_EMAIL_VERIFICATION', '/login'),
+        'after_email_verification' => env('TYRO_LOGIN_REDIRECT_AFTER_EMAIL_VERIFICATION', '/'),
     ],
 
     /*
@@ -412,7 +412,7 @@ return [
     |
     | Automatically locks out users after too many failed login attempts.
     | This prevents automated bots and attackers from guessing passwords.
-    | 
+    |
     | Technical Details:
     | - Uses Laravel Cache (Redis, Memcached, or file-based)
     | - No database modifications required

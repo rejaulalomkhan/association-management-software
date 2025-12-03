@@ -29,6 +29,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'membership_id',
         'father_name',
         'dob',
         'permanent_address',
@@ -71,6 +72,28 @@ class User extends Authenticatable
     public function getPendingAmount()
     {
         return $this->payments()->where('status', 'pending')->sum('amount');
+    }
+
+    /**
+     * Get the name of the unique identifier for the user.
+     *
+     * @return string
+     */
+    public function username()
+    {
+        return config('tyro-login.login_field') == 'phone' ? 'phone' : 'email';
+    }
+
+    /**
+     * Find the user instance for the given username.
+     *
+     * @param  string  $username
+     * @return \App\Models\User|null
+     */
+    public function findForPassport($username)
+    {
+        $field = $this->username();
+        return $this->where($field, $username)->first();
     }
 
     protected function casts(): array

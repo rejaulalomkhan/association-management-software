@@ -13,10 +13,13 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Livewire Styles -->
+    @livewireStyles
 </head>
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
     <div class="min-h-screen flex flex-col md:flex-row">
-        
+
         <!-- Desktop Sidebar -->
         <aside class="hidden md:block w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen">
             <x-sidebar />
@@ -49,5 +52,8 @@
     </div>
 
     <x-toast />
+
+    <!-- Livewire Scripts -->
+    @livewireScripts
 </body>
 </html>
