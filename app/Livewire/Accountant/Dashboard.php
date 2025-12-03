@@ -93,10 +93,10 @@ class Dashboard extends Component
         $stats = [
             'pending' => Payment::where('status', 'pending')->count(),
             'approved_today' => Payment::where('status', 'approved')
-                ->whereDate('approved_at', today())
+                ->whereDate('updated_at', today())
                 ->count(),
             'total_amount_today' => Payment::where('status', 'approved')
-                ->whereDate('approved_at', today())
+                ->whereDate('updated_at', today())
                 ->sum('amount'),
             'rejected_today' => Payment::where('status', 'rejected')
                 ->whereDate('updated_at', today())

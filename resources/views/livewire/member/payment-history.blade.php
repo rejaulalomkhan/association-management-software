@@ -250,10 +250,10 @@
                 </div>
                 @endif
 
-                @if($selectedPayment->status === 'approved' && $selectedPayment->approved_at)
+                @if($selectedPayment->status === 'approved')
                 <div>
                     <p class="text-sm text-gray-500">অনুমোদনের তারিখ</p>
-                    <p class="font-semibold text-gray-900">{{ \Carbon\Carbon::parse($selectedPayment->approved_at)->format('d M Y, h:i A') }}</p>
+                    <p class="font-semibold text-gray-900">{{ $selectedPayment->updated_at->format('d M Y, h:i A') }}</p>
                 </div>
                 @endif
             </div>

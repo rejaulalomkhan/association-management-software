@@ -59,22 +59,22 @@
   - [x] Two tables: Paid Members | Unpaid Members
   - [x] Month/Year filters
   - [x] Current month statistics
-- [ ] `Admin\Transactions` - All transactions management
-  - [ ] Filter by member, month, year, status
-  - [ ] Approve/reject payments
-  - [ ] Add admin notes
-  - [ ] Export reports
+- [x] `Admin\Transactions` - All transactions management
+  - [x] Filter by member, month, year, status
+  - [x] Approve/reject payments
+  - [x] Add admin notes
+  - [x] Export reports
 
 ## Accountant Panel
 - [x] `Accountant\Dashboard` - Pending payments overview
   - [x] List pending payments with member details
   - [x] Quick approve/reject actions
   - [x] Monthly summary cards
-- [ ] `Accountant\Transactions` - Transaction management
-  - [ ] View all transactions
-  - [ ] Filter by month, year, status
-  - [ ] Process payments
-  - [ ] Add processing notes
+- [x] `Accountant\Transactions` - Transaction management
+  - [x] View all transactions
+  - [x] Filter by month, year, status
+  - [x] Process payments
+  - [x] Add processing notes
 
 ## Member Panel
 - [x] `Member\Dashboard` - Finance dashboard (App-like UI)
@@ -103,7 +103,7 @@
 - [x] Month/Year helpers with Bangla support
 - [x] Outstanding dues calculator
 - [x] Notification system for payment updates
-- [ ] PDF receipt generator
+- [x] PDF receipt generator
 
 ## Bangla Localization
 - [x] Create lang/bn directory
