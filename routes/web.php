@@ -3,8 +3,10 @@
 use App\Livewire\Auth\Register;
 use App\Livewire\Member\Dashboard as MemberDashboard;
 use App\Livewire\Member\EditProfile;
+use App\Livewire\Member\Profile;
 use App\Livewire\Member\SubmitPayment;
 use App\Livewire\Member\PaymentHistory;
+use App\Livewire\Member\Notifications;
 use App\Livewire\Accountant\Dashboard as AccountantDashboard;
 use App\Livewire\Accountant\Transactions as AccountantTransactions;
 use App\Livewire\Admin\Dashboard as AdminDashboard;
@@ -36,19 +38,23 @@ Route::get('/register', Register::class)->name('register');
 
 Route::middleware(['auth', 'role:member'])->prefix('member')->name('member.')->group(function () {
     Route::get('/dashboard', MemberDashboard::class)->name('dashboard');
+    Route::get('/profile', Profile::class)->name('profile');
     Route::get('/profile/edit', EditProfile::class)->name('profile.edit');
     Route::get('/payment', SubmitPayment::class)->name('payment');
     Route::get('/history', PaymentHistory::class)->name('history');
+    Route::get('/notifications', Notifications::class)->name('notifications');
 });
 
 Route::middleware(['auth', 'role:accountant'])->prefix('accountant')->name('accountant.')->group(function () {
     Route::get('/dashboard', AccountantDashboard::class)->name('dashboard');
+    Route::get('/profile', Profile::class)->name('profile');
     Route::get('/transactions', AccountantTransactions::class)->name('transactions');
     Route::get('/approve/{payment}', function() { return 'Approve page coming soon'; })->name('approve');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
+    Route::get('/profile', Profile::class)->name('profile');
     Route::get('/pending-registrations', PendingRegistrations::class)->name('pending-registrations');
     Route::get('/members', MemberList::class)->name('members');
     Route::get('/members/add', AddMember::class)->name('members.add');
