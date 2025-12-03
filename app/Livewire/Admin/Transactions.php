@@ -162,4 +162,7 @@ class Transactions extends Component
 
         return view('livewire.admin.transactions', [
             'transactions' => $transactions,
-         
+            'members' => $members,
+        ])->layout('layouts.app');
+    }
+}
