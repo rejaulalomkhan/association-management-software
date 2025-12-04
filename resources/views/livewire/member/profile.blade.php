@@ -14,15 +14,15 @@
         @endif
 
         <!-- Profile Card -->
-        <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg mb-6">
+        <div class="mb-6 overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
             <div class="p-6">
-                <div class="flex flex-col items-center text-center sm:flex-row sm:text-left sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+                <div class="flex flex-col items-center space-y-4 text-center sm:flex-row sm:text-left sm:items-start sm:space-y-0 sm:space-x-6">
                     <!-- Profile Picture -->
                     <div class="flex-shrink-0">
                         @if(auth()->user()->photo)
-                            <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="{{ auth()->user()->name }}" class="object-cover w-24 h-24 sm:w-32 sm:h-32 border-4 border-gray-300 rounded-full">
+                            <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="{{ auth()->user()->name }}" class="object-cover w-24 h-24 border-4 border-gray-300 rounded-full sm:w-32 sm:h-32">
                         @else
-                            <div class="flex items-center justify-center w-24 h-24 sm:w-32 sm:h-32 text-3xl sm:text-4xl font-bold text-white bg-blue-500 border-4 border-gray-300 rounded-full">
+                            <div class="flex items-center justify-center w-24 h-24 text-3xl font-bold text-white bg-blue-500 border-4 border-gray-300 rounded-full sm:w-32 sm:h-32 sm:text-4xl">
                                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                             </div>
                         @endif
@@ -30,10 +30,23 @@
 
                     <!-- Profile Info -->
                     <div class="flex-1">
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ auth()->user()->name }}</h2>
-                        @if(auth()->user()->membership_id)
-                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">সদস্য আইডি: <span class="font-mono font-semibold">{{ auth()->user()->membership_id }}</span></p>
-                        @endif
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ auth()->user()->name }}</h2>
+                                @if(auth()->user()->membership_id)
+                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">সদস্য আইডি: <span class="font-mono font-semibold">{{ auth()->user()->membership_id }}</span></p>
+                                @endif
+                            </div>
+                            @if(auth()->user()->blood_group)
+                            <div class="flex-shrink-0 ml-4">
+                                <div class="px-4 py-2 text-center bg-red-100 border-2 border-red-300 rounded-lg dark:bg-red-900 dark:border-red-700">
+                                    <div class="text-xs font-medium text-red-600 dark:text-red-300">রক্তের গ্রুপ</div>
+                                    <div class="text-2xl font-bold text-red-700 dark:text-red-200">{{ auth()->user()->blood_group }}</div>
+                                </div>
+                            </div>
+                            @endif
+                        </div>
+
                         <div class="mt-3 space-y-1 text-sm text-gray-700 dark:text-gray-300">
                             @if(auth()->user()->phone)
                             <p class="flex items-center">
@@ -51,13 +64,22 @@
                                 <span class="font-medium">ইমেইল:</span> <span class="ml-1">{{ auth()->user()->email }}</span>
                             </p>
                             @endif
-                            @if(auth()->user()->address)
+                            @if(auth()->user()->permanent_address)
                             <p class="flex items-start">
                                 <svg class="w-4 h-4 mr-2 mt-0.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 </svg>
-                                <span class="font-medium">ঠিকানা:</span> <span class="ml-1">{{ auth()->user()->address }}</span>
+                                <span class="font-medium">স্থায়ী ঠিকানা:</span> <span class="ml-1">{{ auth()->user()->permanent_address }}</span>
+                            </p>
+                            @endif
+                            @if(auth()->user()->present_address && auth()->user()->present_address !== auth()->user()->permanent_address)
+                            <p class="flex items-start">
+                                <svg class="w-4 h-4 mr-2 mt-0.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                <span class="font-medium">বর্তমান ঠিকানা:</span> <span class="ml-1">{{ auth()->user()->present_address }}</span>
                             </p>
                             @endif
                         </div>
@@ -65,12 +87,54 @@
 
                     <!-- Edit Button -->
                     <div class="flex-shrink-0">
-                        <button @click="showEditModal = true" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                        <a href="{{ role_route('profile.edit') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
                             <svg class="inline-block w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
                             প্রোফাইল সম্পাদনা
-                        </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 gap-6 mb-6 md:grid-cols-3">
+            <!-- Total Paid Card -->
+            <div class="overflow-hidden bg-white border-t-4 border-green-500 shadow-md dark:bg-gray-800 rounded-xl">
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">মোট পরিশোধিত</p>
+                            <p class="mt-2 text-3xl font-bold text-green-600 dark:text-green-400">৳{{ number_format($totalPaid, 2) }}</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">{{ $paidMonths }} মাস</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Due Card -->
+            <div class="overflow-hidden bg-white border-t-4 border-red-500 shadow-md dark:bg-gray-800 rounded-xl">
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">বকেয়া</p>
+                            <p class="mt-2 text-3xl font-bold text-red-600 dark:text-red-400">৳{{ number_format($totalDue, 2) }}</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">{{ $dueMonths }} মাস</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Payment Card -->
+            <div class="overflow-hidden bg-white border-t-4 border-yellow-500 shadow-md dark:bg-gray-800 rounded-xl">
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">অপেক্ষমান পেমেন্ট</p>
+                            <p class="mt-2 text-3xl font-bold text-yellow-600 dark:text-yellow-400">৳{{ number_format($pendingAmount, 2) }}</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">{{ $pendingMonths }} মাস</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -190,20 +254,23 @@
                             প্রোফাইল সম্পাদনা
                         </h3>
 
-                        <form wire:submit.prevent="updateBasicInfo" class="mt-6 space-y-6">
+                        <form wire:submit="updateBasicInfo" class="mt-6 space-y-6">
                             <!-- Profile Photo -->
-                            <div class="flex flex-col items-center space-y-4">
+                            <div class="flex flex-col items-center space-y-4" x-data="{ photoPreview: null }">
                                 <div class="relative">
-                                    @if($photo)
-                                        <img src="{{ $photo->temporaryUrl() }}" alt="Preview" class="object-cover w-32 h-32 border-4 border-gray-300 rounded-full">
-                                    @elseif(auth()->user()->photo)
-                                        <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="{{ auth()->user()->name }}" class="object-cover w-32 h-32 border-4 border-gray-300 rounded-full">
-                                    @else
-                                        <div class="flex items-center justify-center w-32 h-32 text-4xl font-bold text-white bg-blue-500 border-4 border-gray-300 rounded-full">
-                                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                                        </div>
-                                    @endif
-                                    
+                                    <template x-if="photoPreview">
+                                        <img :src="photoPreview" alt="Preview" class="object-cover w-32 h-32 border-4 border-gray-300 rounded-full">
+                                    </template>
+                                    <template x-if="!photoPreview">
+                                        @if(auth()->user()->photo)
+                                            <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="{{ auth()->user()->name }}" class="object-cover w-32 h-32 border-4 border-gray-300 rounded-full">
+                                        @else
+                                            <div class="flex items-center justify-center w-32 h-32 text-4xl font-bold text-white bg-blue-500 border-4 border-gray-300 rounded-full">
+                                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                            </div>
+                                        @endif
+                                    </template>
+
                                     <!-- Loading indicator for photo upload -->
                                     <div wire:loading wire:target="photo" class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 rounded-full">
                                         <svg class="w-8 h-8 text-white animate-spin" fill="none" viewBox="0 0 24 24">
@@ -216,7 +283,8 @@
                                     <label class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700">
                                         <span wire:loading.remove wire:target="photo">ছবি নির্বাচন করুন</span>
                                         <span wire:loading wire:target="photo">আপলোড হচ্ছে...</span>
-                                        <input type="file" wire:model="photo" class="hidden" accept="image/*">
+                                        <input type="file" wire:model="photo" class="hidden" accept="image/*"
+                                               @change="photoPreview = URL.createObjectURL($event.target.files[0])">
                                     </label>
                                     @error('photo') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">সর্বোচ্চ ২MB</p>

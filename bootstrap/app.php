@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\AllowPhoneAsEmail::class,
         ]);
+
+        // Redirect unauthenticated users to login page
+        $middleware->redirectGuestsTo(fn () => route('tyro-login.login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

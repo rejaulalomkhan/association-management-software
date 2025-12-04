@@ -31,12 +31,30 @@ class Profile extends Component
         $this->address = $user->address;
     }
 
+    public function loadProfileData()
+    {
+        $user = auth()->user();
+        $this->name = $user->name;
+        $this->email = $user->email;
+        $this->phone = $user->phone;
+        $this->address = $user->address;
+    }
+
     public function updateBasicInfo()
     {
+        $userId = auth()->id();
+
+        \Log::info('Profile update started', [
+            'user_id' => $userId,
+            'name' => $this->name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+        ]);
+
         $this->validate([
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255|unique:users,email,' . auth()->id(),
-            'phone' => 'required|string|max:20|unique:users,phone,' . auth()->id(),
+            'email' => 'nullable|email|max:255|unique:users,email,' . $userId . ',id',
+            'phone' => 'required|string|max:20|unique:users,phone,' . $userId . ',id',
             'address' => 'nullable|string|max:500',
             'photo' => 'nullable|image|max:2048',
         ]);
@@ -55,6 +73,8 @@ class Profile extends Component
         }
 
         $user->save();
+
+        \Log::info('Profile updated successfully', ['user_id' => $userId]);
 
         session()->flash('message', 'প্রোফাইল সফলভাবে আপডেট করা হয়েছে।');
         $this->reset(['photo']);
@@ -103,8 +123,44 @@ class Profile extends Component
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
+        // Calculate total paid (approved payments only)
+        $totalPaid = Payment::where('user_id', auth()->id())
+            ->where('status', 'approved')
+            ->sum('amount');
+
+        // Count approved months
+        $paidMonths = Payment::where('user_id', auth()->id())
+            ->where('status', 'approved')
+            ->count();
+
+        // Calculate total due (rejected only, as they are actual dues)
+        $totalDue = Payment::where('user_id', auth()->id())
+            ->where('status', 'rejected')
+            ->sum('amount');
+
+        // Count rejected months
+        $dueMonths = Payment::where('user_id', auth()->id())
+            ->where('status', 'rejected')
+            ->count();
+
+        // Calculate pending payments
+        $pendingAmount = Payment::where('user_id', auth()->id())
+            ->where('status', 'pending')
+            ->sum('amount');
+
+        // Count pending months
+        $pendingMonths = Payment::where('user_id', auth()->id())
+            ->where('status', 'pending')
+            ->count();
+
         return view('livewire.member.profile', [
             'transactions' => $transactions,
+            'totalPaid' => $totalPaid,
+            'paidMonths' => $paidMonths,
+            'totalDue' => $totalDue,
+            'dueMonths' => $dueMonths,
+            'pendingAmount' => $pendingAmount,
+            'pendingMonths' => $pendingMonths,
         ])->layout('layouts.app');
     }
 }
