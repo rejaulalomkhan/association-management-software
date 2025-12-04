@@ -19,8 +19,8 @@
                 <div class="flex flex-col items-center space-y-4 text-center sm:flex-row sm:text-left sm:items-start sm:space-y-0 sm:space-x-6">
                     <!-- Profile Picture -->
                     <div class="flex-shrink-0">
-                        @if(auth()->user()->photo)
-                            <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="{{ auth()->user()->name }}" class="object-cover w-24 h-24 border-4 border-gray-300 rounded-full sm:w-32 sm:h-32">
+                        @if(auth()->user()->profile_pic)
+                            <img src="{{ asset('storage/' . auth()->user()->profile_pic) }}" alt="{{ auth()->user()->name }}" class="object-cover w-24 h-24 border-4 border-gray-300 rounded-full sm:w-32 sm:h-32">
                         @else
                             <div class="flex items-center justify-center w-24 h-24 text-3xl font-bold text-white bg-blue-500 border-4 border-gray-300 rounded-full sm:w-32 sm:h-32 sm:text-4xl">
                                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}

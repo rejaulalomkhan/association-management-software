@@ -22,11 +22,14 @@ class ProfileEdit extends Component
     public $nationality;
     public $position;
     public $blood_group;
-    public $photo;
+    public $profile_pic;
+    public $tempPhotoPath; // Store temporary photo path
     public $current_password;
     public $new_password;
     public $new_password_confirmation;
     public $showPasswordSection = false;
+
+    protected $listeners = ['photoUploaded'];
 
     public function mount()
     {
@@ -55,6 +58,12 @@ class ProfileEdit extends Component
     {
         $userId = auth()->id();
 
+        // Debug: Check if profile_pic is received
+        \Log::info('Profile Update - profile_pic type: ' . gettype($this->profile_pic));
+        if ($this->profile_pic) {
+            \Log::info('Profile Update - profile_pic class: ' . get_class($this->profile_pic));
+        }
+
         $this->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255|unique:users,email,' . $userId . ',id',
@@ -66,7 +75,7 @@ class ProfileEdit extends Component
             'nationality' => 'nullable|string|max:100',
             'position' => 'nullable|string|max:255',
             'blood_group' => 'nullable|string|max:10',
-            'photo' => 'nullable|image|max:2048',
+            'profile_pic' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:5120', // 5MB
         ]);
 
         $user = auth()->user();
@@ -81,17 +90,33 @@ class ProfileEdit extends Component
         $user->position = $this->position;
         $user->blood_group = $this->blood_group;
 
-        if ($this->photo) {
-            if ($user->photo) {
-                Storage::disk('public')->delete($user->photo);
+        if ($this->profile_pic) {
+            \Log::info('Profile Update - Uploading photo...');
+            try {
+                // Delete old photo if exists
+                if ($user->profile_pic) {
+                    \Log::info('Profile Update - Deleting old photo: ' . $user->profile_pic);
+                    Storage::disk('public')->delete($user->profile_pic);
+                }
+
+                // Store new photo
+                $path = $this->profile_pic->store('photos', 'public');
+                \Log::info('Profile Update - Photo stored at: ' . $path);
+                $user->profile_pic = $path;
+            } catch (\Exception $e) {
+                \Log::error('Profile Update - Photo upload error: ' . $e->getMessage());
+                session()->flash('error', 'ছবি আপলোড করতে সমস্যা হয়েছে: ' . $e->getMessage());
+                return;
             }
-            $user->photo = $this->photo->store('photos', 'public');
+        } else {
+            \Log::info('Profile Update - No photo to upload');
         }
 
         $user->save();
+        \Log::info('Profile Update - User saved with profile_pic: ' . $user->profile_pic);
 
         session()->flash('message', 'প্রোফাইল সফলভাবে আপডেট করা হয়েছে।');
-        $this->reset(['photo']);
+        $this->reset(['profile_pic']);
 
         return redirect(role_route('profile'));
     }

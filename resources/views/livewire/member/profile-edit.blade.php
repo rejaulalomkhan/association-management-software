@@ -7,6 +7,12 @@
             </div>
         @endif
 
+        @if (session()->has('error'))
+            <div class="p-4 mb-4 text-red-800 bg-red-100 border border-red-200 rounded-lg dark:bg-red-900 dark:text-red-200 dark:border-red-800">
+                {{ session('error') }}
+            </div>
+        @endif
+
         @if (session()->has('password_message'))
             <div class="p-4 mb-4 text-green-800 bg-green-100 border border-green-200 rounded-lg dark:bg-green-900 dark:text-green-200 dark:border-green-800">
                 {{ session('password_message') }}
@@ -34,16 +40,35 @@
                 </p>
             </div>
 
-            <form wire:submit="updateProfile" class="p-6 space-y-6">
+            <form wire:submit="updateProfile" enctype="multipart/form-data" class="p-6 space-y-6">
                 <!-- Profile Photo -->
-                <div class="flex flex-col items-center space-y-4" x-data="{ photoPreview: null }">
+                <div class="flex flex-col items-center space-y-4"
+                     x-data="{
+                         photoPreview: null,
+                         uploading: false,
+                         uploadPhoto() {
+                             let file = $refs.photoInput.files[0];
+                             if (file) {
+                                 this.uploading = true;
+                                 this.photoPreview = URL.createObjectURL(file);
+                                 @this.upload('profile_pic', file, (uploadedFilename) => {
+                                     this.uploading = false;
+                                 }, (error) => {
+                                     this.uploading = false;
+                                     alert('আপলোড ব্যর্থ: ' + error);
+                                 }, (event) => {
+                                     // Progress
+                                 });
+                             }
+                         }
+                     }">
                     <div class="relative">
                         <template x-if="photoPreview">
                             <img :src="photoPreview" alt="Preview" class="object-cover w-32 h-32 border-4 border-gray-300 rounded-full">
                         </template>
                         <template x-if="!photoPreview">
-                            @if(auth()->user()->photo)
-                                <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="{{ auth()->user()->name }}" class="object-cover w-32 h-32 border-4 border-gray-300 rounded-full">
+                            @if(auth()->user()->profile_pic)
+                                <img src="{{ asset('storage/' . auth()->user()->profile_pic) }}" alt="{{ auth()->user()->name }}" class="object-cover w-32 h-32 border-4 border-gray-300 rounded-full">
                             @else
                                 <div class="flex items-center justify-center w-32 h-32 text-4xl font-bold text-white bg-blue-500 border-4 border-gray-300 rounded-full">
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
@@ -52,7 +77,7 @@
                         </template>
 
                         <!-- Loading indicator -->
-                        <div wire:loading wire:target="photo" class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 rounded-full">
+                        <div wire:loading wire:target="profile_pic" class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 rounded-full">
                             <svg class="w-8 h-8 text-white animate-spin" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -61,12 +86,15 @@
                     </div>
                     <div>
                         <label class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700">
-                            <span wire:loading.remove wire:target="photo">ছবি নির্বাচন করুন</span>
-                            <span wire:loading wire:target="photo">আপলোড হচ্ছে...</span>
-                            <input type="file" wire:model="photo" class="hidden" accept="image/*"
-                                   @change="photoPreview = URL.createObjectURL($event.target.files[0])">
+                            <span x-show="!uploading">ছবি নির্বাচন করুন</span>
+                            <span x-show="uploading">আপলোড হচ্ছে...</span>
+                            <input type="file"
+                                   x-ref="photoInput"
+                                   @change="uploadPhoto()"
+                                   class="hidden"
+                                   accept="image/*">
                         </label>
-                        @error('photo') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                        @error('profile_pic') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                         <p class="mt-1 text-xs text-center text-gray-500 dark:text-gray-400">সর্বোচ্চ ২MB</p>
                     </div>
                 </div>
@@ -162,7 +190,7 @@
                     <a href="{{ role_route('profile') }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700">
                         বাতিল
                     </a>
-                    <button type="submit" wire:loading.attr="disabled" wire:target="updateProfile,photo" class="relative px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button type="submit" wire:loading.attr="disabled" wire:target="updateProfile,profile_pic" class="relative px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
                         <span wire:loading.remove wire:target="updateProfile">সংরক্ষণ করুন</span>
                         <span wire:loading wire:target="updateProfile" class="flex items-center">
                             <svg class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">

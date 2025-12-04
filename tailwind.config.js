@@ -7,7 +7,11 @@ export default {
         "./vendor/hasinhayder/tyro-login/resources/views/**/*.blade.php",
     ],
     theme: {
-        extend: {},
+        extend: {
+            fontFamily: {
+                sans: ['"Noto Serif Bengali"', 'system-ui', 'sans-serif'],
+            },
+        },
     },
     plugins: [],
 };

@@ -40,7 +40,6 @@ class User extends Authenticatable
         'nationality',
         'position',
         'profile_pic',
-        'photo',
         'status',
         'joined_at',
     ];

@@ -15,7 +15,12 @@
         <div class="form-card">
             <!-- Logo -->
             <div class="logo-container">
-                @if($branding['logo'] ?? false)
+                @php
+                    $orgLogo = app(\App\Services\SettingsService::class)->get('organization_logo');
+                @endphp
+                @if($orgLogo)
+                <img src="{{ asset('storage/' . $orgLogo) }}" alt="{{ app(\App\Services\SettingsService::class)->get('organization_name', config('app.name')) }}" style="max-height: 60px; width: auto;">
+                @elseif($branding['logo'] ?? false)
                 <img src="{{ $branding['logo'] }}" alt="{{ $branding['app_name'] ?? config('app.name') }}">
                 @else
                 <div class="app-logo">

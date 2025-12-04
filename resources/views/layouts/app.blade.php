@@ -8,9 +8,14 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Noto Serif Bengali', serif !important;
+        }
+    </style>
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -18,22 +23,26 @@
     @livewireStyles
 </head>
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
-    <div class="flex flex-col min-h-screen md:flex-row">
+    <div class="flex flex-col min-h-screen">
 
-        <!-- Desktop Sidebar -->
-        <aside class="hidden w-64 min-h-screen bg-white border-r border-gray-200 md:block dark:bg-gray-800 dark:border-gray-700">
-            <x-sidebar />
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex flex-col flex-1 h-screen pb-16 md:pb-0">
-            <!-- Desktop Header -->
-            <header class="sticky top-0 z-10 items-center justify-between hidden px-6 py-3 bg-white border-b border-gray-200 shadow-sm md:flex dark:bg-gray-800 dark:border-gray-700">
-                <div class="flex items-center">
+        <!-- Header (Desktop and Mobile) -->
+        <header class="sticky top-0 z-20 flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+            <div class="flex items-center">
+                <a href="{{ role_route('dashboard') }}" wire:navigate class="flex items-center space-x-3 transition-opacity hover:opacity-80">
+                    @php
+                        $logo = app(\App\Services\SettingsService::class)->get('organization_logo');
+                        $orgName = app(\App\Services\SettingsService::class)->get('organization_name', 'প্রজন্ম উন্নয়ন মিশন');
+                    @endphp
+                    @if($logo)
+                        <img src="{{ asset('storage/' . $logo) }}" alt="Logo" class="w-auto h-10">
+                    @else
+                        <x-application-logo class="block w-auto h-8 text-gray-800 fill-current dark:text-gray-200" />
+                    @endif
                     <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                        {{ config('app.name', 'প্রজন্ম উন্নয়ন মিশন') }}
+                        {{ $orgName }}
                     </h1>
-                </div>
+                </a>
+            </div>
 
                 <!-- Profile Dropdown -->
                 <div class="flex items-center space-x-4" x-data="{ profileOpen: false, notificationOpen: false }">
@@ -127,8 +136,8 @@
                     <!-- Profile -->
                     <div class="relative">
                         <button @click="profileOpen = !profileOpen" class="flex items-center space-x-3 focus:outline-none">
-                            @if(auth()->user()->photo)
-                                <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="{{ auth()->user()->name }}" class="object-cover w-10 h-10 border-2 border-gray-300 rounded-full">
+                            @if(auth()->user()->profile_pic)
+                                <img src="{{ asset('storage/' . auth()->user()->profile_pic) }}" alt="{{ auth()->user()->name }}" class="object-cover w-10 h-10 border-2 border-gray-300 rounded-full">
                             @else
                                 <div class="flex items-center justify-center w-10 h-10 font-bold text-white bg-blue-500 border-2 border-gray-300 rounded-full">
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
@@ -196,12 +205,27 @@
                 </div>
             </header>
 
+        <!-- Content Area with Sidebar -->
+        <div class="flex flex-1 md:flex-row">
+            <!-- Desktop Sidebar -->
+            <aside class="hidden w-64 bg-white border-r border-gray-200 md:block dark:bg-gray-800 dark:border-gray-700">
+                <x-sidebar />
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex flex-col flex-1 pb-16 md:pb-0">
+                <div class="flex-1 p-6 overflow-y-auto">
+                    {{ $slot }}
+                </div>
+            </main>
+        </div>
+
             <!-- Mobile Header -->
-            <header class="sticky top-0 z-10 flex items-center justify-between p-4 bg-white shadow md:hidden dark:bg-gray-800">
+            <header class="hidden">
                 <!-- Profile Picture and Name -->
                 <div class="flex items-center space-x-3">
-                    @if(auth()->user()->photo)
-                        <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="{{ auth()->user()->name }}" class="object-cover w-10 h-10 border-2 border-gray-300 rounded-full">
+                    @if(auth()->user()->profile_pic)
+                        <img src="{{ asset('storage/' . auth()->user()->profile_pic) }}" alt="{{ auth()->user()->name }}" class="object-cover w-10 h-10 border-2 border-gray-300 rounded-full">
                     @else
                         <div class="flex items-center justify-center w-10 h-10 text-sm font-bold text-white bg-blue-500 border-2 border-gray-300 rounded-full">
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
@@ -227,11 +251,6 @@
                     @endif
                 </a>
             </header>
-
-            <div class="flex-1 p-6 overflow-y-auto">
-                {{ $slot }}
-            </div>
-        </main>
 
         <!-- Mobile Bottom Nav -->
         <nav class="fixed bottom-0 z-50 w-full bg-white border-t border-gray-200 md:hidden dark:bg-gray-800 dark:border-gray-700">
