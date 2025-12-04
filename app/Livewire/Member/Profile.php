@@ -7,6 +7,7 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Payment;
+use App\Services\SettingsService;
 
 class Profile extends Component
 {
@@ -21,6 +22,7 @@ class Profile extends Component
     public $new_password;
     public $new_password_confirmation;
     public $showPasswordModal = false;
+    public $selectedYear;
 
     public function mount()
     {
@@ -29,6 +31,14 @@ class Profile extends Component
         $this->email = $user->email;
         $this->phone = $user->phone;
         $this->address = $user->address;
+
+        // Set default year to current year
+        $this->selectedYear = date('Y');
+    }
+
+    public function updatedSelectedYear()
+    {
+        // This will automatically re-render when year changes
     }
 
     public function loadProfileData()
@@ -153,6 +163,41 @@ class Profile extends Component
             ->where('status', 'pending')
             ->count();
 
+        // Get organization established year from settings
+        $settingsService = app(SettingsService::class);
+        $establishedYear = $settingsService->get('organization_established_year', 2024);
+        $currentYear = date('Y');
+
+        // Generate years array from established year to current year
+        $years = range($currentYear, $establishedYear);
+
+        // Bengali month names
+        $banglaMonths = [
+            'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
+            'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'
+        ];
+
+        // Get payments for selected year
+        $yearlyPayments = Payment::where('user_id', auth()->id())
+            ->where('status', 'approved')
+            ->whereYear('created_at', $this->selectedYear)
+            ->get()
+            ->keyBy(function($payment) {
+                return date('n', strtotime($payment->created_at)); // 1-12
+            });
+
+        // Prepare monthly data
+        $monthlyData = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $payment = $yearlyPayments->get($i);
+            $monthlyData[] = [
+                'month' => $banglaMonths[$i - 1],
+                'date' => $payment ? date('d-m-Y', strtotime($payment->created_at)) : '',
+                'amount' => $payment ? number_format($payment->amount, 0) : '',
+                'signature' => $payment ? auth()->user()->name : '',
+            ];
+        }
+
         return view('livewire.member.profile', [
             'transactions' => $transactions,
             'totalPaid' => $totalPaid,
@@ -161,6 +206,8 @@ class Profile extends Component
             'dueMonths' => $dueMonths,
             'pendingAmount' => $pendingAmount,
             'pendingMonths' => $pendingMonths,
+            'years' => $years,
+            'monthlyData' => $monthlyData,
         ])->layout('layouts.app');
     }
 }
