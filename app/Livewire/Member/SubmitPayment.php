@@ -249,7 +249,7 @@ class SubmitPayment extends Component
         $overdueAmount = $overdueMonths * $monthlyFee;
 
         return [
-            'months' => $overdueMonths,
+            'months' => (int) round($overdueMonths),
             'amount' => $overdueAmount
         ];
     }

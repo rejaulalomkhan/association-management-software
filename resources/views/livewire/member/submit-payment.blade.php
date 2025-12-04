@@ -1,5 +1,5 @@
 <div class="py-6">
-    <div class="px-4 mx-auto max-w-4xl sm:px-6 lg:px-8">
+    <div class="max-w-4xl px-4 mx-auto sm:px-6 lg:px-8">
         <!-- Page Header -->
         <div class="mb-6">
             <div class="flex items-center justify-between">
@@ -24,7 +24,11 @@
         <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
             <div class="p-6">
                 <!-- Overdue Information -->
-                @if($overdueInfo['months'] > 0)
+                @php
+                    $overdueMonths = (int) ($overdueInfo['months'] ?? 0);
+                    $overdueAmount = (float) ($overdueInfo['amount'] ?? 0);
+                @endphp
+                @if($overdueMonths > 0)
                     <div class="p-4 mb-6 border-l-4 border-orange-500 bg-orange-50 dark:bg-orange-900 dark:border-orange-600">
                         <div class="flex items-start">
                             <svg class="w-5 h-5 mr-2 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,8 +36,10 @@
                             </svg>
                             <div>
                                 <p class="text-sm font-semibold text-orange-800 dark:text-orange-200">
-                                    আপনার পূর্বের <span class="font-bold">{{ $overdueInfo['months'] }} মাসের</span>
-                                    <span class="font-bold">৳{{ number_format($overdueInfo['amount'], 0) }}</span> টাকা বকেয়া রয়েছে
+                                    আপনার পূর্বের
+                                    <span class="font-bold">{{ $overdueMonths }} মাসের</span>
+                                    <span class="font-bold">৳{{ number_format($overdueAmount, 0) }}</span>
+                                    টাকা বকেয়া রয়েছে
                                 </p>
                                 <p class="mt-1 text-xs text-orange-600 dark:text-orange-400">
                                     বকেয়া পরিশোধের জন্য নিচে "বকেয়া পরিশোধ" অপশন নির্বাচন করুন
@@ -119,84 +125,87 @@
                         </div>
                     </div>
 
-                    <!-- Year Selection (show only for overdue and advance) -->
+                    <!-- Year + Month Selection (for overdue and advance) -->
                     @if($payment_type !== 'current')
-                    <div wire:loading.class="opacity-50 pointer-events-none" wire:loading.attr="aria-busy" wire:target="payment_type">
-                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">সাল নির্বাচন করুন *</label>
-                        <div class="relative">
-                            <select wire:model.live="paymentYear" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                                @foreach($paymentYears as $year)
-                                    <option value="{{ $year }}">{{ $year }}</option>
-                                @endforeach
-                            </select>
-                            <div wire:loading wire:target="payment_type" class="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                                <svg class="w-5 h-5 text-green-600 animate-spin" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-
-                    <!-- Month Selection Dropdown -->
-                    <div x-data="{ open: false }"
-                        wire:key="month-dropdown-{{ $payment_type }}-{{ $paymentYear }}"
-                        @payment-type-changed.window="open = false"
-                        wire:loading.class="opacity-50 pointer-events-none" wire:loading.attr="aria-busy" wire:target="payment_type">
-                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">কোন মাসের পেমেন্ট? * <span class="text-xs text-gray-500">(একাধিক নির্বাচন করতে পারবেন)</span></label>
-
-                        <!-- Dropdown Button -->
-                        <div @click="open = !open" class="relative">
-                            <button type="button" class="flex items-center justify-between w-full px-4 py-3 text-sm text-left bg-white border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500">
-                                <span>
-                                    @if(count($selectedMonths) > 0)
-                                        <span class="font-semibold text-green-600 dark:text-green-400">{{ count($selectedMonths) }} টি মাস নির্বাচিত</span>
-                                    @else
-                                        <span class="text-gray-500">মাস নির্বাচন করুন...</span>
-                                    @endif
-                                </span>
-                                <svg class="w-5 h-5 ml-2 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </button>
-
-                                <!-- Dropdown Content -->
-                                <div x-show="open" @click.away="open = false" x-transition class="absolute z-10 w-full mt-2 overflow-hidden bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-700 dark:border-gray-600">
-                                <div class="overflow-y-auto max-h-64">
-                                    @php
-                                        $unpaidMonths = [];
-                                        if(isset($paymentYear)) {
-                                            $unpaidMonths = $this->getUnpaidMonthsForYear($paymentYear);
-                                        }
-                                    @endphp
-
-                                    @if(count($unpaidMonths) > 0)
-                                        @foreach($unpaidMonths as $monthNum)
-                                            <label class="flex items-center px-4 py-3 transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 {{ in_array($monthNum, $selectedMonths) ? 'bg-green-50 dark:bg-green-900' : '' }}">
-                                                <input type="checkbox" wire:model.live="selectedMonths" value="{{ $monthNum }}" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
-                                                <span class="ml-3 text-sm {{ in_array($monthNum, $selectedMonths) ? 'font-semibold text-green-700 dark:text-green-300' : 'text-gray-700 dark:text-gray-300' }}">
-                                                    {{ $banglaMonthNames[$monthNum] }}
-                                                </span>
-                                            </label>
-                                        @endforeach
-                                    @else
-                                        <div class="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
-                                            এই বছরের সব মাসের পেমেন্ট সম্পন্ন হয়েছে
-                                        </div>
-                                    @endif
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <!-- Year Selection -->
+                        <div wire:loading.class="opacity-50 pointer-events-none" wire:loading.attr="aria-busy" wire:target="payment_type">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">সাল নির্বাচন করুন *</label>
+                            <div class="relative">
+                                <select wire:model.live="paymentYear" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                    @foreach($paymentYears as $year)
+                                        <option value="{{ $year }}">{{ $year }}</option>
+                                    @endforeach
+                                </select>
+                                <div wire:loading wire:target="payment_type" class="absolute inset-0 flex items-center justify-center rounded-lg bg-white/60 dark:bg-gray-800/60">
+                                    <svg class="w-5 h-5 text-green-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
                                 </div>
                             </div>
                         </div>
 
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            নির্বাচিত: <span class="font-semibold text-green-600">{{ count($selectedMonths) }} মাস</span>
-                        </p>
-                        @error('selectedMonths') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                        <!-- Month Selection Dropdown -->
+                        <div x-data="{ open: false }"
+                            wire:key="month-dropdown-{{ $payment_type }}-{{ $paymentYear }}"
+                            @payment-type-changed.window="open = false"
+                            wire:loading.class="opacity-50 pointer-events-none" wire:loading.attr="aria-busy" wire:target="payment_type">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">কোন মাসের পেমেন্ট? * <span class="text-xs text-gray-500">(একাধিক নির্বাচন করতে পারবেন)</span></label>
+
+                            <!-- Dropdown Button -->
+                            <div @click="open = !open" class="relative">
+                                <button type="button" class="flex items-center justify-between w-full px-4 py-3 text-sm text-left bg-white border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                    <span>
+                                        @if(count($selectedMonths) > 0)
+                                            <span class="font-semibold text-green-600 dark:text-green-400">{{ count($selectedMonths) }} টি মাস নির্বাচিত</span>
+                                        @else
+                                            <span class="text-gray-500">মাস নির্বাচন করুন...</span>
+                                        @endif
+                                    </span>
+                                    <svg class="w-5 h-5 ml-2 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+
+                                <!-- Dropdown Content -->
+                                <div x-show="open" @click.away="open = false" x-transition class="absolute z-10 w-full mt-2 overflow-hidden bg-white border border-gray-300 rounded-lg shadow-lg dark:bg-gray-700 dark:border-gray-600">
+                                    <div class="overflow-y-auto max-h-64">
+                                        @php
+                                            $unpaidMonths = [];
+                                            if(isset($paymentYear)) {
+                                                $unpaidMonths = $this->getUnpaidMonthsForYear($paymentYear);
+                                            }
+                                        @endphp
+
+                                        @if(count($unpaidMonths) > 0)
+                                            @foreach($unpaidMonths as $monthNum)
+                                                <label class="flex items-center px-4 py-3 transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 {{ in_array($monthNum, $selectedMonths) ? 'bg-green-50 dark:bg-green-900' : '' }}">
+                                                    <input type="checkbox" wire:model.live="selectedMonths" value="{{ $monthNum }}" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                                                    <span class="ml-3 text-sm {{ in_array($monthNum, $selectedMonths) ? 'font-semibold text-green-700 dark:text-green-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                                        {{ $banglaMonthNames[$monthNum] }}
+                                                    </span>
+                                                </label>
+                                            @endforeach
+                                        @else
+                                            <div class="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
+                                                এই বছরের সব মাসের পেমেন্ট সম্পন্ন হয়েছে
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                নির্বাচিত: <span class="font-semibold text-green-600">{{ count($selectedMonths) }} মাস</span>
+                            </p>
+                            @error('selectedMonths') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                        </div>
                     </div>
+                    @endif
 
                     <!-- Payment Amount Display -->
-                    <div class="p-4 bg-green-50 border border-green-200 rounded-lg dark:bg-green-900 dark:border-green-800" wire:loading.class="opacity-50" wire:target="payment_type">
+                    <div class="p-4 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900 dark:border-green-800" wire:loading.class="opacity-50" wire:target="payment_type">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-700 dark:text-gray-200">পেমেন্ট পরিমাণ</p>
@@ -226,10 +235,31 @@
                     </div>
 
                     <!-- Proof Screenshot (Optional) -->
-                    <div>
+                    <div x-data="{ fileName: '', previewUrl: '' }">
                         <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">স্ক্রিনশট / ছবি (ঐচ্ছিক)</label>
-                        <input type="file" wire:model="payment_proof" class="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:outline-none">
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">যদি থাকে, পেমেন্টের স্ক্রিনশট বা ছবি আপলোড করুন (সর্বোচ্চ ২ এমবি)।</p>
+
+                        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                            <label class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <input type="file" wire:model="payment_proof" accept="image/*" class="hidden" x-on:change="fileName = $event.target.files[0]?.name || ''; previewUrl = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : ''">
+                                <span x-text="fileName || 'ফাইল নির্বাচন করুন / Choose file'"></span>
+                            </label>
+
+                            <label class="inline-flex items-center px-3 py-2 text-xs font-medium text-white bg-green-600 border border-green-600 rounded-lg cursor-pointer hover:bg-green-700">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a2 2 0 012-2h3.28a1 1 0 01.948.684L10.5 6H21a1 1 0 011 1v11a2 2 0 01-2 2H5a2 2 0 01-2-2V4z" />
+                                </svg>
+                                <span>ক্যামেরা থেকে নিন</span>
+                                <input type="file" wire:model="payment_proof" accept="image/*" capture="environment" class="hidden" x-on:change="fileName = $event.target.files[0]?.name || 'Camera photo'; previewUrl = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : ''">
+                            </label>
+                        </div>
+
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">পেমেন্টের স্ক্রিনশট বা ছবি তুলুন / আপলোড করুন (সর্বোচ্চ ২ এমবি, শুধু ছবি)।</p>
+
+                        <div x-show="previewUrl" class="mt-3">
+                            <p class="mb-1 text-xs font-medium text-gray-600 dark:text-gray-300">প্রিভিউ:</p>
+                            <img :src="previewUrl" alt="Payment proof preview" class="object-contain w-full border border-gray-200 rounded-lg max-h-56 dark:border-gray-600">
+                        </div>
+
                         @error('payment_proof') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                     </div>
 
@@ -242,11 +272,11 @@
 
                     <!-- Submit Button -->
                     <div class="flex gap-3">
-                        <button type="submit" class="flex-1 px-6 py-3 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors">
+                        <button type="submit" class="flex-1 px-6 py-3 text-sm font-medium text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
                             <span wire:loading.remove wire:target="submitPayment">পেমেন্ট সাবমিট করুন</span>
                             <span wire:loading wire:target="submitPayment">সাবমিট হচ্ছে...</span>
                         </button>
-                        <a href="{{ route('member.profile') }}" class="px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
+                        <a href="{{ route('member.profile') }}" class="px-6 py-3 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
                             বাতিল
                         </a>
                     </div>
