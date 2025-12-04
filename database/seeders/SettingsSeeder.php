@@ -26,8 +26,14 @@ class SettingsSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'key' => 'organization_start_month',
-                'value' => '2025-01', // Year-Month format
+                'key' => 'organization_established_year',
+                'value' => '2024',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'key' => 'organization_established_month',
+                'value' => '11', // 1-12 for Jan-Dec
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

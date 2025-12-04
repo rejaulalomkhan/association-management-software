@@ -13,7 +13,8 @@ class Settings extends Component
 
     public $organization_name;
     public $organization_name_en;
-    public $organization_start_month;
+    public $organization_established_year;
+    public $organization_established_month;
     public $monthly_fee;
     public $organization_address;
     public $organization_phone;
@@ -32,7 +33,8 @@ class Settings extends Component
 
         $this->organization_name = $settings['organization_name'];
         $this->organization_name_en = $settings['organization_name_en'];
-        $this->organization_start_month = $settings['organization_start_month'];
+        $this->organization_established_year = $settings['organization_established_year'];
+        $this->organization_established_month = $settings['organization_established_month'];
         $this->monthly_fee = $settings['monthly_fee'];
         $this->organization_address = $settings['organization_address'];
         $this->organization_phone = $settings['organization_phone'];
@@ -51,7 +53,8 @@ class Settings extends Component
         $this->validate([
             'organization_name' => 'required|string|max:255',
             'organization_name_en' => 'required|string|max:255',
-            'organization_start_month' => 'required|date_format:Y-m',
+            'organization_established_year' => 'required|integer|min:2000|max:2100',
+            'organization_established_month' => 'required|integer|min:1|max:12',
             'monthly_fee' => 'required|numeric|min:0',
             'organization_address' => 'nullable|string',
             'organization_phone' => 'nullable|string|max:20',
@@ -66,7 +69,8 @@ class Settings extends Component
 
         $settingsService->set('organization_name', $this->organization_name);
         $settingsService->set('organization_name_en', $this->organization_name_en);
-        $settingsService->set('organization_start_month', $this->organization_start_month);
+        $settingsService->set('organization_established_year', $this->organization_established_year);
+        $settingsService->set('organization_established_month', $this->organization_established_month);
         $settingsService->set('monthly_fee', $this->monthly_fee);
         $settingsService->set('organization_address', $this->organization_address);
         $settingsService->set('organization_phone', $this->organization_phone);

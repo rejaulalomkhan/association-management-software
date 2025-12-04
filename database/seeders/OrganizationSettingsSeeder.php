@@ -23,5 +23,11 @@ class OrganizationSettingsSeeder extends Seeder
             ['key' => 'organization_name'],
             ['value' => 'প্রজন্ম উন্নয়ন মিশন']
         );
+
+        // Monthly fee
+        Setting::firstOrCreate(
+            ['key' => 'monthly_fee'],
+            ['value' => '500']
+        );
     }
 }

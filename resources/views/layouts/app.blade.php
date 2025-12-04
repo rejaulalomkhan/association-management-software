@@ -47,15 +47,25 @@
                 <!-- Profile Dropdown -->
                 <div class="flex items-center space-x-4" x-data="{ profileOpen: false, notificationOpen: false }">
                     <!-- Notifications -->
+                    @php
+                        $customUnreadCount = \App\Models\Notification::where('user_id', auth()->id())
+                            ->where('read', false)
+                            ->count();
+                        $customNotifications = \App\Models\Notification::where('user_id', auth()->id())
+                            ->latest()
+                            ->take(5)
+                            ->get();
+                    @endphp
+
                     <div class="relative">
                         <button @click="notificationOpen = !notificationOpen" class="relative text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                             </svg>
                             <!-- Notification badge -->
-                            @if(auth()->user()->unreadNotifications->count() > 0)
+                            @if($customUnreadCount > 0)
                             <span class="absolute top-0 right-0 flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full ring-2 ring-white">
-                                {{ auth()->user()->unreadNotifications->count() > 9 ? '9+' : auth()->user()->unreadNotifications->count() }}
+                                {{ $customUnreadCount > 9 ? '9+' : $customUnreadCount }}
                             </span>
                             @endif
                         </button>
@@ -75,18 +85,18 @@
                             <!-- Header -->
                             <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                                 <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200">নোটিফিকেশন</h3>
-                                @if(auth()->user()->unreadNotifications->count() > 0)
-                                <span class="text-xs font-medium text-blue-600 dark:text-blue-400">{{ auth()->user()->unreadNotifications->count() }} নতুন</span>
+                                @if($customUnreadCount > 0)
+                                <span class="text-xs font-medium text-blue-600 dark:text-blue-400">{{ $customUnreadCount }} নতুন</span>
                                 @endif
                             </div>
 
                             <!-- Notifications List -->
                             <div class="flex-1 overflow-y-auto">
-                                @forelse(auth()->user()->notifications->take(5) as $notification)
-                                    <div class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-700 {{ $notification->read_at ? '' : 'bg-blue-50 dark:bg-blue-900/20' }}">
+                                @forelse($customNotifications as $notification)
+                                    <div class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-700 {{ $notification->read ? '' : 'bg-blue-50 dark:bg-blue-900/20' }}">
                                         <div class="flex items-start space-x-3">
                                             <div class="flex-shrink-0">
-                                                @if(($notification->data['type'] ?? '') === 'payment_approved')
+                                                @if($notification->type === 'payment_approved')
                                                     <div class="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full dark:bg-green-900">
                                                         <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -107,7 +117,7 @@
                                                 @endif
                                             </div>
                                             <div class="flex-1 min-w-0">
-                                                <p class="text-sm text-gray-800 dark:text-gray-200">{{ $notification->data['message'] ?? 'নতুন নোটিফিকেশন' }}</p>
+                                                <p class="text-sm text-gray-800 dark:text-gray-200">{{ $notification->message }}</p>
                                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $notification->created_at->diffForHumans() }}</p>
                                             </div>
                                         </div>
@@ -239,14 +249,20 @@
                     </div>
                 </div>
 
-                <!-- Notification Icon -->
+                <!-- Notification Icon (mobile) - uses custom notifications table -->
+                @php
+                    $mobileUnreadCount = \App\Models\Notification::where('user_id', auth()->id())
+                        ->where('read', false)
+                        ->count();
+                @endphp
+
                 <a href="@if(auth()->user()->hasRole('member')) {{ route('member.notifications') }} @else # @endif" class="relative text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                     </svg>
-                    @if(auth()->user()->unreadNotifications->count() > 0)
+                    @if($mobileUnreadCount > 0)
                     <span class="absolute top-0 right-0 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full">
-                        {{ auth()->user()->unreadNotifications->count() > 9 ? '9+' : auth()->user()->unreadNotifications->count() }}
+                        {{ $mobileUnreadCount > 9 ? '9+' : $mobileUnreadCount }}
                     </span>
                     @endif
                 </a>

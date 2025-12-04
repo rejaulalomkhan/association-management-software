@@ -19,6 +19,7 @@ class Transactions extends Component
     public $selectedStatus = '';
     public $adminNote = '';
     public $selectedPaymentId = null;
+    public $selectedPaymentForView = null;
 
     public function mount()
     {
@@ -50,14 +51,12 @@ class Transactions extends Component
     {
         $payment = Payment::findOrFail($paymentId);
         $payment->status = 'approved';
+        $payment->processed_at = now();
+        $payment->processed_by = auth()->id();
         $payment->save();
 
-        // Send notification
-        NotificationHelper::create(
-            $payment->user_id,
-            'payment_approved',
-            "আপনার {$payment->month}/{$payment->year} মাসের পেমেন্ট অনুমোদিত হয়েছে"
-        );
+        // Send notification using helper service
+        app(NotificationHelper::class)->sendPaymentApprovalNotification($payment);
 
         session()->flash('success', 'পেমেন্ট অনুমোদিত হয়েছে');
     }
@@ -66,14 +65,12 @@ class Transactions extends Component
     {
         $payment = Payment::findOrFail($paymentId);
         $payment->status = 'rejected';
+        $payment->processed_at = now();
+        $payment->processed_by = auth()->id();
         $payment->save();
 
-        // Send notification
-        NotificationHelper::create(
-            $payment->user_id,
-            'payment_rejected',
-            "আপনার {$payment->month}/{$payment->year} মাসের পেমেন্ট প্রত্যাখ্যান করা হয়েছে"
-        );
+        // Send notification using helper service
+        app(NotificationHelper::class)->sendPaymentRejectionNotification($payment, $this->adminNote ?? '');
 
         session()->flash('success', 'পেমেন্ট প্রত্যাখ্যান করা হয়েছে');
     }
@@ -92,10 +89,7 @@ class Transactions extends Component
             $payment = Payment::findOrFail($this->selectedPaymentId);
             $payment->admin_note = $this->adminNote;
             $payment->save();
-
-            session()->flash('success', 'নোট সংরক্ষিত হয়েছে');
-            $this->dispatch('close-note-modal');
-            $this->reset(['selectedPaymentId', 'adminNote']);
+            // Do not auto-flash here; rejecting will handle message
         }
     }
 
@@ -104,7 +98,9 @@ class Transactions extends Component
         $query = Payment::with(['user', 'paymentMethod']);
 
         if ($this->selectedMonth) {
-            $query->where('month', $this->selectedMonth);
+            // month column stores English month name, dropdown gives numeric month
+            $englishMonth = date('F', mktime(0, 0, 0, (int) $this->selectedMonth, 1));
+            $query->where('month', $englishMonth);
         }
 
         if ($this->selectedYear) {
@@ -132,12 +128,39 @@ class Transactions extends Component
         }, 'transactions-report-' . date('Y-m-d') . '.pdf');
     }
 
+    public function viewPayment($paymentId)
+    {
+        $this->selectedPaymentForView = Payment::with(['user', 'paymentMethod', 'approver'])->findOrFail($paymentId);
+        $this->dispatch('open-view-modal');
+    }
+
+    public function downloadReceipt($paymentId)
+    {
+        $payment = Payment::with(['user', 'paymentMethod', 'approver'])->findOrFail($paymentId);
+
+        if ($payment->status !== 'approved') {
+            session()->flash('success', 'শুধু অনুমোদিত পেমেন্টের রিসিপ্ট ডাউনলোড করা যাবে।');
+            return;
+        }
+
+        $pdf = Pdf::loadView('pdf.payment-receipt', [
+            'payment' => $payment,
+        ]);
+
+        $fileName = 'receipt-' . ($payment->transaction_id ?: ($payment->id)) . '.pdf';
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, $fileName);
+    }
+
     public function render()
     {
         $query = Payment::with(['user', 'paymentMethod']);
 
         if ($this->selectedMonth) {
-            $query->where('month', $this->selectedMonth);
+            $englishMonth = date('F', mktime(0, 0, 0, (int) $this->selectedMonth, 1));
+            $query->where('month', $englishMonth);
         }
 
         if ($this->selectedYear) {

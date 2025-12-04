@@ -47,6 +47,9 @@
     </div>
     @endif
 
+    <!-- Due Payment Card -->
+    <livewire:member.due-payment-card />
+
     <!-- Balance Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <!-- Total Paid -->

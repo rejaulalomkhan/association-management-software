@@ -39,11 +39,12 @@ class MemberService
     public function calculateOutstandingDues(User $user): array
     {
         $orgStart = Carbon::parse($this->settingsService->getOrganizationStartDate());
-        $memberJoined = $user->joined_at ? Carbon::parse($user->joined_at) : Carbon::now();
+        // For due calculation, always start from organization start month
+        $memberJoined = $orgStart;
         $monthlyFee = $this->settingsService->getMonthlyFee();
 
-        // Start from whichever is later: org start or member join
-        $startDate = $orgStart->greaterThan($memberJoined) ? $orgStart : $memberJoined;
+        // Always start counting from organization start date
+        $startDate = $orgStart;
         $currentDate = Carbon::now();
 
         // Calculate total months

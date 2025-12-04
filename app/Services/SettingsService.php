@@ -51,7 +51,8 @@ class SettingsService
         return $this->getMultiple([
             'organization_name',
             'organization_name_en',
-            'organization_start_month',
+            'organization_established_year',
+            'organization_established_month',
             'monthly_fee',
             'organization_logo',
             'organization_address',
@@ -70,11 +71,29 @@ class SettingsService
     }
 
     /**
+     * Get organization established year.
+     */
+    public function getOrganizationEstablishedYear(): int
+    {
+        return (int) $this->get('organization_established_year', now()->year);
+    }
+
+    /**
+     * Get organization established month.
+     */
+    public function getOrganizationEstablishedMonth(): int
+    {
+        return (int) $this->get('organization_established_month', 1);
+    }
+
+    /**
      * Get organization start date.
      */
     public function getOrganizationStartDate(): string
     {
-        return $this->get('organization_start_month', now()->format('Y-m'));
+        $year = $this->getOrganizationEstablishedYear();
+        $month = $this->getOrganizationEstablishedMonth();
+        return sprintf('%04d-%02d', $year, $month);
     }
 
     /**

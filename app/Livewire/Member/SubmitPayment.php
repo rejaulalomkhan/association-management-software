@@ -6,103 +6,378 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
+use App\Models\User;
 use App\Services\SettingsService;
-use App\Services\MemberService;
-use App\Services\TransactionService;
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class SubmitPayment extends Component
 {
     use WithFileUploads;
+    public $selectedUserId;
+    public $availableUsers = [];
 
-    public $selectedMonth;
-    public $selectedYear;
-    public $amount;
+    public $payment_type = 'current';
+    public $paymentYear;
+    public $selectedMonths = [];
+    public $payment_amount = 0;
     public $payment_method_id;
-    public $proof;
-    public $description;
+    public $payment_reference;
+    public $payment_note;
+    public $isTypeChanging = false;
+    public $payment_proof;
 
-    public $unpaidMonths = [];
-    public $paymentMethods = [];
-    public $monthlyFee;
-
-    public function mount(MemberService $memberService, SettingsService $settingsService)
+    private function getEnglishMonthName(int $monthNum): ?string
     {
-        $this->monthlyFee = $settingsService->getMonthlyFee();
-        $this->amount = $this->monthlyFee;
-        $this->unpaidMonths = $memberService->getUnpaidMonths(Auth::user());
-        $this->paymentMethods = PaymentMethod::active()->get();
+        $englishMonths = [
+            1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
+            5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
+            9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+        ];
 
-        // Pre-select current month if unpaid
-        $currentMonth = Carbon::now()->format('F');
-        $currentYear = Carbon::now()->year;
+        return $englishMonths[$monthNum] ?? null;
+    }
 
-        foreach ($this->unpaidMonths as $month) {
-            if ($month['month'] === $currentMonth && $month['year'] === $currentYear) {
-                $this->selectedMonth = $currentMonth;
-                $this->selectedYear = $currentYear;
-                break;
+    private function getMonthNumberFromEnglishName(string $name): ?int
+    {
+        $map = [
+            'January' => 1, 'February' => 2, 'March' => 3, 'April' => 4,
+            'May' => 5, 'June' => 6, 'July' => 7, 'August' => 8,
+            'September' => 9, 'October' => 10, 'November' => 11, 'December' => 12,
+        ];
+
+        return $map[$name] ?? null;
+    }
+
+    public function mount()
+    {
+        // Check if user is authenticated
+        if (!auth()->check()) {
+            return redirect()->route('tyro-login.login');
+        }
+
+        $currentUser = auth()->user();
+
+        // Determine if current user is admin or accountant
+        $roleSlugs = collect($currentUser->tyroRoleSlugs() ?? []);
+        $isAdminOrAccountant = $roleSlugs->contains(fn ($slug) => in_array($slug, ['admin', 'super-admin', 'accountant']));
+
+        if ($isAdminOrAccountant) {
+            // Admin / Accountant can select any active user
+            $this->availableUsers = User::orderBy('name')->get(['id', 'name', 'membership_id']);
+            $this->selectedUserId = $currentUser->id; // default to self
+        } else {
+            // Normal member can only submit for themselves
+            $this->availableUsers = [$currentUser];
+            $this->selectedUserId = $currentUser->id;
+        }
+
+        $this->payment_type = 'current';
+        $this->paymentYear = date('Y');
+
+        // Auto-select current month for current payment type
+        $currentMonth = (int)date('n');
+        $this->selectedMonths = [$currentMonth];
+
+        $this->updatePaymentAmount();
+    }
+
+    public function updatedPaymentType()
+    {
+        $this->isTypeChanging = true;
+
+        // Reset selections when payment type changes
+        $this->selectedMonths = [];
+        $this->payment_amount = 0;
+
+        if ($this->payment_type === 'current') {
+            // Auto-select current month if it is unpaid
+            $currentMonth = (int) date('n');
+            $currentYear = (int) date('Y');
+
+            $alreadyPaid = Payment::where('user_id', $this->selectedUserId)
+                ->where('status', 'approved')
+                ->where('year', $currentYear)
+                ->where('month', $this->getEnglishMonthName($currentMonth))
+                ->exists();
+
+            $this->paymentYear = $currentYear;
+
+            if (!$alreadyPaid) {
+                $this->selectedMonths = [$currentMonth];
+            }
+        } elseif ($this->payment_type === 'overdue') {
+            // Oldest year where there is at least one unpaid month
+            $oldestYear = $this->getOldestOverdueYear();
+            $this->paymentYear = $oldestYear ?? (int) date('Y');
+
+            $this->selectedMonths = $this->getUnpaidMonthsForYear($this->paymentYear);
+        } elseif ($this->payment_type === 'advance') {
+            // For advance, start from current year and show future unpaid months
+            $this->paymentYear = (int) date('Y');
+            $this->selectedMonths = $this->getUnpaidMonthsForYear($this->paymentYear);
+        }
+
+        $this->updatePaymentAmount();
+        $this->dispatch('payment-type-changed');
+
+        $this->isTypeChanging = false;
+    }
+
+    public function updatedPaymentYear()
+    {
+        $this->selectedMonths = [];
+        $this->updatePaymentAmount();
+    }
+
+    public function updatedSelectedMonths()
+    {
+        $this->updatePaymentAmount();
+    }
+
+    public function getUnpaidMonthsForYear($year)
+    {
+        $settingsService = app(SettingsService::class);
+        $establishedYear = (int) $settingsService->get('organization_established_year', 2024);
+        $establishedMonth = (int) $settingsService->get('organization_established_month', 1);
+
+        // Paid months based on month/year columns to avoid double payments
+        $paidMonths = Payment::where('user_id', $this->selectedUserId)
+            ->where('status', 'approved')
+            ->where('year', $year)
+            ->pluck('month')
+            ->map(function ($monthName) {
+                return $this->getMonthNumberFromEnglishName($monthName);
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        $currentYear = (int) date('Y');
+        $currentMonth = (int) date('n');
+        $unpaidMonths = [];
+
+        if ($this->payment_type === 'current') {
+            if ($year == $currentYear && !in_array($currentMonth, $paidMonths)) {
+                $unpaidMonths = [$currentMonth];
+            }
+        } elseif ($this->payment_type === 'overdue') {
+            if ($year == $establishedYear) {
+                $startMonth = $establishedMonth;
+                $endMonth = ($year == $currentYear) ? $currentMonth - 1 : 12;
+            } elseif ($year < $currentYear && $year >= $establishedYear) {
+                $startMonth = 1;
+                $endMonth = 12;
+            } elseif ($year == $currentYear) {
+                $startMonth = 1;
+                $endMonth = $currentMonth - 1;
+            } else {
+                return [];
+            }
+
+            for ($m = $startMonth; $m <= $endMonth; $m++) {
+                if (!in_array($m, $paidMonths)) {
+                    $unpaidMonths[] = $m;
+                }
+            }
+        } elseif ($this->payment_type === 'advance') {
+            if ($year == $currentYear) {
+                $startMonth = $currentMonth + 1;
+                $endMonth = 12;
+
+                for ($m = $startMonth; $m <= $endMonth; $m++) {
+                    if (!in_array($m, $paidMonths)) {
+                        $unpaidMonths[] = $m;
+                    }
+                }
+            } elseif ($year == $currentYear + 1) {
+                for ($m = 1; $m <= 12; $m++) {
+                    if (!in_array($m, $paidMonths)) {
+                        $unpaidMonths[] = $m;
+                    }
+                }
             }
         }
+
+        return $unpaidMonths;
     }
 
-    protected function rules()
+    private function getOldestOverdueYear()
     {
+        $settingsService = app(SettingsService::class);
+        $establishedYear = (int) $settingsService->get('organization_established_year', 2024);
+
+        for ($year = $establishedYear; $year < date('Y'); $year++) {
+            $unpaidCount = $this->getUnpaidMonthsCountForYear($year);
+            if ($unpaidCount > 0) {
+                return $year;
+            }
+        }
+
+        return date('Y');
+    }
+
+    private function getUnpaidMonthsCountForYear($year)
+    {
+        $paidMonths = Payment::where('user_id', $this->selectedUserId)
+            ->where('status', 'approved')
+            ->where('year', $year)
+            ->count();
+
+        $currentYear = (int) date('Y');
+        $totalMonths = ($year < $currentYear) ? 12 : (int) date('n');
+
+        return max(0, $totalMonths - $paidMonths);
+    }
+
+    public function getTotalOverdueInfo()
+    {
+        $settingsService = app(SettingsService::class);
+        $establishedYear = (int) $settingsService->get('organization_established_year', 2024);
+        $establishedMonth = (int) $settingsService->get('organization_established_month', 1);
+        $monthlyFee = (float) $settingsService->get('monthly_fee', 500);
+
+        $establishmentDate = \Carbon\Carbon::create($establishedYear, $establishedMonth, 1);
+        $lastMonthDate = \Carbon\Carbon::now()->subMonth()->endOfMonth();
+        $totalMonthsShouldPay = $establishmentDate->diffInMonths($lastMonthDate) + 1;
+
+        $paidMonths = Payment::where('user_id', $this->selectedUserId)
+            ->where('status', 'approved')
+            ->whereYear('created_at', '>=', $establishedYear)
+            ->count();
+
+        $overdueMonths = max(0, $totalMonthsShouldPay - $paidMonths);
+        $overdueAmount = $overdueMonths * $monthlyFee;
+
         return [
-            'selectedMonth' => 'required|string',
-            'selectedYear' => 'required|integer',
-            'amount' => 'required|numeric|min:1',
+            'months' => $overdueMonths,
+            'amount' => $overdueAmount
+        ];
+    }
+
+    private function updatePaymentAmount()
+    {
+        $settingsService = app(SettingsService::class);
+        $monthlyFee = (float) $settingsService->get('monthly_fee', 500);
+        $this->payment_amount = count($this->selectedMonths) * $monthlyFee;
+    }
+
+    public function submitPayment()
+    {
+        $this->validate([
+            'selectedUserId' => 'required|exists:users,id',
+            'payment_amount' => 'required|numeric|min:1',
             'payment_method_id' => 'required|exists:payment_methods,id',
-            'proof' => 'nullable|image|max:2048',
-            'description' => 'nullable|string|max:500',
-        ];
-    }
+            'selectedMonths' => 'required|array|min:1',
+            'payment_reference' => 'nullable|string|max:255',
+            'payment_note' => 'nullable|string|max:500',
+            'payment_proof' => 'nullable|image|max:2048',
+        ], [
+            'selectedUserId.required' => 'কোন সদস্যের জন্য পেমেন্ট দিচ্ছেন তা নির্বাচন করুন।',
+            'selectedUserId.exists' => 'নির্বাচিত সদস্যটি সিস্টেমে পাওয়া যায়নি।',
+            'payment_amount.required' => 'পেমেন্ট এর পরিমাণ প্রয়োজন।',
+            'payment_amount.min' => 'কমপক্ষে এক মাসের পেমেন্ট নির্বাচন করুন।',
+            'payment_method_id.required' => 'পেমেন্ট মাধ্যম নির্বাচন করুন।',
+            'payment_method_id.exists' => 'নির্বাচিত পেমেন্ট মাধ্যমটি সিস্টেমে পাওয়া যায়নি।',
+            'selectedMonths.required' => 'কমপক্ষে একটি মাস নির্বাচন করুন।',
+            'selectedMonths.min' => 'কমপক্ষে একটি মাস নির্বাচন করুন।',
+            'payment_reference.max' => 'রেফারেন্স নাম্বার সর্বোচ্চ ২৫৫ অক্ষরের হতে পারবে।',
+            'payment_note.max' => 'নোট সর্বোচ্চ ৫০০ অক্ষরের হতে পারবে।',
+            'payment_proof.image' => 'স্ক্রিনশট বা ছবি ফরম্যাট ভুল হয়েছে।',
+            'payment_proof.max' => 'স্ক্রিনশট সর্বোচ্চ ২ এমবি হতে পারবে।',
+        ]);
 
-    public function selectMonth($month, $year)
-    {
-        $this->selectedMonth = $month;
-        $this->selectedYear = $year;
-        $this->amount = $this->monthlyFee;
-    }
-
-    public function submit(TransactionService $transactionService)
-    {
-        $this->validate();
-
-        // Check if payment already exists for this month
-        $exists = Payment::where('user_id', Auth::id())
-            ->where('month', $this->selectedMonth)
-            ->where('year', $this->selectedYear)
-            ->exists();
-
-        if ($exists) {
-            session()->flash('error', 'এই মাসের জন্য ইতিমধ্যে একটি পেমেন্ট জমা দেওয়া হয়েছে।');
-            return;
+        // যদি ট্রানজেকশন আইডি দেওয়া থাকে এবং শুধু এক মাস নির্বাচন করা হয়,
+        // সেক্ষেত্রে আগের রেকর্ড আছে কিনা চেক করি। একসাথে একাধিক মাসের জন্য
+        // একই ট্রানজেকশন আইডি ব্যবহার করা যাবে।
+        if ($this->payment_reference && count($this->selectedMonths) === 1) {
+            $txExists = Payment::where('transaction_id', $this->payment_reference)->exists();
+            if ($txExists) {
+                $this->addError('payment_reference', 'এই ট্রানজেকশন আইডি আগে থেকেই ব্যবহার হয়েছে।');
+                return;
+            }
         }
 
-        $data = [
-            'month' => $this->selectedMonth,
-            'year' => $this->selectedYear,
-            'amount' => $this->amount,
-            'payment_method_id' => $this->payment_method_id,
-            'method' => PaymentMethod::find($this->payment_method_id)->name,
-            'description' => $this->description,
-        ];
+        $settingsService = app(SettingsService::class);
+        $monthlyFee = (float) $settingsService->get('monthly_fee', 500);
 
-        if ($this->proof) {
-            $data['proof_path'] = $this->proof->store('payment-proofs', 'public');
+        $proofPath = null;
+        if ($this->payment_proof) {
+            $proofPath = $this->payment_proof->store('payment_proofs', 'public');
         }
 
-        $transactionService->createPayment(Auth::user(), $data);
+        foreach ($this->selectedMonths as $monthNum) {
+            $monthName = $this->getEnglishMonthName((int) $monthNum);
+            if (!$monthName) {
+                continue;
+            }
+
+            // Prevent duplicate submission for same user + month + year
+            $alreadyExists = Payment::where('user_id', $this->selectedUserId)
+                ->where('year', (int) $this->paymentYear)
+                ->where('month', $monthName)
+                ->whereIn('status', ['pending', 'approved'])
+                ->exists();
+
+            if ($alreadyExists) {
+                continue;
+            }
+
+            Payment::create([
+                'user_id' => $this->selectedUserId,
+                'month' => $monthName,
+                'year' => (int) $this->paymentYear,
+                'amount' => $monthlyFee,
+                'method' => optional(PaymentMethod::find($this->payment_method_id))->name ?? 'manual',
+                'payment_method_id' => $this->payment_method_id,
+                'description' => $this->payment_note,
+                'transaction_id' => $this->payment_reference,
+                'proof_path' => $proofPath,
+                'status' => 'pending',
+            ]);
+        }
 
         session()->flash('success', 'পেমেন্ট সফলভাবে জমা দেওয়া হয়েছে! অনুমোদনের জন্য অপেক্ষা করুন।');
 
-        return redirect()->route('member.history');
+        return redirect()->route('member.profile');
     }
 
     public function render()
     {
-        return view('livewire.member.submit-payment')->layout('layouts.app');
+        $settingsService = app(SettingsService::class);
+        $currentYear = (int) date('Y');
+        $establishedYear = $settingsService->get('organization_established_year', 2024);
+
+        // Generate available years based on payment type
+        if ($this->payment_type === 'advance') {
+            $paymentYears = range($currentYear, $currentYear + 1);
+        } else {
+            $paymentYears = range($currentYear, $establishedYear);
+        }
+
+        $paymentMethods = PaymentMethod::active()->get();
+        $monthlyFee = (float) $settingsService->get('monthly_fee', 500);
+
+        $banglaMonthNames = [
+            1 => 'জানুয়ারি', 2 => 'ফেব্রুয়ারি', 3 => 'মার্চ', 4 => 'এপ্রিল',
+            5 => 'মে', 6 => 'জুন', 7 => 'জুলাই', 8 => 'আগস্ট',
+            9 => 'সেপ্টেম্বর', 10 => 'অক্টোবর', 11 => 'নভেম্বর', 12 => 'ডিসেম্বর'
+        ];
+
+        $overdueInfo = $this->getTotalOverdueInfo();
+
+        $currentUser = auth()->user();
+        $roleSlugs = collect($currentUser->tyroRoleSlugs() ?? []);
+        $isAdminOrAccountant = $roleSlugs->contains(fn ($slug) => in_array($slug, ['admin', 'super-admin', 'accountant']));
+
+        return view('livewire.member.submit-payment', [
+            'availableUsers' => $this->availableUsers,
+            'isAdminOrAccountant' => $isAdminOrAccountant,
+            'paymentMethods' => $paymentMethods,
+            'paymentYears' => $paymentYears,
+            'monthlyFee' => $monthlyFee,
+            'banglaMonthNames' => $banglaMonthNames,
+            'overdueInfo' => $overdueInfo,
+        ])->layout('layouts.app');
     }
 }
+

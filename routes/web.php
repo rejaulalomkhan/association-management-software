@@ -20,6 +20,7 @@ use App\Livewire\Admin\RoleManagement;
 use App\Livewire\Admin\PrivilegeManagement;
 use App\Livewire\Admin\UserRoleAssignment;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Member\PaymentReceiptController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -38,6 +39,8 @@ Route::middleware(['auth', 'role:member'])->prefix('member')->name('member.')->g
     Route::get('/payment', SubmitPayment::class)->name('payment');
     Route::get('/history', PaymentHistory::class)->name('history');
     Route::get('/notifications', Notifications::class)->name('notifications');
+    Route::get('/payments/{payment}/receipt-preview', [PaymentReceiptController::class, 'preview'])
+        ->name('payments.receipt.preview');
 });
 
 Route::middleware(['auth', 'role:accountant'])->prefix('accountant')->name('accountant.')->group(function () {

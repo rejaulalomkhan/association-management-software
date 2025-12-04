@@ -30,12 +30,34 @@
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                    <label class="block mb-1 text-sm font-medium text-gray-700">সংগঠন শুরুর মাস</label>
-                    <input type="month" wire:model="organization_start_month"
+                    <label class="block mb-1 text-sm font-medium text-gray-700">সংগঠন শুরুর সাল</label>
+                    <input type="number" wire:model="organization_established_year" min="2000" max="2100"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                    @error('organization_start_month') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                    @error('organization_established_year') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
                 </div>
 
+                <div>
+                    <label class="block mb-1 text-sm font-medium text-gray-700">সংগঠন শুরুর মাস</label>
+                    <select wire:model="organization_established_month"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <option value="1">জানুয়ারি</option>
+                        <option value="2">ফেব্রুয়ারি</option>
+                        <option value="3">মার্চ</option>
+                        <option value="4">এপ্রিল</option>
+                        <option value="5">মে</option>
+                        <option value="6">জুন</option>
+                        <option value="7">জুলাই</option>
+                        <option value="8">আগস্ট</option>
+                        <option value="9">সেপ্টেম্বর</option>
+                        <option value="10">অক্টোবর</option>
+                        <option value="11">নভেম্বর</option>
+                        <option value="12">ডিসেম্বর</option>
+                    </select>
+                    @error('organization_established_month') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                     <label class="block mb-1 text-sm font-medium text-gray-700">মাসিক চাঁদা (৳)</label>
                     <input type="number" wire:model="monthly_fee" step="0.01"

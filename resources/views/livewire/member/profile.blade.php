@@ -1,4 +1,4 @@
-<div class="py-6" x-data="{ showEditModal: false }" @close-modal.window="showEditModal = false">
+<div class="py-6">
     <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
         <!-- Success Messages -->
         @if (session()->has('message'))
@@ -135,16 +135,29 @@
                             </div>
                         @endif
 
-                        <!-- Edit Button -->
-                        <a href="{{ role_route('profile.edit') }}" wire:navigate class="inline-flex items-center px-2 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors whitespace-nowrap">
-                            <svg class="inline-block w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                            </svg>
-                            প্রোফাইল সম্পাদনা
-                        </a>
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col gap-2">
+                            <a href="{{ route('member.payment') }}" wire:navigate class="inline-flex items-center px-2 py-1.5 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors whitespace-nowrap">
+                                <svg class="inline-block w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                                পেমেন্ট সাবমিট
+                            </a>
+                            <a href="{{ role_route('profile.edit') }}" wire:navigate class="inline-flex items-center px-2 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors whitespace-nowrap">
+                                <svg class="inline-block w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                প্রোফাইল সম্পাদনা
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Due Payment Card -->
+        <div class="mb-6">
+            <livewire:member.due-payment-card />
         </div>
 
         <!-- Stats Cards -->
@@ -266,11 +279,12 @@
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-900">
                                 <tr>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">তারিখ</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">মাস</th>
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">সাবমিটের তারিখ</th>
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">যে মাসের পেমেন্ট</th>
                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">পরিমাণ</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">মাধ্যম</th>
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">পেমেন্ট মাধ্যম</th>
                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">অবস্থা</th>
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">রিসিপ্ট</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
@@ -280,7 +294,7 @@
                                         {{ \Carbon\Carbon::parse($transaction->created_at)->format('d M Y') }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-gray-100">
-                                        {{ $transaction->payment_month }}
+                                        {{ \App\Helpers\BanglaHelper::getBanglaMonth($transaction->month) }} {{ $transaction->year }}
                                     </td>
                                     <td class="px-6 py-4 text-sm font-semibold text-gray-900 whitespace-nowrap dark:text-gray-100">
                                         ৳{{ number_format($transaction->amount, 2) }}
@@ -301,6 +315,23 @@
                                             <span class="px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full dark:bg-yellow-900 dark:text-yellow-200">
                                                 অপেক্ষমাণ
                                             </span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-sm whitespace-nowrap space-x-2">
+                                        @if($transaction->status === 'approved')
+                                            {{-- Preview button (HTML view) --}}
+                                            <a href="{{ route('member.payments.receipt.preview', $transaction->id) }}"
+                                               class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100">
+                                                প্রিভিউ
+                                            </a>
+
+                                            {{-- Existing PDF download via Livewire --}}
+                                            <button wire:click="downloadReceipt({{ $transaction->id }})"
+                                                    class="inline-flex items-center px-2 py-1 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700 focus:outline-none focus:ring-1 focus:ring-green-500">
+                                                ডাউনলোড
+                                            </button>
+                                        @else
+                                            <span class="text-xs text-gray-400">-</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -325,39 +356,18 @@
     </div>
 
     <!-- Edit Profile Modal -->
-    <div x-show="showEditModal"
-         x-cloak
-         class="fixed inset-0 z-50 overflow-y-auto"
-         aria-labelledby="modal-title"
-         role="dialog"
-         aria-modal="true"
-         style="display: none;">
+    @if($showEditModal)
+    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <!-- Overlay -->
-            <div x-show="showEditModal"
-                 x-transition:enter="ease-out duration-300"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="ease-in duration-200"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"
-                 @click="showEditModal = false"
-                 class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-                 aria-hidden="true"></div>
+            <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" wire:click="$set('showEditModal', false)" aria-hidden="true"></div>
 
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
             <!-- Modal Content -->
-            <div x-show="showEditModal"
-                 x-transition:enter="ease-out duration-300"
-                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                 x-transition:leave="ease-in duration-200"
-                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 @click.stop
-                 class="relative inline-block w-full max-w-2xl px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:p-6">                <div class="absolute top-0 right-0 pt-4 pr-4">
-                    <button @click="showEditModal = false" class="text-gray-400 hover:text-gray-500">
+            <div class="relative inline-block w-full max-w-2xl px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-800 sm:my-8 sm:align-middle sm:p-6">
+                <div class="absolute top-0 right-0 pt-4 pr-4">
+                    <button wire:click="$set('showEditModal', false)" class="text-gray-400 hover:text-gray-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -444,7 +454,7 @@
                                     পাসওয়ার্ড পরিবর্তন
                                 </button>
                                 <div class="flex space-x-3">
-                                    <button type="button" @click="showEditModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700">
+                                    <button type="button" wire:click="$set('showEditModal', false)" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700">
                                         বাতিল
                                     </button>
                                     <button type="submit" wire:loading.attr="disabled" wire:target="updateBasicInfo,photo" class="relative px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -465,6 +475,9 @@
             </div>
         </div>
     </div>
+    @endif
+
+
 
     <!-- Password Change Modal -->
     @if($showPasswordModal)

@@ -7,7 +7,10 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Payment;
+use App\Models\PaymentMethod;
 use App\Services\SettingsService;
+use App\Services\MemberService;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class Profile extends Component
 {
@@ -21,6 +24,7 @@ class Profile extends Component
     public $current_password;
     public $new_password;
     public $new_password_confirmation;
+    public $showEditModal = false;
     public $showPasswordModal = false;
     public $selectedYear;
 
@@ -89,9 +93,7 @@ class Profile extends Component
         session()->flash('message', 'প্রোফাইল সফলভাবে আপডেট করা হয়েছে।');
         $this->reset(['photo']);
         $this->mount();
-
-        // Close modal using Alpine.js
-        $this->dispatch('close-modal');
+        $this->showEditModal = false;
     }
 
     public function openPasswordModal()
@@ -105,6 +107,37 @@ class Profile extends Component
         $this->showPasswordModal = false;
         $this->reset(['current_password', 'new_password', 'new_password_confirmation']);
     }
+
+    public function getTotalOverdueInfo()
+    {
+        $settingsService = app(SettingsService::class);
+        $establishedYear = (int) $settingsService->get('organization_established_year', 2024);
+        $establishedMonth = (int) $settingsService->get('organization_established_month', 1);
+        $monthlyFee = (float) $settingsService->get('monthly_fee', 500);
+        $currentYear = (int) date('Y');
+        $currentMonth = (int) date('n');
+
+        // Calculate total months from establishment to previous month
+        $establishmentDate = \Carbon\Carbon::create($establishedYear, $establishedMonth, 1);
+        $lastMonthDate = \Carbon\Carbon::now()->subMonth()->endOfMonth();
+        $totalMonthsShouldPay = $establishmentDate->diffInMonths($lastMonthDate) + 1;
+
+        // Count paid months
+        $paidMonths = Payment::where('user_id', auth()->id())
+            ->where('status', 'approved')
+            ->where('created_at', '<', \Carbon\Carbon::now()->startOfMonth())
+            ->count();
+
+        $overdueMonths = max(0, $totalMonthsShouldPay - $paidMonths);
+        $overdueAmount = $overdueMonths * $monthlyFee;
+
+        return [
+            'months' => $overdueMonths,
+            'amount' => $overdueAmount
+        ];
+    }
+
+
 
     public function updatePassword()
     {
@@ -127,8 +160,33 @@ class Profile extends Component
         $this->closePasswordModal();
     }
 
+    public function downloadReceipt($paymentId)
+    {
+        $payment = Payment::with(['paymentMethod'])->where('user_id', auth()->id())->findOrFail($paymentId);
+
+        if ($payment->status !== 'approved') {
+            session()->flash('message', 'শুধু অনুমোদিত পেমেন্টের রিসিপ্ট ডাউনলোড করা যাবে।');
+            return;
+        }
+
+        $pdf = Pdf::loadView('pdf.payment-receipt', [
+            'payment' => $payment,
+        ]);
+
+        $fileName = 'receipt-' . ($payment->transaction_id ?: ($payment->id)) . '.pdf';
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, $fileName);
+    }
+
     public function render()
     {
+        $memberService = app(MemberService::class);
+        $user = auth()->user();
+
+        $dues = $memberService->calculateOutstandingDues($user);
+
         $transactions = Payment::where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -143,15 +201,9 @@ class Profile extends Component
             ->where('status', 'approved')
             ->count();
 
-        // Calculate total due (rejected only, as they are actual dues)
-        $totalDue = Payment::where('user_id', auth()->id())
-            ->where('status', 'rejected')
-            ->sum('amount');
-
-        // Count rejected months
-        $dueMonths = Payment::where('user_id', auth()->id())
-            ->where('status', 'rejected')
-            ->count();
+        // Use unified outstanding dues calculation for total due
+        $totalDue = (float) $dues['total_due'];
+        $dueMonths = (int) $dues['unpaid_months'];
 
         // Calculate pending payments
         $pendingAmount = Payment::where('user_id', auth()->id())
