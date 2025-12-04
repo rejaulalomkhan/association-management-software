@@ -66,6 +66,12 @@ class MemberService
         $totalPaid = (int) $paidMonths * (float) $monthlyFee;
         $totalPending = (int) $pendingMonths * (float) $monthlyFee;
 
+        // Determine if only current month is due or everything is clear
+        $currentMonthIndex = $totalMonths; // treating last month in range as current
+        $hasAnyDue = $unpaidMonths > 0;
+        $onlyCurrentMonthDue = $hasAnyDue && $unpaidMonths === 1 && $paidMonths === ($totalMonths - 1);
+        $allCleared = !$hasAnyDue;
+
         return [
             'total_months' => $totalMonths,
             'paid_months' => $paidMonths,
@@ -78,6 +84,9 @@ class MemberService
             'start_date' => $startDate,
             'current_month' => $currentDate->format('F'),
             'current_year' => $currentDate->year,
+            'has_due' => $hasAnyDue,
+            'only_current_month_due' => $onlyCurrentMonthDue,
+            'all_cleared' => $allCleared,
         ];
     }
 

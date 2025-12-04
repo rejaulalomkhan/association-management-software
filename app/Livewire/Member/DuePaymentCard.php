@@ -23,6 +23,9 @@ class DuePaymentCard extends Component
         $dueMonths = (int) $dues['unpaid_months'];
         $dueAmount = (float) $dues['total_due'];
         $monthlyFee = (float) $dues['monthly_fee'];
+        $hasDue = (bool) $dues['has_due'];
+        $onlyCurrentMonthDue = (bool) $dues['only_current_month_due'];
+        $allCleared = (bool) $dues['all_cleared'];
 
         return view('livewire.member.due-payment-card', [
             'totalMonths' => $totalMonths,
@@ -30,6 +33,9 @@ class DuePaymentCard extends Component
             'dueMonths' => $dueMonths,
             'dueAmount' => $dueAmount,
             'monthlyFee' => $monthlyFee,
+            'hasDue' => $hasDue,
+            'onlyCurrentMonthDue' => $onlyCurrentMonthDue,
+            'allCleared' => $allCleared,
         ]);
     }
 }
