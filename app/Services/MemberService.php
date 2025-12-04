@@ -47,7 +47,7 @@ class MemberService
         $startDate = $orgStart;
         $currentDate = Carbon::now();
 
-        // Calculate total months
+        // Calculate total months as whole months between start and current
         $totalMonths = $startDate->diffInMonths($currentDate) + 1;
 
         // Get paid months
@@ -61,10 +61,10 @@ class MemberService
             ->count();
 
         // Calculate dues
-        $unpaidMonths = $totalMonths - $paidMonths;
-        $totalDue = $unpaidMonths * $monthlyFee;
-        $totalPaid = $paidMonths * $monthlyFee;
-        $totalPending = $pendingMonths * $monthlyFee;
+        $unpaidMonths = max(0, (int) $totalMonths - (int) $paidMonths);
+        $totalDue = (int) $unpaidMonths * (float) $monthlyFee;
+        $totalPaid = (int) $paidMonths * (float) $monthlyFee;
+        $totalPending = (int) $pendingMonths * (float) $monthlyFee;
 
         return [
             'total_months' => $totalMonths,

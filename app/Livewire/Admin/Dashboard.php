@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\User;
 use App\Models\Payment;
 use App\Services\TransactionService;
+use App\Services\MemberService;
 use Carbon\Carbon;
 
 class Dashboard extends Component
@@ -19,7 +20,7 @@ class Dashboard extends Component
         $this->selectedYear = Carbon::now()->year;
     }
 
-    public function render(TransactionService $transactionService)
+    public function render(TransactionService $transactionService, MemberService $memberService)
     {
         $summary = $transactionService->getMonthlySummary($this->selectedMonth, $this->selectedYear);
 
@@ -41,6 +42,14 @@ class Dashboard extends Component
 
         $paidMemberIds = $paidMembers->pluck('user_id')->toArray();
         $unpaidMembers = $allActiveMembers->whereNotIn('id', $paidMemberIds)->take(10);
+
+        // Attach due info for unpaid members
+        $unpaidMembers = $unpaidMembers->map(function ($member) use ($memberService) {
+            $dues = $memberService->calculateOutstandingDues($member);
+            $member->due_months = $dues['unpaid_months'];
+            $member->due_amount = $dues['total_due'];
+            return $member;
+        });
 
         $stats = [
             'total_members' => User::where('status', 'active')
