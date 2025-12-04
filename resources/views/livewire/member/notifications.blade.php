@@ -52,16 +52,43 @@
                         <div class="flex items-start justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-900">
-                                    {{ $notification->data['message'] ?? 'নতুন নোটিফিকেশন' }}
+                                    @php
+                                        $type = $notification->data['type'] ?? 'general';
+                                        $monthName = $notification->data['month'] ?? null;
+                                        $year = $notification->data['year'] ?? null;
+                                        $amount = $notification->data['amount'] ?? null;
+                                    @endphp
+
+                                    @if($type === 'payment_approved')
+                                        {{ $monthName ? \App\Helpers\BanglaHelper::getBanglaMonth($monthName) . ' ' . $year . ' মাসের পেমেন্ট অনুমোদিত হয়েছে।' : 'আপনার পেমেন্ট অনুমোদিত হয়েছে।' }}
+                                        @if($amount)
+                                            (পরিমাণ: ৳{{ number_format($amount, 2) }})
+                                        @endif
+                                    @elseif($type === 'payment_rejected')
+                                        {{ $monthName ? \App\Helpers\BanglaHelper::getBanglaMonth($monthName) . ' ' . $year . ' মাসের পেমেন্ট প্রত্যাখ্যান করা হয়েছে।' : 'আপনার পেমেন্ট প্রত্যাখ্যান করা হয়েছে।' }}
+                                        @if(!empty($notification->data['reason']))
+                                            কারণ: {{ $notification->data['reason'] }}
+                                        @endif
+                                    @else
+                                        {{ $notification->data['message'] ?? 'নতুন নোটিফিকেশন' }}
+                                    @endif
                                 </p>
                                 <p class="mt-1 text-xs text-gray-500">
                                     {{ $notification->created_at->format('d M Y, h:i A') }}
                                     <span class="mx-1">•</span>
                                     {{ $notification->created_at->diffForHumans() }}
                                 </p>
+                                @if(!empty($notification->data['payment_id']))
+                                    <div class="mt-2">
+                                        <a href="{{ route('member.payments.receipt.preview', $notification->data['payment_id']) }}"
+                                           class="inline-flex items-center px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full hover:bg-blue-200">
+                                            রিসিপ্ট / বিস্তারিত দেখুন
+                                        </a>
+                                    </div>
+                                @endif
                             </div>
                             @if(!$notification->read_at)
-                                <span class="flex-shrink-0 inline-flex items-center px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">
+                                <span class="inline-flex items-center flex-shrink-0 px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">
                                     নতুন
                                 </span>
                             @endif

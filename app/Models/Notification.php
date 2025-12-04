@@ -31,6 +31,11 @@ class Notification extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class, 'related_id');
+    }
+
     /**
      * Scope to get unread notifications
      */

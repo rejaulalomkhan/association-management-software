@@ -64,7 +64,7 @@
                             </svg>
                             <!-- Notification badge -->
                             @if($customUnreadCount > 0)
-                            <span class="absolute top-0 right-0 flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full ring-2 ring-white">
+                            <span class="absolute -top-2 -right-1 flex items-center justify-center min-w-[18px] h-4 px-0.5 text-[10px] font-bold text-white bg-red-600 rounded-full ring-2 ring-white shadow-md">
                                 {{ $customUnreadCount > 9 ? '9+' : $customUnreadCount }}
                             </span>
                             @endif

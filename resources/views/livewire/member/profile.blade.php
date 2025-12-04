@@ -223,6 +223,7 @@
                     <div class="flex items-center gap-2">
                         <label for="year-filter" class="text-sm font-medium text-gray-700 dark:text-gray-300">সাল:</label>
                         <select wire:model.live="selectedYear" id="year-filter" class="px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option value="">সকল বছর</option>
                             @foreach($years as $year)
                                 <option value="{{ $year }}">{{ $year }}</option>
                             @endforeach
