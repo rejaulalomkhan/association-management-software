@@ -59,7 +59,7 @@ return [
     | Environment: TYRO_LOGIN_LAYOUT=centered
     |
     */
-    'layout' => env('TYRO_LOGIN_LAYOUT', 'centered'),
+    'layout' => env('TYRO_LOGIN_LAYOUT', 'fullscreen'),
 
     /*
     |--------------------------------------------------------------------------
