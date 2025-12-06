@@ -1,14 +1,14 @@
 <div class="space-y-6">
     <!-- Header with Profile -->
-    <div class="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+    <div class="p-6 text-white rounded-lg shadow-lg bg-gradient-to-br from-indigo-600 to-purple-600">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 @if($user->profile_pic)
                     <img src="{{ asset('storage/' . $user->profile_pic) }}" alt="{{ $user->name }}"
-                        class="h-16 w-16 rounded-full object-cover ring-4 ring-white">
+                        class="object-cover w-16 h-16 rounded-full ring-4 ring-white">
                 @else
-                    <div class="h-16 w-16 rounded-full bg-indigo-400 flex items-center justify-center ring-4 ring-white">
-                        <span class="text-white font-bold text-2xl">{{ substr($user->name, 0, 2) }}</span>
+                    <div class="flex items-center justify-center w-16 h-16 bg-indigo-400 rounded-full ring-4 ring-white">
+                        <span class="text-2xl font-bold text-white">{{ substr($user->name, 0, 2) }}</span>
                     </div>
                 @endif
                 <div>
@@ -25,21 +25,21 @@
 
     <!-- Current Month Payment Notification -->
     @if(!$currentMonthPaid)
-    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+    <div class="p-4 border-l-4 border-yellow-400 rounded-lg bg-yellow-50">
         <div class="flex items-center">
             <div class="flex-shrink-0">
-                <svg class="h-6 w-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
             </div>
-            <div class="ml-3 flex-1">
+            <div class="flex-1 ml-3">
                 <p class="text-sm font-medium text-yellow-800">
-                    {{ $currentMonth }} {{ $currentYear }} মাসের টাকা এখনো জমা দেওয়া হয়নি!
+                    {{ $currentYear }} এর {{ $currentMonth }}  মাসের টাকা এখনো জমা দেওয়া হয়নি!
                 </p>
             </div>
             <div>
                 <a href="{{ route('member.payment') }}" wire:navigate
-                    class="px-4 py-2 bg-yellow-400 text-yellow-900 rounded-lg font-medium hover:bg-yellow-500">
+                    class="px-4 py-2 font-medium text-yellow-900 bg-yellow-400 rounded-lg hover:bg-yellow-500">
                     এখনই জমা দিন
                 </a>
             </div>
@@ -51,9 +51,9 @@
     <livewire:member.due-payment-card />
 
     <!-- Balance Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
         <!-- Total Paid -->
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="p-6 bg-white rounded-lg shadow">
             <div class="flex items-center justify-between mb-3">
                 <p class="text-sm font-medium text-gray-600">মোট জমা</p>
                 <div class="p-2 bg-green-100 rounded-lg">
@@ -63,11 +63,11 @@
                 </div>
             </div>
             <p class="text-3xl font-bold text-gray-900">৳{{ number_format($duesInfo['total_paid'], 2) }}</p>
-            <p class="text-sm text-gray-500 mt-1">{{ $duesInfo['paid_months'] }} মাস পরিশোধিত</p>
+            <p class="mt-1 text-sm text-gray-500">{{ $duesInfo['paid_months'] }} মাস পরিশোধিত</p>
         </div>
 
         <!-- Total Due -->
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="p-6 bg-white rounded-lg shadow">
             <div class="flex items-center justify-between mb-3">
                 <p class="text-sm font-medium text-gray-600">বকেয়া</p>
                 <div class="p-2 bg-red-100 rounded-lg">
@@ -77,11 +77,11 @@
                 </div>
             </div>
             <p class="text-3xl font-bold text-gray-900">৳{{ number_format($duesInfo['total_due'], 2) }}</p>
-            <p class="text-sm text-gray-500 mt-1">{{ $duesInfo['unpaid_months'] }} মাস বাকি</p>
+            <p class="mt-1 text-sm text-gray-500">{{ $duesInfo['unpaid_months'] }} মাস বাকি</p>
         </div>
 
         <!-- Pending -->
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="p-6 bg-white rounded-lg shadow">
             <div class="flex items-center justify-between mb-3">
                 <p class="text-sm font-medium text-gray-600">অপেক্ষমাণ</p>
                 <div class="p-2 bg-yellow-100 rounded-lg">
@@ -91,15 +91,15 @@
                 </div>
             </div>
             <p class="text-3xl font-bold text-gray-900">৳{{ number_format($duesInfo['total_pending'], 2) }}</p>
-            <p class="text-sm text-gray-500 mt-1">{{ $duesInfo['pending_months'] }} মাস অপেক্ষমাণ</p>
+            <p class="mt-1 text-sm text-gray-500">{{ $duesInfo['pending_months'] }} মাস অপেক্ষমাণ</p>
         </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
         <a href="{{ route('member.payment') }}" wire:navigate
-            class="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
-            <div class="p-3 bg-indigo-100 rounded-full mb-3">
+            class="flex flex-col items-center justify-center p-6 transition-shadow bg-white rounded-lg shadow hover:shadow-lg">
+            <div class="p-3 mb-3 bg-indigo-100 rounded-full">
                 <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -108,8 +108,8 @@
         </a>
 
         <a href="{{ route('member.history') }}" wire:navigate
-            class="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
-            <div class="p-3 bg-green-100 rounded-full mb-3">
+            class="flex flex-col items-center justify-center p-6 transition-shadow bg-white rounded-lg shadow hover:shadow-lg">
+            <div class="p-3 mb-3 bg-green-100 rounded-full">
                 <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
@@ -118,8 +118,8 @@
         </a>
 
         <a href="{{ route('member.profile.edit') }}" wire:navigate
-            class="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
-            <div class="p-3 bg-blue-100 rounded-full mb-3">
+            class="flex flex-col items-center justify-center p-6 transition-shadow bg-white rounded-lg shadow hover:shadow-lg">
+            <div class="p-3 mb-3 bg-blue-100 rounded-full">
                 <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
@@ -130,8 +130,8 @@
         <form method="POST" action="{{ route('tyro-login.logout') }}">
             @csrf
             <button type="submit"
-                class="w-full flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
-                <div class="p-3 bg-red-100 rounded-full mb-3">
+                class="flex flex-col items-center justify-center w-full p-6 transition-shadow bg-white rounded-lg shadow hover:shadow-lg">
+                <div class="p-3 mb-3 bg-red-100 rounded-full">
                     <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
@@ -150,7 +150,7 @@
         @if($recentPayments->count() > 0)
         <div class="divide-y divide-gray-200">
             @foreach($recentPayments as $payment)
-            <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+            <div class="px-6 py-4 transition-colors hover:bg-gray-50">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="p-2 rounded-lg
@@ -186,7 +186,7 @@
             @endforeach
         </div>
 
-        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
             <a href="{{ route('member.history') }}" wire:navigate
                 class="text-sm font-medium text-indigo-600 hover:text-indigo-800">
                 সব লেনদেন দেখুন →
@@ -194,12 +194,12 @@
         </div>
         @else
         <div class="px-6 py-12 text-center text-gray-500">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
             <p class="mt-4">কোনো লেনদেন নেই</p>
             <a href="{{ route('member.payment') }}" wire:navigate
-                class="mt-4 inline-block px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                class="inline-block px-6 py-2 mt-4 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
                 প্রথম পেমেন্ট জমা দিন
             </a>
         </div>
