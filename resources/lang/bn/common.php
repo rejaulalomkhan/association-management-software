@@ -63,7 +63,7 @@ return [
     'payment_method' => 'পেমেন্ট মাধ্যম',
     'payment_methods' => 'পেমেন্ট মাধ্যমসমূহ',
     'payment_proof' => 'পেমেন্ট প্রমাণ',
-    'monthly_fee' => 'মাসিক চাঁদা',
+    'monthly_fee' => 'মাসিক টাকা',
     'due' => 'বকেয়া',
     'dues' => 'বকেয়াসমূহ',
     'outstanding_dues' => 'মোট বকেয়া',

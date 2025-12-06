@@ -34,7 +34,7 @@
             </div>
             <div class="ml-3 flex-1">
                 <p class="text-sm font-medium text-yellow-800">
-                    {{ $currentMonth }} {{ $currentYear }} মাসের চাঁদা এখনো জমা দেওয়া হয়নি!
+                    {{ $currentMonth }} {{ $currentYear }} মাসের টাকা এখনো জমা দেওয়া হয়নি!
                 </p>
             </div>
             <div>

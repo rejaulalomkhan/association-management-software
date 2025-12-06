@@ -47,7 +47,7 @@ return [
     'no_transactions' => 'কোনো লেনদেন নেই।',
     'select_month_to_pay' => 'পেমেন্ট করতে মাস নির্বাচন করুন।',
     'no_unpaid_months' => 'সব মাসের পেমেন্ট জমা দেওয়া হয়েছে!',
-    'current_month_unpaid' => ':month :year মাসের চাঁদা এখনো জমা দেওয়া হয়নি!',
+    'current_month_unpaid' => ':month :year মাসের টাকা এখনো জমা দেওয়া হয়নি!',
     'pay_now' => 'এখনই জমা দিন',
     'first_payment_prompt' => 'প্রথম পেমেন্ট জমা দিন',
 
