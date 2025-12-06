@@ -217,10 +217,10 @@ class Profile extends Component
 
         // Get organization established year from settings
         $settingsService = app(SettingsService::class);
-        $establishedYear = $settingsService->get('organization_established_year', 2024);
-        $currentYear = date('Y');
+        $establishedYear = (int) $settingsService->get('organization_established_year', 2024);
+        $currentYear = (int) date('Y');
 
-        // Generate years array from established year to current year
+        // Generate years array from established year to current year (descending for latest first)
         $years = range($currentYear, $establishedYear);
 
         // Bengali month names
@@ -229,13 +229,22 @@ class Profile extends Component
             'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'
         ];
 
-        // Get payments for selected year
+        // Map English month names stored in payments table to month numbers
+        $monthMap = [
+            'January' => 1, 'February' => 2, 'March' => 3, 'April' => 4,
+            'May' => 5, 'June' => 6, 'July' => 7, 'August' => 8,
+            'September' => 9, 'October' => 10, 'November' => 11, 'December' => 12,
+        ];
+
+        // Get payments for selected year using explicit year/month columns
         $yearlyPayments = Payment::where('user_id', auth()->id())
             ->where('status', 'approved')
-            ->whereYear('created_at', $this->selectedYear)
+            ->when($this->selectedYear, function ($query) {
+                $query->where('year', $this->selectedYear);
+            })
             ->get()
-            ->keyBy(function($payment) {
-                return date('n', strtotime($payment->created_at)); // 1-12
+            ->keyBy(function ($payment) use ($monthMap) {
+                return $monthMap[$payment->month] ?? null; // 1-12
             });
 
         // Prepare monthly data

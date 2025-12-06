@@ -24,6 +24,7 @@ class SubmitPayment extends Component
     public $payment_note;
     public $isTypeChanging = false;
     public $payment_proof;
+    public $isCurrentMonthAlreadyPaid = false;
 
     private function getEnglishMonthName(int $monthNum): ?string
     {
@@ -77,7 +78,21 @@ class SubmitPayment extends Component
         $currentMonth = (int)date('n');
         $this->selectedMonths = [$currentMonth];
 
+        $this->refreshCurrentMonthPaidFlag();
+
         $this->updatePaymentAmount();
+    }
+
+    private function refreshCurrentMonthPaidFlag(): void
+    {
+        $currentMonth = (int) date('n');
+        $currentYear = (int) date('Y');
+
+        $this->isCurrentMonthAlreadyPaid = Payment::where('user_id', $this->selectedUserId)
+            ->where('status', 'approved')
+            ->where('year', $currentYear)
+            ->where('month', $this->getEnglishMonthName($currentMonth))
+            ->exists();
     }
 
     public function updatedPaymentType()
@@ -104,6 +119,8 @@ class SubmitPayment extends Component
             if (!$alreadyPaid) {
                 $this->selectedMonths = [$currentMonth];
             }
+
+            $this->isCurrentMonthAlreadyPaid = $alreadyPaid;
         } elseif ($this->payment_type === 'overdue') {
             // Oldest year where there is at least one unpaid month
             $oldestYear = $this->getOldestOverdueYear();
@@ -130,6 +147,24 @@ class SubmitPayment extends Component
 
     public function updatedSelectedMonths()
     {
+        $this->updatePaymentAmount();
+    }
+
+    public function updatedSelectedUserId()
+    {
+        // When changing member, recompute whether current month is already paid
+        $this->refreshCurrentMonthPaidFlag();
+
+        // Reset type/year/months to sensible defaults for the newly selected user
+        if ($this->payment_type === 'current') {
+            $currentMonth = (int) date('n');
+            $this->paymentYear = (int) date('Y');
+
+            $this->selectedMonths = $this->isCurrentMonthAlreadyPaid ? [] : [$currentMonth];
+        } else {
+            $this->selectedMonths = [];
+        }
+
         $this->updatePaymentAmount();
     }
 
@@ -263,6 +298,23 @@ class SubmitPayment extends Component
 
     public function submitPayment()
     {
+        // Prevent submitting payment for current month if already paid
+        if ($this->payment_type === 'current') {
+            $currentMonth = (int) date('n');
+            $currentYear = (int) date('Y');
+
+            $alreadyPaid = Payment::where('user_id', $this->selectedUserId)
+                ->where('status', 'approved')
+                ->where('year', $currentYear)
+                ->where('month', $this->getEnglishMonthName($currentMonth))
+                ->exists();
+
+            if ($alreadyPaid) {
+                $this->addError('selectedMonths', 'এই মাসের পেমেন্ট আগে থেকেই পরিশোধিত হয়েছে।');
+                return;
+            }
+        }
+
         $this->validate([
             'selectedUserId' => 'required|exists:users,id',
             'payment_amount' => 'required|numeric|min:1',

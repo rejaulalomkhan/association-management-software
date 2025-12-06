@@ -100,8 +100,11 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
-                                    @if ($transaction->user->photo)
-                                        <img src="{{ asset('storage/' . $transaction->user->photo) }}" alt="{{ $transaction->user->name }}" class="object-cover w-10 h-10 rounded-full">
+                                    @php
+                                        $profilePic = $transaction->user->profile_pic ?? $transaction->user->photo ?? null;
+                                    @endphp
+                                    @if ($profilePic)
+                                        <img src="{{ asset('storage/' . $profilePic) }}" alt="{{ $transaction->user->name }}" class="object-cover w-10 h-10 rounded-full">
                                     @else
                                         <div class="flex items-center justify-center w-10 h-10 font-bold text-white bg-blue-500 rounded-full">
                                             {{ strtoupper(substr($transaction->user->name, 0, 1)) }}
@@ -145,13 +148,13 @@
                                     @if ($transaction->status === 'pending')
                                         <button wire:click="approvePayment({{ $transaction->id }})"
                                                 wire:confirm="আপনি কি এই পেমেন্ট অনুমোদন করতে চান?"
-                                                class="text-green-600 hover:text-green-900 cursor-pointer">
+                                                class="text-green-600 cursor-pointer hover:text-green-900">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                             </svg>
                                         </button>
                                         <button wire:click="openNoteModal({{ $transaction->id }})"
-                                                class="text-red-600 hover:text-red-900 cursor-pointer"
+                                                class="text-red-600 cursor-pointer hover:text-red-900"
                                                 title="পেমেন্ট প্রত্যাখ্যান করুন">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -160,7 +163,7 @@
                                     @endif
                                     <!-- View details -->
                                     <button wire:click="viewPayment({{ $transaction->id }})"
-                                            class="text-gray-700 hover:text-gray-900 cursor-pointer"
+                                            class="text-gray-700 cursor-pointer hover:text-gray-900"
                                             title="বিস্তারিত দেখুন">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -168,7 +171,7 @@
                                         </svg>
                                     </button>
                                         <button wire:click="openNoteModal({{ $transaction->id }})"
-                                            class="text-blue-600 hover:text-blue-900 cursor-pointer"
+                                            class="text-blue-600 cursor-pointer hover:text-blue-900"
                                             title="নোট যোগ করুন">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -177,7 +180,7 @@
                                     @if ($transaction->status === 'approved')
                                         <!-- Download receipt for approved payments -->
                                         <button wire:click="downloadReceipt({{ $transaction->id }})"
-                                                class="text-green-700 hover:text-green-900 cursor-pointer"
+                                                class="text-green-700 cursor-pointer hover:text-green-900"
                                                 title="রিসিপ্ট ডাউনলোড করুন">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
@@ -304,7 +307,7 @@
                         <div class="mt-4">
                             <p class="mb-2 text-sm text-gray-500">প্রমাণপত্র (স্ক্রিনশট/ছবি)</p>
                             <a href="{{ asset('storage/' . $selectedPaymentForView->proof_path) }}" target="_blank">
-                                <img src="{{ asset('storage/' . $selectedPaymentForView->proof_path) }}" alt="Proof" class="object-contain w-full max-h-80 rounded-lg border">
+                                <img src="{{ asset('storage/' . $selectedPaymentForView->proof_path) }}" alt="Proof" class="object-contain w-full border rounded-lg max-h-80">
                             </a>
                         </div>
                     @endif

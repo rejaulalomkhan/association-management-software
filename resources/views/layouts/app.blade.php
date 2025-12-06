@@ -16,17 +16,20 @@
             font-family: 'Noto Serif Bengali', serif !important;
         }
     </style>
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- Livewire Styles -->
     @livewireStyles
 </head>
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
-    <div class="flex flex-col min-h-screen">
+    <div class="flex flex-col min-h-screen" x-data="{ sidebarOpen: false }">
 
         <!-- Header (Desktop and Mobile) -->
-        <header class="sticky top-0 z-20 flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+        <header class="sticky top-0 z-20 flex items-center justify-between px-3 py-3 bg-white border-b border-gray-200 shadow-sm sm:px-6 dark:bg-gray-800 dark:border-gray-700">
+            <!-- Sidebar Toggle (Mobile) moved to bottom bar -->
             <div class="flex items-center">
                 <a href="{{ role_route('dashboard') }}" wire:navigate class="flex items-center space-x-3 transition-opacity hover:opacity-80">
                     @php
@@ -216,11 +219,27 @@
             </header>
 
         <!-- Content Area with Sidebar -->
-        <div class="flex flex-1 md:flex-row">
-            <!-- Desktop Sidebar -->
-            <aside class="hidden w-64 bg-white border-r border-gray-200 md:block dark:bg-gray-800 dark:border-gray-700">
-                <x-sidebar />
-            </aside>
+
+        <div class="flex-1 block md:flex md:flex-row">
+            <!-- Sidebar (Desktop & Mobile Offcanvas) -->
+            <div class="relative">
+                <!-- Desktop Sidebar -->
+                <aside class="hidden w-64 h-full bg-white border-r border-gray-200 md:block dark:bg-gray-800 dark:border-gray-700">
+                    <x-sidebar />
+                </aside>
+                <!-- Mobile Offcanvas Sidebar -->
+                <div x-show="sidebarOpen" class="fixed inset-0 z-40 flex md:hidden" style="display: none;">
+                    <div class="fixed inset-0 bg-black bg-opacity-40" @click="sidebarOpen = false"></div>
+                    <aside class="relative w-64 h-full bg-white border-r border-gray-200 shadow-xl dark:bg-gray-800 dark:border-gray-700">
+                        <button class="absolute text-gray-500 top-2 right-2 hover:text-gray-700" @click="sidebarOpen = false">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <x-sidebar />
+                    </aside>
+                </div>
+            </div>
 
             <!-- Main Content -->
             <main class="flex flex-col flex-1 pb-16 md:pb-0">

@@ -14,11 +14,11 @@
         @endif
 
         <!-- Profile Card -->
-        <div class="mb-4 overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
-            <div class="p-4 sm:p-6">
-                <div class="flex flex-col items-center space-y-4 text-center sm:flex-row sm:text-left sm:items-start sm:space-y-0 sm:space-x-6">
+        <div class="mb-4 overflow-hidden bg-white shadow-sm dark:bg-gray-800 rounded-none sm:rounded-lg w-full">
+            <div class="p-2 sm:p-6 w-full">
+                <div class="flex flex-col gap-3 items-center text-center w-full sm:flex-row sm:text-left sm:items-start sm:gap-6">
                     <!-- Profile Picture -->
-                    <div class="flex-shrink-0">
+                    <div class="flex-shrink-0 w-full sm:w-auto flex flex-col items-center">
                         @if(auth()->user()->profile_pic)
                             <img src="{{ asset('storage/' . auth()->user()->profile_pic) }}" alt="{{ auth()->user()->name }}" class="object-cover w-20 h-20 border-4 border-gray-300 rounded-full sm:w-24 sm:h-24">
                         @else
@@ -49,24 +49,24 @@
                     </div>
 
                     <!-- Profile Info -->
-                    <div class="flex-1">
-                        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="flex-1 w-full">
+                        <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                             <div class="flex-1">
-                                <div class="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                                    <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ auth()->user()->name }}</h2>
+                                <div class="flex flex-wrap items-center justify-center gap-1 sm:justify-start">
+                                    <h2 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{{ auth()->user()->name }}</h2>
                                     @if(auth()->user()->blood_group)
-                                    <span class="inline-flex items-center px-3 py-1 text-sm font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900 dark:text-red-200">
+                                    <span class="inline-flex items-center px-2 py-0.5 text-xs sm:text-sm font-semibold text-red-700 bg-red-100 rounded-full dark:bg-red-900 dark:text-red-200">
                                         🩸 {{ auth()->user()->blood_group }}
                                     </span>
                                     @endif
                                 </div>
                                 @if(auth()->user()->membership_id)
-                                <p class="mt-1 text-sm text-center text-gray-600 sm:text-left dark:text-gray-400">সদস্য আইডি: <span class="font-mono font-semibold">{{ auth()->user()->membership_id }}</span></p>
+                                <p class="mt-1 text-xs sm:text-sm text-center text-gray-600 sm:text-left dark:text-gray-400">সদস্য আইডি: <span class="font-mono font-semibold">{{ auth()->user()->membership_id }}</span></p>
                                 @endif
                             </div>
                         </div>
 
-                        <div class="mt-3 space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                        <div class="mt-2 space-y-1 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                             @if(auth()->user()->position || auth()->user()->profession)
                             <p class="flex items-center justify-center text-center sm:justify-start sm:text-left">
                                 <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,7 +123,7 @@
                     </div>
 
                     <!-- Organization Logo -->
-                    <div class="flex flex-col items-center flex-shrink-0 gap-3">
+                    <div class="flex flex-col items-center flex-shrink-0 gap-2 w-full sm:w-auto">
                         @php
                             $logo = app(\App\Services\SettingsService::class)->get('organization_logo');
                         @endphp
@@ -136,14 +136,14 @@
                         @endif
 
                         <!-- Action Buttons -->
-                        <div class="flex flex-col gap-2">
-                            <a href="{{ route('member.payment') }}" wire:navigate class="inline-flex items-center px-2 py-1.5 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors whitespace-nowrap">
+                        <div class="flex flex-col gap-2 w-full sm:flex-row sm:w-auto">
+                            <a href="{{ route('member.payment') }}" wire:navigate class="inline-flex items-center justify-center w-full sm:w-auto px-2 py-1.5 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors whitespace-nowrap">
                                 <svg class="inline-block w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                                 </svg>
                                 পেমেন্ট সাবমিট
                             </a>
-                            <a href="{{ role_route('profile.edit') }}" wire:navigate class="inline-flex items-center px-2 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors whitespace-nowrap">
+                            <a href="{{ role_route('profile.edit') }}" wire:navigate class="inline-flex items-center justify-center w-full sm:w-auto px-2 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors whitespace-nowrap">
                                 <svg class="inline-block w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                 </svg>
@@ -156,15 +156,15 @@
         </div>
 
         <!-- Due Payment Card -->
-        <div class="mb-6">
+        <div class="mb-4 w-full">
             <livewire:member.due-payment-card />
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-2 gap-3 mb-6 md:gap-6 md:grid-cols-4">
+        <div class="grid grid-cols-2 gap-2 mb-4 md:gap-6 md:grid-cols-4 w-full">
             <!-- Total Paid Card -->
             <div class="overflow-hidden bg-white border-t-4 border-green-500 shadow-md dark:bg-gray-800 rounded-xl">
-                <div class="p-4 md:p-6">
+                <div class="p-2 sm:p-4 md:p-6">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
                             <p class="text-xs font-medium text-gray-600 md:text-sm dark:text-gray-400">মোট পরিশোধিত</p>
@@ -174,10 +174,9 @@
                     </div>
                 </div>
             </div>
-
             <!-- Total Due Card -->
             <div class="overflow-hidden bg-white border-t-4 border-red-500 shadow-md dark:bg-gray-800 rounded-xl">
-                <div class="p-4 md:p-6">
+                <div class="p-2 sm:p-4 md:p-6">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
                             <p class="text-xs font-medium text-gray-600 md:text-sm dark:text-gray-400">বকেয়া</p>
@@ -187,10 +186,9 @@
                     </div>
                 </div>
             </div>
-
             <!-- Pending Payment Card -->
             <div class="overflow-hidden bg-white border-t-4 border-yellow-500 shadow-md dark:bg-gray-800 rounded-xl">
-                <div class="p-4 md:p-6">
+                <div class="p-2 sm:p-4 md:p-6">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
                             <p class="text-xs font-medium text-gray-600 md:text-sm dark:text-gray-400">অপেক্ষমান পেমেন্ট</p>
@@ -200,10 +198,9 @@
                     </div>
                 </div>
             </div>
-
             <!-- Total Transactions Card -->
             <div class="overflow-hidden bg-white border-t-4 border-blue-500 shadow-md dark:bg-gray-800 rounded-xl">
-                <div class="p-4 md:p-6">
+                <div class="p-2 sm:p-4 md:p-6">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
                             <p class="text-xs font-medium text-gray-600 md:text-sm dark:text-gray-400">মোট লেনদেন</p>
@@ -216,9 +213,9 @@
         </div>
 
         <!-- Monthly Payment Record Book -->
-        <div class="mb-6 overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-6">
+        <div class="mb-4 overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg w-full">
+            <div class="p-3 sm:p-6 w-full">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4 w-full">
                     <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">বার্ষিক পেমেন্ট রেকর্ড বই</h3>
                     <div class="flex items-center gap-2">
                         <label for="year-filter" class="text-sm font-medium text-gray-700 dark:text-gray-300">সাল:</label>
@@ -231,34 +228,44 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full border border-gray-300 dark:border-gray-600">
+                <div class="overflow-x-auto w-full">
+                    <table class="min-w-max w-full border border-gray-300 dark:border-gray-600 text-xs sm:text-sm">
                         <thead class="bg-blue-50 dark:bg-gray-700">
                             <tr>
-                                <th class="px-4 py-3 text-sm font-bold text-center text-gray-700 border border-gray-300 dark:border-gray-600 dark:text-gray-200">মাস</th>
-                                <th class="px-4 py-3 text-sm font-bold text-center text-gray-700 border border-gray-300 dark:border-gray-600 dark:text-gray-200">তারিখ</th>
-                                <th class="px-4 py-3 text-sm font-bold text-center text-gray-700 border border-gray-300 dark:border-gray-600 dark:text-gray-200">টাকা</th>
-                                <th class="px-4 py-3 text-sm font-bold text-center text-gray-700 border border-gray-300 dark:border-gray-600 dark:text-gray-200">স্বাক্ষর</th>
+                                <th class="px-2 py-2 sm:px-4 sm:py-3 font-bold text-center text-gray-700 border border-gray-300 dark:border-gray-600 dark:text-gray-200">মাস</th>
+                                <th class="px-2 py-2 sm:px-4 sm:py-3 font-bold text-center text-gray-700 border border-gray-300 dark:border-gray-600 dark:text-gray-200">তারিখ</th>
+                                <th class="px-2 py-2 sm:px-4 sm:py-3 font-bold text-center text-gray-700 border border-gray-300 dark:border-gray-600 dark:text-gray-200">টাকা</th>
+                                <th class="px-2 py-2 sm:px-4 sm:py-3 font-bold text-center text-gray-700 border border-gray-300 dark:border-gray-600 dark:text-gray-200">স্বাক্ষর</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white dark:bg-gray-800">
                             @foreach($monthlyData as $data)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                <td class="px-4 py-3 text-sm font-medium text-center text-gray-900 border border-gray-300 dark:border-gray-600 dark:text-gray-100">
+                                <td class="px-2 py-2 sm:px-4 sm:py-3 font-medium text-center text-gray-900 border border-gray-300 dark:border-gray-600 dark:text-gray-100">
                                     {{ $data['month'] }}
                                 </td>
-                                <td class="px-4 py-3 text-sm text-center text-gray-700 border border-gray-300 dark:border-gray-600 dark:text-gray-300">
+                                <td class="px-2 py-2 sm:px-4 sm:py-3 text-center text-gray-700 border border-gray-300 dark:border-gray-600 dark:text-gray-300">
                                     {{ $data['date'] }}
                                 </td>
-                                <td class="px-4 py-3 text-sm font-semibold text-center text-gray-900 border border-gray-300 dark:border-gray-600 dark:text-gray-100">
+                                <td class="px-2 py-2 sm:px-4 sm:py-3 font-semibold text-center text-gray-900 border border-gray-300 dark:border-gray-600 dark:text-gray-100">
                                     @if($data['amount'])
                                         <span class="text-green-600 dark:text-green-400">৳{{ $data['amount'] }}</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 text-center border border-gray-300 dark:border-gray-600">
+                                <td class="px-2 py-2 sm:px-4 sm:py-3 text-center border border-gray-300 dark:border-gray-600">
                                     @if($data['signature'])
-                                        <span class="text-lg italic text-gray-700 dark:text-gray-300" style="font-family: 'Dancing Script', cursive !important;">
-                                            {{ $data['signature'] }}
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200">
+                                            @php
+                                                $user = \App\Models\User::where('name', $data['signature'])->first();
+                                            @endphp
+                                            @if($user && $user->profile_pic)
+                                                <img src="{{ asset('storage/' . $user->profile_pic) }}" alt="{{ $user->name }}" class="w-5 h-5 rounded-full object-cover border border-gray-300 dark:border-gray-600">
+                                            @else
+                                                <span class="flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-[10px] font-bold border border-gray-300 dark:border-gray-600">
+                                                    {{ strtoupper(mb_substr($data['signature'], 0, 1)) }}
+                                                </span>
+                                            @endif
+                                            <span>{{ $data['signature'] }}</span>
                                         </span>
                                     @endif
                                 </td>
@@ -271,13 +278,13 @@
         </div>
 
         <!-- Transaction History -->
-        <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
-            <div class="p-6">
-                <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">আমার ট্রানজেকশন</h3>
+        <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg w-full">
+            <div class="p-3 sm:p-6 w-full">
+                <h3 class="mb-3 text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">আমার ট্রানজেকশন</h3>
 
                 @if($transactions->count() > 0)
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <div class="overflow-x-auto w-full">
+                        <table class="min-w-max w-full divide-y divide-gray-200 dark:divide-gray-700 text-xs sm:text-sm">
                             <thead class="bg-gray-50 dark:bg-gray-900">
                                 <tr>
                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">সাবমিটের তারিখ</th>
@@ -318,11 +325,11 @@
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 text-sm whitespace-nowrap space-x-2">
+                                    <td class="px-6 py-4 space-x-2 text-sm whitespace-nowrap">
                                         @if($transaction->status === 'approved')
                                             {{-- Preview button (HTML view) --}}
                                             <a href="{{ route('member.payments.receipt.preview', $transaction->id) }}"
-                                               class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100">
+                                               class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 rounded bg-blue-50 hover:bg-blue-100">
                                                 প্রিভিউ
                                             </a>
 

@@ -99,12 +99,21 @@
                     <div>
                         <label class="block mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">পেমেন্ট ধরন *</label>
                         <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-                            <label class="relative flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer transition-all {{ $payment_type === 'current' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900' : 'border-gray-300 hover:border-blue-300 dark:border-gray-600' }}">
-                                <input type="radio" wire:model.live="payment_type" value="current" class="sr-only">
+                            <label class="relative flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer transition-all {{ $payment_type === 'current' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900' : 'border-gray-300 hover:border-blue-300 dark:border-gray-600' }} {{ $isCurrentMonthAlreadyPaid ? 'opacity-60 cursor-not-allowed' : '' }}">
+                                <input type="radio" wire:model.live="payment_type" value="current" class="sr-only" {{ $isCurrentMonthAlreadyPaid ? 'disabled' : '' }}>
                                 <svg class="w-8 h-8 mb-2 {{ $payment_type === 'current' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
-                                <span class="text-sm font-medium text-center {{ $payment_type === 'current' ? 'text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-400' }}">চলতি মাস</span>
+                                <span class="text-sm font-medium text-center {{ $payment_type === 'current' ? 'text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-400' }}">
+                                    @if($isCurrentMonthAlreadyPaid)
+                                        চলতি মাস (পরিশোধিত)
+                                    @else
+                                        চলতি মাস
+                                    @endif
+                                </span>
+                                @if($isCurrentMonthAlreadyPaid)
+                                    <span class="mt-1 text-xs font-medium text-green-700">এই মাসের পেমেন্ট পরিশোধিত</span>
+                                @endif
                             </label>
 
                             <label class="relative flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer transition-all {{ $payment_type === 'overdue' ? 'border-orange-500 bg-orange-50 dark:bg-orange-900' : 'border-gray-300 hover:border-orange-300 dark:border-gray-600' }} {{ $overdueInfo['months'] == 0 ? 'opacity-50 cursor-not-allowed' : '' }}">
