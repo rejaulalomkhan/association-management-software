@@ -159,12 +159,21 @@ class PaymentHistory extends Component
             'December' => 'ডিসেম্বর'
         ];
 
-        $years = range(date('Y'), date('Y') - 5);
+        $settingsService = app(\App\Services\SettingsService::class);
+    $establishedYear = (int) $settingsService->get('organization_established_year', 2024);
+    $currentYear = (int) date('Y');
+    
+    // Ensure established year is not in the future
+    if ($establishedYear > $currentYear) {
+        $establishedYear = $currentYear;
+    }
 
-        return view('livewire.member.payment-history', [
-            'payments' => $payments,
-            'months' => $months,
-            'years' => $years
-        ])->layout('layouts.app');
+    $years = range($currentYear, $establishedYear);
+
+    return view('livewire.member.payment-history', [
+        'payments' => $payments,
+        'months' => $months,
+        'years' => $years
+    ])->layout('layouts.app');
     }
 }

@@ -33,9 +33,9 @@
                 <label class="block mb-2 text-sm font-medium text-gray-700">বছর</label>
                 <select wire:model.live="selectedYear" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="">সকল বছর</option>
-                    @for ($year = date('Y'); $year >= 2024; $year--)
+                    @foreach ($years as $year)
                         <option value="{{ $year }}">{{ $year }}</option>
-                    @endfor
+                    @endforeach
                 </select>
             </div>
 

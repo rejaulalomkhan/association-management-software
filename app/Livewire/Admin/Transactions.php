@@ -211,9 +211,21 @@ class Transactions extends Component
             ->orderBy('name')
             ->get();
 
+        $settingsService = app(\App\Services\SettingsService::class);
+        $establishedYear = (int) $settingsService->get('organization_established_year', 2024);
+        $currentYear = (int) date('Y');
+        
+        // Ensure established year is not in the future
+        if ($establishedYear > $currentYear) {
+            $establishedYear = $currentYear;
+        }
+
+        $years = range($currentYear, $establishedYear);
+
         return view('livewire.admin.transactions', [
             'transactions' => $transactions,
             'members' => $members,
+            'years' => $years,
         ])->layout('layouts.app');
     }
 }
