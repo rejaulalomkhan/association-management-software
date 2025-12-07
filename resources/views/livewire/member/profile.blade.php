@@ -388,7 +388,7 @@
                             প্রোফাইল সম্পাদনা
                         </h3>
 
-                        <form wire:submit="updateBasicInfo" class="mt-6 space-y-6">
+                        <form wire:submit.prevent="updateBasicInfo" class="mt-6 space-y-6">
                             <!-- Profile Photo -->
                             <div class="flex flex-col items-center space-y-4" x-data="{ photoPreview: null }">
                                 <div class="relative">

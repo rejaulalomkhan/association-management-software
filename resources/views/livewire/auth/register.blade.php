@@ -1,7 +1,7 @@
 <div>
     <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Member Registration</h2>
 
-    <form wire:submit="register">
+    <form wire:submit.prevent="register">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Name -->
             <div>

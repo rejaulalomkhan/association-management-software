@@ -20,11 +20,14 @@ class Transactions extends Component
     public $adminNote = '';
     public $selectedPaymentId = null;
     public $selectedPaymentForView = null;
+    public $selectedPaymentIdForApprove = null;
 
     public function mount()
     {
-        $this->selectedMonth = date('n');
-        $this->selectedYear = date('Y');
+        // Initialize with current month and year as default
+        // Use string type to match select option values
+        $this->selectedMonth = date('n'); // Current month (1-12) as string
+        $this->selectedYear = date('Y');  // Current year as string
     }
 
     public function updatingSelectedMonth()
@@ -81,6 +84,12 @@ class Transactions extends Component
         $payment = Payment::find($paymentId);
         $this->adminNote = $payment->admin_note ?? '';
         $this->dispatch('open-note-modal');
+    }
+
+    public function openApproveModal($paymentId)
+    {
+        $this->selectedPaymentIdForApprove = $paymentId;
+        $this->dispatch('open-approve-modal');
     }
 
     public function saveNote()
@@ -158,20 +167,21 @@ class Transactions extends Component
     {
         $query = Payment::with(['user', 'paymentMethod']);
 
-        if ($this->selectedMonth) {
+        if ($this->selectedMonth && $this->selectedMonth !== '') {
+            // month column stores English month name, dropdown gives numeric month
             $englishMonth = date('F', mktime(0, 0, 0, (int) $this->selectedMonth, 1));
             $query->where('month', $englishMonth);
         }
 
-        if ($this->selectedYear) {
+        if ($this->selectedYear && $this->selectedYear !== '') {
             $query->where('year', $this->selectedYear);
         }
 
-        if ($this->selectedMember) {
+        if ($this->selectedMember && $this->selectedMember !== '') {
             $query->where('user_id', $this->selectedMember);
         }
 
-        if ($this->selectedStatus) {
+        if ($this->selectedStatus && $this->selectedStatus !== '') {
             $query->where('status', $this->selectedStatus);
         }
 

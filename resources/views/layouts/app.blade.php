@@ -19,12 +19,42 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- Livewire Styles -->
     @livewireStyles
 </head>
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
+    <!-- Global Livewire Loading Indicator -->
+    <div wire:loading.delay class="fixed top-0 left-0 right-0 z-50">
+        <div class="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse">
+            <div class="h-full bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay with Spinner -->
+    <div wire:loading.delay.long class="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
+        <div class="flex flex-col items-center p-8 bg-white rounded-2xl shadow-2xl">
+            <!-- Spinner -->
+            <div class="relative w-16 h-16">
+                <div class="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-transparent border-t-blue-600 rounded-full animate-spin"></div>
+            </div>
+            <!-- Loading Text -->
+            <p class="mt-4 text-lg font-semibold text-gray-700">লোড হচ্ছে...</p>
+            <p class="mt-1 text-sm text-gray-500">অনুগ্রহ করে অপেক্ষা করুন</p>
+        </div>
+    </div>
+
+    <style>
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+            animation: shimmer 1.5s infinite;
+        }
+    </style>
+
     <div class="flex flex-col min-h-screen" x-data="{ sidebarOpen: false }">
 
         <!-- Header (Desktop and Mobile) -->
@@ -184,7 +214,7 @@
                             </div>
 
                             <!-- Menu Items -->
-                            <a href="@if(auth()->user()->hasRole('member')) {{ route('member.profile') }} @elseif(auth()->user()->hasRole('admin')) {{ route('admin.profile') }} @elseif(auth()->user()->hasRole('accountant')) {{ route('accountant.profile') }} @else # @endif" class="flex items-center block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <a href="@if(auth()->user()->hasRole('member')) {{ route('member.profile') }} @elseif(auth()->user()->hasRole('admin')) {{ route('admin.profile') }} @elseif(auth()->user()->hasRole('accountant')) {{ route('accountant.profile') }} @else # @endif" wire:navigate class="flex items-center block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                                 <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
@@ -192,7 +222,7 @@
                             </a>
 
                             @if(auth()->user()->hasRole('admin'))
-                            <a href="{{ route('admin.settings') }}" class="flex items-center block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <a href="{{ route('admin.settings') }}" wire:navigate class="flex items-center block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                                 <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>

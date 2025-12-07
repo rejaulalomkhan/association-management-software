@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Livewire\Member;
+namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class ProfileEdit extends Component
 {
@@ -29,25 +30,26 @@ class ProfileEdit extends Component
     public $current_password;
     public $new_password;
     public $new_password_confirmation;
-    public $showPasswordSection = false;
 
     public function mount()
     {
         $user = auth()->user();
-        $this->name = $user->name;
-        $this->email = $user->email;
-        $this->phone = $user->phone;
-        $this->father_name = $user->father_name;
-        $this->dob = $user->dob;
-        $this->permanent_address = $user->permanent_address;
-        $this->present_address = $user->present_address;
-        $this->same_address = ($user->permanent_address === $user->present_address);
-        $this->profession = $user->profession;
-        $this->religion = $user->religion;
-        $this->nationality = $user->nationality;
-        $this->position = $user->position;
-        $this->blood_group = $user->blood_group;
-        $this->profile_pic = $user->profile_pic;
+        
+        // Load all user data with null coalescing to handle missing fields
+        $this->name = $user->name ?? '';
+        $this->email = $user->email ?? '';
+        $this->phone = $user->phone ?? '';
+        $this->father_name = $user->father_name ?? '';
+        $this->dob = $user->dob ?? '';
+        $this->permanent_address = $user->permanent_address ?? '';
+        $this->present_address = $user->present_address ?? '';
+        $this->same_address = ($user->permanent_address && $user->permanent_address === $user->present_address);
+        $this->profession = $user->profession ?? '';
+        $this->religion = $user->religion ?? '';
+        $this->nationality = $user->nationality ?? '';
+        $this->position = $user->position ?? '';
+        $this->blood_group = $user->blood_group ?? '';
+        $this->profile_pic = $user->profile_pic ?? '';
     }
 
     public function updatedSameAddress($value)
@@ -57,14 +59,21 @@ class ProfileEdit extends Component
         }
     }
 
+    public function updatedPermanentAddress($value)
+    {
+        if ($this->same_address) {
+            $this->present_address = $value;
+        }
+    }
+
     public function updateProfile()
     {
         $userId = auth()->id();
 
         $this->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'email', 'max:255', \Illuminate\Validation\Rule::unique('users')->ignore($userId)],
-            'phone' => ['required', 'string', 'max:20', \Illuminate\Validation\Rule::unique('users')->ignore($userId)],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($userId)],
+            'phone' => ['required', 'string', 'max:20', Rule::unique('users')->ignore($userId)],
             'father_name' => 'nullable|string|max:255',
             'dob' => 'nullable|date',
             'permanent_address' => 'nullable|string|max:500',
@@ -78,13 +87,19 @@ class ProfileEdit extends Component
         ]);
 
         $user = auth()->user();
+        
+        // If same address is checked, copy permanent to present
+        if ($this->same_address) {
+            $this->present_address = $this->permanent_address;
+        }
+
         $user->name = $this->name;
         $user->email = $this->email;
         $user->phone = $this->phone;
         $user->father_name = $this->father_name;
         $user->dob = $this->dob;
         $user->permanent_address = $this->permanent_address;
-        $user->present_address = $this->same_address ? $this->permanent_address : $this->present_address;
+        $user->present_address = $this->present_address;
         $user->profession = $this->profession;
         $user->religion = $this->religion;
         $user->nationality = $this->nationality;
@@ -94,7 +109,7 @@ class ProfileEdit extends Component
         // Handle profile picture upload
         if ($this->new_profile_pic) {
             try {
-                // Delete old photo if exists
+                // Delete old profile pic if exists
                 if ($user->profile_pic && Storage::disk('public')->exists($user->profile_pic)) {
                     Storage::disk('public')->delete($user->profile_pic);
                 }
@@ -111,7 +126,7 @@ class ProfileEdit extends Component
 
         $user->save();
 
-        session()->flash('message', 'প্রোফাইল সফলভাবে আপডেট করা হয়েছে।');
+        session()->flash('success', 'প্রোফাইল সফলভাবে আপডেট করা হয়েছে।');
         $this->reset(['new_profile_pic']);
     }
 
@@ -134,11 +149,11 @@ class ProfileEdit extends Component
 
         session()->flash('password_message', 'পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে।');
         $this->reset(['current_password', 'new_password', 'new_password_confirmation']);
-        $this->showPasswordSection = false;
     }
 
     public function render()
     {
-        return view('livewire.member.profile-edit')->layout('layouts.app');
+        return view('livewire.admin.profile-edit')->layout('layouts.app');
     }
 }
+

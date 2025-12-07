@@ -89,7 +89,9 @@ class Transactions extends Component
         $query = Payment::with(['user', 'paymentMethod']);
 
         if ($this->selectedMonth) {
-            $query->where('month', $this->selectedMonth);
+            // month column stores English month name, dropdown gives numeric month
+            $englishMonth = date('F', mktime(0, 0, 0, (int) $this->selectedMonth, 1));
+            $query->where('month', $englishMonth);
         }
 
         if ($this->selectedYear) {

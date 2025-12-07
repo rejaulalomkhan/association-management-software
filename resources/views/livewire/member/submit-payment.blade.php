@@ -159,7 +159,8 @@
                         <div x-data="{ open: false }"
                             wire:key="month-dropdown-{{ $payment_type }}-{{ $paymentYear }}"
                             @payment-type-changed.window="open = false"
-                            wire:loading.class="opacity-50 pointer-events-none" wire:loading.attr="aria-busy" wire:target="payment_type">
+                            x-init="$watch('$wire.paymentYear', () => open = false); $watch('$wire.payment_type', () => open = false)"
+                            wire:loading.class="opacity-50 pointer-events-none" wire:loading.attr="aria-busy" wire:target="payment_type,paymentYear">
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">কোন মাসের পেমেন্ট? * <span class="text-xs text-gray-500">(একাধিক নির্বাচন করতে পারবেন)</span></label>
 
                             <!-- Dropdown Button -->

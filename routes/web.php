@@ -19,6 +19,7 @@ use App\Livewire\Admin\Transactions;
 use App\Livewire\Admin\RoleManagement;
 use App\Livewire\Admin\PrivilegeManagement;
 use App\Livewire\Admin\UserRoleAssignment;
+use App\Livewire\Admin\ProfileEdit as AdminProfileEdit;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Member\PaymentReceiptController;
 
@@ -54,7 +55,7 @@ Route::middleware(['auth', 'role:accountant'])->prefix('accountant')->name('acco
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
     Route::get('/profile', Profile::class)->name('profile');
-    Route::get('/profile/edit', ProfileEdit::class)->name('profile.edit');
+    Route::get('/profile/edit', AdminProfileEdit::class)->name('profile.edit');
     Route::get('/pending-registrations', PendingRegistrations::class)->name('pending-registrations');
     Route::get('/members', MemberList::class)->name('members');
     Route::get('/members/add', AddMember::class)->name('members.add');

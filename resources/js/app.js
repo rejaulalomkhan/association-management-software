@@ -1,11 +1,13 @@
 import './bootstrap';
-import Alpine from 'alpinejs';
-import focus from '@alpinejs/focus';
-import collapse from '@alpinejs/collapse';
 
-window.Alpine = Alpine;
+// Alpine.js is provided by Livewire 3 - don't load it separately!
+// import Alpine from 'alpinejs';
+// import focus from '@alpinejs/focus';
+// import collapse from '@alpinejs/collapse';
 
-Alpine.plugin(focus);
-Alpine.plugin(collapse);
+// window.Alpine = Alpine;
 
-Alpine.start();
+// Alpine.plugin(focus);
+// Alpine.plugin(collapse);
+
+// Alpine.start();
