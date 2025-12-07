@@ -64,17 +64,19 @@ class TransactionService
     /**
      * Get monthly summary statistics.
      */
-    public function getMonthlySummary(string $month = null, int $year = null): array
+    /**
+     * Get summary statistics based on filters.
+     */
+    public function getStatsSummary(?string $month = null, ?int $year = null): array
     {
-        if (!$month) {
-            $month = now()->format('F');
-        }
-        if (!$year) {
-            $year = now()->year;
-        }
+        $payments = Payment::query();
 
-        $payments = Payment::where('month', $month)
-            ->where('year', $year);
+        if ($month) {
+            $payments->where('month', $month);
+        }
+        if ($year) {
+            $payments->where('year', $year);
+        }
 
         $totalPaid = $payments->clone()->where('status', 'approved')->sum('amount');
         $totalPending = $payments->clone()->where('status', 'pending')->sum('amount');
@@ -84,8 +86,20 @@ class TransactionService
         $pendingCount = $payments->clone()->where('status', 'pending')->count();
         $rejectedCount = $payments->clone()->where('status', 'rejected')->count();
 
-        $totalMembers = User::where('status', 'active')->count();
-        $unpaidCount = $totalMembers - $paidCount;
+        $totalMembers = User::where('status', 'active')
+            ->whereHas('roles', function($q) {
+                $q->where('name', 'member');
+            })->count();
+
+        // Calculate unpaid count only if specific month/year is selected
+        // Otherwise, it doesn't make sense to subtract transaction count from member count
+        $unpaidCount = 0;
+        $collectionRate = 0;
+
+        if ($month && $year) {
+            $unpaidCount = max(0, $totalMembers - $paidCount);
+            $collectionRate = $totalMembers > 0 ? round(($paidCount / $totalMembers) * 100, 2) : 0;
+        }
 
         return [
             'month' => $month,
@@ -98,7 +112,7 @@ class TransactionService
             'rejected_count' => $rejectedCount,
             'unpaid_count' => $unpaidCount,
             'total_members' => $totalMembers,
-            'collection_rate' => $totalMembers > 0 ? round(($paidCount / $totalMembers) * 100, 2) : 0,
+            'collection_rate' => $collectionRate,
         ];
     }
 

@@ -51,7 +51,7 @@
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
         <!-- Total Members -->
         <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl group hover:-translate-y-1">
             <div class="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 transition-transform bg-blue-500 rounded-full opacity-10 group-hover:scale-150"></div>
@@ -72,7 +72,27 @@
             <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
         </div>
 
-        <!-- Paid This Month -->
+        <!-- Lifetime Collection -->
+        <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl group hover:-translate-y-1">
+            <div class="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 transition-transform bg-purple-500 rounded-full opacity-10 group-hover:scale-150"></div>
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
+                        <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-medium text-purple-600 bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400 px-2.5 py-0.5 rounded-full">
+                        সর্বমোট
+                    </span>
+                </div>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">মোট সংগ্রহ</p>
+                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">৳{{ number_format($stats['lifetime_collection']) }}</h3>
+            </div>
+            <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-indigo-600"></div>
+        </div>
+
+        <!-- Filtered Collection -->
         <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl group hover:-translate-y-1">
             <div class="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 transition-transform bg-green-500 rounded-full opacity-10 group-hover:scale-150"></div>
             <div class="p-6">
@@ -83,14 +103,14 @@
                         </svg>
                     </div>
                     <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        {{ $selectedMonth ? \App\Helpers\BanglaHelper::getBanglaMonth($selectedMonth) : 'এই মাস' }}
+                        {{ $selectedMonth ? \App\Helpers\BanglaHelper::getBanglaMonth($selectedMonth) : ($selectedYear ? $selectedYear : 'সব সময়') }}
                     </span>
                 </div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">পরিশোধিত</p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">ফিল্টারকৃত সংগ্রহ</p>
                 <div class="flex items-baseline gap-2 mt-1">
-                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $stats['paid_count'] }}</h3>
-                    <span class="text-sm font-medium text-green-600 dark:text-green-400">৳{{ number_format($stats['total_paid']) }}</span>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white">৳{{ number_format($stats['total_paid']) }}</h3>
                 </div>
+                <p class="text-xs text-gray-500 mt-1">{{ $stats['paid_count'] }} টি পেমেন্ট</p>
             </div>
             <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-emerald-600"></div>
         </div>
@@ -105,12 +125,21 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
+                    @if($selectedMonth && $selectedYear)
                     <span class="text-xs font-medium text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 px-2.5 py-0.5 rounded-full">
                         {{ round($stats['collection_rate'], 1) }}% সংগৃহীত
                     </span>
+                    @endif
                 </div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">বকেয়া</p>
-                <h3 class="mt-1 text-3xl font-bold text-gray-900 dark:text-white">{{ $stats['unpaid_count'] }}</h3>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    {{ $selectedMonth && $selectedYear ? 'এই মাসে বকেয়া (সদস্য)' : 'বকেয়া' }}
+                </p>
+                <h3 class="mt-1 text-3xl font-bold text-gray-900 dark:text-white">
+                    {{ $selectedMonth && $selectedYear ? $stats['unpaid_count'] : '-' }}
+                </h3>
+                @if(!($selectedMonth && $selectedYear))
+                    <p class="text-xs text-gray-400 mt-1">মাস ও বছর সিলেক্ট করুন</p>
+                @endif
             </div>
             <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-pink-600"></div>
         </div>
@@ -280,7 +309,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                <p class="text-gray-500 dark:text-gray-400">সব সদস্য পেমেন্ট করেছে! 🎉</p>
+                @if($selectedMonth && $selectedYear)
+                    <p class="text-gray-500 dark:text-gray-400">সব সদস্য পেমেন্ট করেছে! 🎉</p>
+                @else
+                    <p class="text-gray-500 dark:text-gray-400">বকেয়া তালিকা দেখতে মাস ও বছর সিলেক্ট করুন</p>
+                @endif
             </div>
             @endif
         </div>
