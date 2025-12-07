@@ -1,7 +1,8 @@
 <div class="flex flex-col h-full">
     <div class="flex-1 overflow-y-auto py-4">
         <nav class="space-y-1 px-2" x-data="{ settingsOpen: {{ request()->routeIs('admin.settings', 'admin.roles', 'admin.privileges', 'admin.user-roles') ? 'true' : 'false' }} }">
-            @if(auth()->user()->hasRole('admin'))
+            
+            @if(request()->routeIs('admin.*') && auth()->user()->hasRole('admin'))
             <!-- Admin Section -->
             <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">
                 Admin
@@ -88,7 +89,7 @@
             </div>
             @endif
 
-            @if(auth()->user()->hasRole('accountant'))
+            @if(request()->routeIs('accountant.*') && auth()->user()->hasRole('accountant'))
             <!-- Accountant Section -->
             <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">
                 Accountant
@@ -113,7 +114,7 @@
             </a>
             @endif
 
-            @if(auth()->user()->hasRole('member'))
+            @if(!request()->routeIs('admin.*') && !request()->routeIs('accountant.*'))
             <!-- Member Section -->
             <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">
                 সদস্য

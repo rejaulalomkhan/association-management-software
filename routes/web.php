@@ -26,7 +26,8 @@ use App\Http\Controllers\Member\PaymentReceiptController;
 Route::get('/', function () {
     if (Auth::check()) {
         // Use role helper to redirect to appropriate dashboard
-        return redirect(role_route('dashboard'));
+        // Redirect everyone to member profile initially
+        return redirect()->route('member.profile');
     }
     return redirect()->route('tyro-login.login');
 })->name('home');
