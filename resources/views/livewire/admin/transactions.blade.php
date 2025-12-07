@@ -291,10 +291,17 @@
                             class="px-4 py-2 text-gray-700 transition bg-gray-300 rounded-lg hover:bg-gray-400">
                         বাতিল
                     </button>
-                    <button wire:click="saveNote"
-                            wire:then="rejectPayment({{ $selectedPaymentId ?? 'null' }})"
-                            class="px-4 py-2 text-white transition bg-red-600 rounded-lg hover:bg-red-700">
-                        নিশ্চিত করে প্রত্যাখ্যান করুন
+                    <button wire:click="rejectPaymentWithNote"
+                            @click="open = false"
+                            wire:loading.attr="disabled"
+                            wire:target="rejectPaymentWithNote"
+                            class="inline-flex items-center px-4 py-2 text-white transition bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50">
+                        <svg wire:loading wire:target="rejectPaymentWithNote" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span wire:loading.remove wire:target="rejectPaymentWithNote">নিশ্চিত করে প্রত্যাখ্যান করুন</span>
+                        <span wire:loading wire:target="rejectPaymentWithNote">প্রত্যাখ্যান হচ্ছে...</span>
                     </button>
                 </div>
             </div>

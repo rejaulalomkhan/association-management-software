@@ -106,13 +106,13 @@
                                 </svg>
                                 <span class="text-sm font-medium text-center {{ $payment_type === 'current' ? 'text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-400' }}">
                                     @if($isCurrentMonthAlreadyPaid)
-                                        চলতি মাস (পরিশোধিত)
+                                        চলতি মাস (জমা দেওয়া হয়েছে)
                                     @else
                                         চলতি মাস
                                     @endif
                                 </span>
                                 @if($isCurrentMonthAlreadyPaid)
-                                    <span class="mt-1 text-xs font-medium text-green-700">এই মাসের পেমেন্ট পরিশোধিত</span>
+                                    <span class="mt-1 text-xs font-medium text-green-700">এই মাসের পেমেন্ট জমা দেওয়া হয়েছে</span>
                                 @endif
                             </label>
 

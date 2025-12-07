@@ -75,6 +75,57 @@ class PaymentHistory extends Component
         }, 'receipt-' . $payment->transaction_id . '.pdf');
     }
 
+    public function editRejectedPayment($paymentId)
+    {
+        $payment = Payment::findOrFail($paymentId);
+
+        // Security check
+        if ($payment->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Only rejected payments can be edited
+        if ($payment->status !== 'rejected') {
+            session()->flash('error', 'শুধুমাত্র প্রত্যাখ্যাত পেমেন্ট সম্পাদনা করা যাবে।');
+            return;
+        }
+
+        // Delete the old payment record - user will create a new one
+        // Keep proof file for now in case they want to use it
+        $payment->delete();
+
+        session()->flash('info', 'প্রত্যাখ্যাত পেমেন্ট মুছে ফেলা হয়েছে। এখন নতুন করে সঠিক তথ্য দিয়ে পেমেন্ট জমা দিন।');
+        
+        // Redirect to payment submission page
+        return redirect()->route('member.payment');
+    }
+
+    public function deleteRejectedPayment($paymentId)
+    {
+        $payment = Payment::findOrFail($paymentId);
+
+        // Security check
+        if ($payment->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Only rejected payments can be deleted
+        if ($payment->status !== 'rejected') {
+            session()->flash('error', 'শুধুমাত্র প্রত্যাখ্যাত পেমেন্ট মুছে ফেলা যাবে।');
+            return;
+        }
+
+        // Delete the payment proof file if exists
+        if ($payment->proof_path && \Storage::disk('public')->exists($payment->proof_path)) {
+            \Storage::disk('public')->delete($payment->proof_path);
+        }
+
+        // Delete the payment record
+        $payment->delete();
+
+        session()->flash('success', 'প্রত্যাখ্যাত পেমেন্ট মুছে ফেলা হয়েছে।');
+    }
+
     public function render()
     {
         $query = Auth::user()->payments()->with('paymentMethod');

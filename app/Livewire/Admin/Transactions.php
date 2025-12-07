@@ -92,14 +92,32 @@ class Transactions extends Component
         $this->dispatch('open-approve-modal');
     }
 
-    public function saveNote()
+    public function rejectPaymentWithNote()
     {
-        if ($this->selectedPaymentId) {
-            $payment = Payment::findOrFail($this->selectedPaymentId);
-            $payment->admin_note = $this->adminNote;
-            $payment->save();
-            // Do not auto-flash here; rejecting will handle message
+        if (!$this->selectedPaymentId) {
+            return;
         }
+
+        $payment = Payment::findOrFail($this->selectedPaymentId);
+        
+        // Save admin note
+        $payment->admin_note = $this->adminNote;
+        
+        // Reject payment
+        $payment->status = 'rejected';
+        $payment->processed_at = now();
+        $payment->processed_by = auth()->id();
+        $payment->save();
+
+        // Send notification
+        app(NotificationHelper::class)->sendPaymentRejectionNotification($payment, $this->adminNote ?? '');
+
+        // Reset and close modal
+        $this->selectedPaymentId = null;
+        $this->adminNote = '';
+        $this->dispatch('close-note-modal');
+
+        session()->flash('success', 'পেমেন্ট প্রত্যাখ্যান করা হয়েছে');
     }
 
     public function exportReport()
