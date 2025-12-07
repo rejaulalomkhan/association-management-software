@@ -22,7 +22,8 @@ class Dashboard extends Component
 
     public function render(TransactionService $transactionService, MemberService $memberService)
     {
-        $summary = $transactionService->getMonthlySummary($this->selectedMonth, $this->selectedYear);
+        $year = $this->selectedYear ? (int) $this->selectedYear : null;
+        $summary = $transactionService->getMonthlySummary($this->selectedMonth, $year);
 
         // Get paid members for selected month
         $paidMembers = Payment::with(['user', 'paymentMethod'])

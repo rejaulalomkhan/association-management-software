@@ -50,9 +50,13 @@ class Transactions extends Component
         $this->resetPage();
     }
 
-    public function approvePayment($paymentId)
+    public function approvePayment()
     {
-        $payment = Payment::findOrFail($paymentId);
+        if (!$this->selectedPaymentIdForApprove) {
+            return;
+        }
+
+        $payment = Payment::findOrFail($this->selectedPaymentIdForApprove);
         $payment->status = 'approved';
         $payment->processed_at = now();
         $payment->processed_by = auth()->id();
@@ -61,7 +65,7 @@ class Transactions extends Component
         // Send notification using helper service
         app(NotificationHelper::class)->sendPaymentApprovalNotification($payment);
 
-        session()->flash('success', 'পেমেন্ট অনুমোদিত হয়েছে');
+        $this->isPaymentApproved = true;
     }
 
     public function rejectPayment($paymentId)
@@ -86,9 +90,14 @@ class Transactions extends Component
         $this->dispatch('open-note-modal');
     }
 
+    public $selectedPaymentForApprove = null;
+    public $isPaymentApproved = false;
+
     public function openApproveModal($paymentId)
     {
         $this->selectedPaymentIdForApprove = $paymentId;
+        $this->selectedPaymentForApprove = Payment::with('user')->find($paymentId);
+        $this->isPaymentApproved = false;
         $this->dispatch('open-approve-modal');
     }
 

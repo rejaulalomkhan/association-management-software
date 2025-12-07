@@ -279,89 +279,122 @@
 
         <!-- Transaction History -->
         <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg w-full">
-            <div class="p-3 sm:p-6 w-full">
-                <h3 class="mb-3 text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">আমার ট্রানজেকশন</h3>
-
-                @if($transactions->count() > 0)
-                    <div class="overflow-x-auto w-full">
-                        <table class="min-w-max w-full divide-y divide-gray-200 dark:divide-gray-700 text-xs sm:text-sm">
-                            <thead class="bg-gray-50 dark:bg-gray-900">
-                                <tr>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">সাবমিটের তারিখ</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">যে মাসের পেমেন্ট</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">পরিমাণ</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">পেমেন্ট মাধ্যম</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">অবস্থা</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-gray-400">রিসিপ্ট</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                                @foreach($transactions as $transaction)
-                                <tr>
-                                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-gray-100">
-                                        {{ \Carbon\Carbon::parse($transaction->created_at)->format('d M Y') }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-gray-100">
-                                        {{ \App\Helpers\BanglaHelper::getBanglaMonth($transaction->month) }} {{ $transaction->year }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm font-semibold text-gray-900 whitespace-nowrap dark:text-gray-100">
-                                        ৳{{ number_format($transaction->amount, 2) }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap dark:text-gray-100">
-                                        {{ $transaction->paymentMethod->name ?? 'N/A' }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($transaction->status === 'approved')
-                                            <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full dark:bg-green-900 dark:text-green-200">
-                                                অনুমোদিত
-                                            </span>
-                                        @elseif($transaction->status === 'rejected')
-                                            <span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full dark:bg-red-900 dark:text-red-200">
-                                                প্রত্যাখ্যাত
-                                            </span>
-                                        @else
-                                            <span class="px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full dark:bg-yellow-900 dark:text-yellow-200">
-                                                অপেক্ষমাণ
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 space-x-2 text-sm whitespace-nowrap">
-                                        @if($transaction->status === 'approved')
-                                            {{-- Preview button (HTML view) --}}
-                                            <a href="{{ route('member.payments.receipt.preview', $transaction->id) }}"
-                                               class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 rounded bg-blue-50 hover:bg-blue-100">
-                                                প্রিভিউ
-                                            </a>
-
-                                            {{-- Existing PDF download via Livewire --}}
-                                            <button wire:click="downloadReceipt({{ $transaction->id }})"
-                                                    class="inline-flex items-center px-2 py-1 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700 focus:outline-none focus:ring-1 focus:ring-green-500">
-                                                ডাউনলোড
-                                            </button>
-                                        @else
-                                            <span class="text-xs text-gray-400">-</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+            <!-- Futuristic Transaction Table -->
+            <div class="mt-10">
+                <div class="flex items-center justify-between mb-6 mx-4">
+                    <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
+                        আমার ট্রানজেকশন
+                    </h2>
+                    <div class="px-4 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-200">
+                        সর্বমোট {{ $transactions->total() }} টি লেনদেন
                     </div>
+                </div>
 
-                    <div class="mt-4">
-                        {{ $transactions->links() }}
-                    </div>
-                @else
-                    <div class="py-12 text-center">
-                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        <p class="text-gray-500 dark:text-gray-400">কোনো ট্রানজেকশন পাওয়া যায়নি</p>
-                    </div>
-                @endif
+                <div class="relative overflow-hidden border border-white/20 shadow-2xl rounded-2xl bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl">
+                    <!-- Decorative Gradients -->
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+                    
+                    @if($transactions->count() > 0)
+                        <div class="overflow-x-auto mx-4">
+                            <table class="min-w-full divide-y divide-gray-200/50 dark:divide-gray-700/50">
+                                <thead class="bg-gray-50/50 dark:bg-gray-700/50">
+                                    <tr>
+                                        <th scope="col" class="px-8 py-5 text-sm font-extrabold tracking-wider text-left uppercase text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">সাবমিটের তারিখ</th>
+                                        <th scope="col" class="px-8 py-5 text-sm font-extrabold tracking-wider text-left uppercase text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">যে মাসের পেমেন্ট</th>
+                                        <th scope="col" class="px-8 py-5 text-sm font-extrabold tracking-wider text-left uppercase text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">পরিমাণ</th>
+                                        <th scope="col" class="px-8 py-5 text-sm font-extrabold tracking-wider text-left uppercase text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">পেমেন্ট মাধ্যম</th>
+                                        <th scope="col" class="px-8 py-5 text-sm font-extrabold tracking-wider text-left uppercase text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">অবস্থা</th>
+                                        <th scope="col" class="px-8 py-5 text-sm font-extrabold tracking-wider text-left uppercase text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">রিসিপ্ট</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200/50 dark:divide-gray-700/50">
+                                    @foreach($transactions as $transaction)
+                                    <tr class="transition-all duration-300 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 group">
+                                        <td class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                                            {{ \Carbon\Carbon::parse($transaction->created_at)->format('d M Y') }}
+                                        </td>
+                                        <td class="px-4 py-2 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-gray-100">
+                                            {{ \App\Helpers\BanglaHelper::getBanglaMonth($transaction->month) }} {{ $transaction->year }}
+                                        </td>
+                                        <td class="px-4 py-2 text-sm font-bold text-gray-900 whitespace-nowrap dark:text-gray-100">
+                                            ৳{{ number_format($transaction->amount, 2) }}
+                                        </td>
+                                        <td class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap dark:text-gray-300">
+                                            <span class="inline-flex items-center px-4 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                                {{ $transaction->paymentMethod->name ?? 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-2 whitespace-nowrap">
+                                            @if($transaction->status === 'approved')
+                                                <span class="inline-flex items-center px-4 py-1 text-xs font-bold text-green-700 bg-green-100 rounded-full shadow-sm dark:bg-green-900/50 dark:text-green-300 ring-1 ring-green-500/20">
+                                                    <span class="w-1.5 h-1.5 mr-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                                                    অনুমোদিত
+                                                </span>
+                                            @elseif($transaction->status === 'rejected')
+                                                <span class="inline-flex items-center px-4 py-1 text-xs font-bold text-red-700 bg-red-100 rounded-full shadow-sm dark:bg-red-900/50 dark:text-red-300 ring-1 ring-red-500/20">
+                                                    <span class="w-1.5 h-1.5 mr-1.5 bg-red-500 rounded-full"></span>
+                                                    প্রত্যাখ্যাত
+                                                </span>
+                                            @else
+                                                  <span class="inline-flex items-center px-4 py-1 text-xs font-bold text-black bg-orange-100 rounded-full shadow-sm dark:bg-orange-900/50 dark:text-orange-300 ring-1 ring-orange-500/20">
+                                                    <svg class="w-3 h-3 mr-1.5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    অপেক্ষমাণ
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-2 space-x-2 text-sm whitespace-nowrap">
+                                            @if($transaction->status === 'approved')
+                                                <div class="flex items-center space-x-2">
+                                                    {{-- Preview button --}}
+                                                    <a href="{{ route('member.payments.receipt.preview', $transaction->id) }}"
+                                                       class="inline-flex items-center px-3 py-2 text-xs font-medium text-blue-600 transition-colors bg-blue-50 rounded-md hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                                                       target="_blank">
+                                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                        প্রিভিউ
+                                                    </a>
+    
+                                                    {{-- Download button --}}
+                                                    <button wire:click="downloadReceipt({{ $transaction->id }})"
+                                                            class="inline-flex items-center px-3 py-2 text-xs font-medium text-white transition-all bg-gradient-to-r from-green-500 to-emerald-600 rounded-md shadow-md hover:shadow-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                                        ডাউনলোড
+                                                    </button>
+                                                </div>
+                                            @elseif($transaction->status === 'pending')
+                                                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                                    অনুমোদনের পর রিসিপ্ট পাবেন
+                                                </span>
+                                            @else
+                                                <span class="text-xs text-gray-400 dark:text-gray-600">-</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+    
+                        <!-- Custom Pagination -->
+                        <div class="px-6 py-4 border-t border-gray-200/50 dark:border-gray-700/50 bg-gray-50/30 dark:bg-gray-800/30">
+                            {{ $transactions->links('vendor.pagination.custom-profile', data: ['scrollTo' => false]) }}
+                        </div>
+                    @else
+                        <div class="flex flex-col items-center justify-center py-16 text-center">
+                            <div class="p-4 mb-4 bg-gray-100 rounded-full dark:bg-gray-700/50">
+                                <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">কোনো লেনদেন পাওয়া যায়নি</h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">আপনার এখনো কোনো পেমেন্ট রেকর্ড নেই।</p>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
-    </div>
 
     <!-- Edit Profile Modal -->
     @if($showEditModal)

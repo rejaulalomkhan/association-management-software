@@ -3,6 +3,7 @@
 namespace App\Livewire\Member;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
@@ -15,6 +16,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class Profile extends Component
 {
     use WithFileUploads;
+    use WithPagination;
 
     public $name;
     public $email;
