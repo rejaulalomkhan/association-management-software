@@ -48,6 +48,24 @@ class SubmitPayment extends Component
         return $map[$name] ?? null;
     }
 
+    private function determineDefaultPaymentType()
+    {
+        $this->refreshCurrentMonthPaidFlag();
+
+        if (!$this->isCurrentMonthAlreadyPaid) {
+            return 'current';
+        }
+
+        // Current month is paid, check for overdue
+        $overdueInfo = $this->getTotalOverdueInfo();
+        if ($overdueInfo['months'] > 0) {
+            return 'overdue';
+        }
+
+        // No overdue, default to advance
+        return 'advance';
+    }
+
     public function mount()
     {
         // Check if user is authenticated
@@ -71,16 +89,11 @@ class SubmitPayment extends Component
             $this->selectedUserId = $currentUser->id;
         }
 
-        $this->payment_type = 'current';
-        $this->paymentYear = date('Y');
-
-        // Auto-select current month for current payment type
-        $currentMonth = (int)date('n');
-        $this->selectedMonths = [$currentMonth];
-
-        $this->refreshCurrentMonthPaidFlag();
-
-        $this->updatePaymentAmount();
+        // Smartly determine default payment type
+        $this->payment_type = $this->determineDefaultPaymentType();
+        
+        // Trigger update logic to set initial state (year, months)
+        $this->updatedPaymentType();
     }
 
     private function refreshCurrentMonthPaidFlag(): void
@@ -89,7 +102,7 @@ class SubmitPayment extends Component
         $currentYear = (int) date('Y');
 
         $this->isCurrentMonthAlreadyPaid = Payment::where('user_id', $this->selectedUserId)
-            ->where('status', 'approved')
+            ->whereIn('status', ['approved', 'pending'])
             ->where('year', $currentYear)
             ->where('month', $this->getEnglishMonthName($currentMonth))
             ->exists();
@@ -108,19 +121,12 @@ class SubmitPayment extends Component
             $currentMonth = (int) date('n');
             $currentYear = (int) date('Y');
 
-            $alreadyPaid = Payment::where('user_id', $this->selectedUserId)
-                ->where('status', 'approved')
-                ->where('year', $currentYear)
-                ->where('month', $this->getEnglishMonthName($currentMonth))
-                ->exists();
-
+            $this->refreshCurrentMonthPaidFlag();
             $this->paymentYear = $currentYear;
 
-            if (!$alreadyPaid) {
+            if (!$this->isCurrentMonthAlreadyPaid) {
                 $this->selectedMonths = [$currentMonth];
             }
-
-            $this->isCurrentMonthAlreadyPaid = $alreadyPaid;
         } elseif ($this->payment_type === 'overdue') {
             // Oldest year where there is at least one unpaid month
             $oldestYear = $this->getOldestOverdueYear();
@@ -129,8 +135,17 @@ class SubmitPayment extends Component
             $this->selectedMonths = $this->getUnpaidMonthsForYear($this->paymentYear);
         } elseif ($this->payment_type === 'advance') {
             // For advance, start from current year and show future unpaid months
-            $this->paymentYear = (int) date('Y');
-            $this->selectedMonths = $this->getUnpaidMonthsForYear($this->paymentYear);
+            $currentYear = (int) date('Y');
+            $this->paymentYear = $currentYear;
+            $unpaidMonths = $this->getUnpaidMonthsForYear($currentYear);
+            
+            // If current year is fully paid, move to next year automatically
+            if (empty($unpaidMonths)) {
+                $this->paymentYear = $currentYear + 1;
+                $unpaidMonths = $this->getUnpaidMonthsForYear($this->paymentYear);
+            }
+            
+            $this->selectedMonths = $unpaidMonths;
         }
 
         $this->updatePaymentAmount();
@@ -152,20 +167,11 @@ class SubmitPayment extends Component
 
     public function updatedSelectedUserId()
     {
-        // When changing member, recompute whether current month is already paid
-        $this->refreshCurrentMonthPaidFlag();
-
-        // Reset type/year/months to sensible defaults for the newly selected user
-        if ($this->payment_type === 'current') {
-            $currentMonth = (int) date('n');
-            $this->paymentYear = (int) date('Y');
-
-            $this->selectedMonths = $this->isCurrentMonthAlreadyPaid ? [] : [$currentMonth];
-        } else {
-            $this->selectedMonths = [];
-        }
-
-        $this->updatePaymentAmount();
+        // When changing member, recompute smart default payment type
+        $this->payment_type = $this->determineDefaultPaymentType();
+        
+        // Trigger update logic to set state (year, months) based on the new type
+        $this->updatedPaymentType();
     }
 
     public function getUnpaidMonthsForYear($year)
