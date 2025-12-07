@@ -167,9 +167,9 @@
                 <div class="p-2 sm:p-4 md:p-6">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
-                            <p class="text-xs font-medium text-gray-600 md:text-sm dark:text-gray-400">মোট পরিশোধিত</p>
-                            <p class="mt-1 text-xl font-bold text-green-600 md:mt-2 md:text-3xl dark:text-green-400">৳{{ number_format($totalPaid, 2) }}</p>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">{{ $paidMonths }} মাস</p>
+                            <p class="text-xs font-medium text-gray-600 md:text-sm dark:text-gray-400">{{ $paidMonths }} মাসের মোট</p>
+                            <p class="mt-1 text-xl font-bold text-green-600 md:mt-2 md:text-3xl dark:text-green-400">৳{{ (int)$totalPaid == $totalPaid ? (int)$totalPaid : number_format($totalPaid, 2) }}</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">টাকা জমা হয়েছে!</p>
                         </div>
                     </div>
                 </div>
