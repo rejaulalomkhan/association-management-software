@@ -34,7 +34,7 @@ Route::get('/', function () {
 
 Route::get('/register', Register::class)->name('register');
 
-Route::middleware(['auth', 'role:member'])->prefix('member')->name('member.')->group(function () {
+Route::middleware(['auth', 'roles:member,accountant,admin'])->prefix('member')->name('member.')->group(function () {
     Route::get('/dashboard', MemberDashboard::class)->name('dashboard');
     Route::get('/profile', Profile::class)->name('profile');
     Route::get('/profile/edit', ProfileEdit::class)->name('profile.edit');
