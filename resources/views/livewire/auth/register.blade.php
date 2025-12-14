@@ -313,5 +313,19 @@
                 </form>
             </div>
         </div>
+
+        <!-- Loading Overlay -->
+        <div wire:loading wire:target="register" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+            <div class="flex flex-col items-center p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl">
+                <!-- Spinner -->
+                <div class="relative w-16 h-16">
+                    <div class="absolute inset-0 border-4 border-indigo-200 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-transparent border-t-indigo-600 rounded-full animate-spin"></div>
+                </div>
+                <!-- Loading Text -->
+                <p class="mt-4 text-lg font-semibold text-gray-700 dark:text-gray-200">নিবন্ধন হচ্ছে...</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">অনুগ্রহ করে অপেক্ষা করুন</p>
+            </div>
+        </div>
     @endif
 </div>

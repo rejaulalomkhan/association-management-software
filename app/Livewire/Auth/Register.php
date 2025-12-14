@@ -102,13 +102,16 @@ class Register extends Component
             'status' => 'pending',
         ]);
 
-        // Assign default role
-        $user->assignRole('member');
+        // Assign default role - find the role first
+        $memberRole = \HasinHayder\Tyro\Models\Role::where('slug', 'member')->first();
+        if ($memberRole) {
+            $user->assignRole($memberRole);
+        }
 
         session()->flash('message', 'Registration successful! Please wait for admin approval.');
 
         // Redirect to login or pending page
-        return redirect()->route('login');
+        return redirect()->route('tyro-login.login');
     }
 
     public function render()

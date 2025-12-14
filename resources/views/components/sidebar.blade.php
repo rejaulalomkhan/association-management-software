@@ -23,7 +23,15 @@
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                অপেক্ষমাণ রেজিস্ট্রেশন
+                <span class="flex-1">অপেক্ষমাণ রেজিস্ট্রেশন</span>
+                @php
+                    $pendingCount = \App\Models\User::where('status', 'pending')->count();
+                @endphp
+                @if($pendingCount > 0)
+                    <span class="flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-600 rounded-full shadow-md">
+                        {{ $pendingCount > 9 ? '9+' : $pendingCount }}
+                    </span>
+                @endif
             </a>
 
             <a href="{{ route('admin.members') }}" wire:navigate
@@ -41,7 +49,15 @@
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
-                লেনদেন
+                <span class="flex-1">লেনদেন</span>
+                @php
+                    $pendingPayments = \App\Models\Payment::where('status', 'pending')->count();
+                @endphp
+                @if($pendingPayments > 0)
+                    <span class="flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-600 rounded-full shadow-md">
+                        {{ $pendingPayments > 9 ? '9+' : $pendingPayments }}
+                    </span>
+                @endif
             </a>
 
             <!-- Separator -->
@@ -110,7 +126,15 @@
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
-                লেনদেন
+                <span class="flex-1">লেনদেন</span>
+                @php
+                    $pendingPayments = \App\Models\Payment::where('status', 'pending')->count();
+                @endphp
+                @if($pendingPayments > 0)
+                    <span class="flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-600 rounded-full shadow-md">
+                        {{ $pendingPayments > 9 ? '9+' : $pendingPayments }}
+                    </span>
+                @endif
             </a>
             @endif
 
