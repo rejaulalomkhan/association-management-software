@@ -12,15 +12,15 @@
     @endif
 
     <div class="form-panel">
-        <div class="form-card">
+        <div class="form-card" style="padding: 1.5rem;">
             <!-- Logo -->
-            <div class="logo-container">
+            <div class="logo-container" style="margin-bottom: 1rem;">
                 @php
                     $orgLogo = app(\App\Services\SettingsService::class)->get('organization_logo');
                     $orgName = app(\App\Services\SettingsService::class)->get('organization_name', config('app.name'));
                 @endphp
                 @if($orgLogo)
-                <img src="{{ asset('storage/' . $orgLogo) }}" alt="{{ $orgName }}" style="max-height: 60px; width: auto;">
+                <img src="{{ asset('storage/' . $orgLogo) }}" alt="{{ $orgName }}" style="max-height: 50px; width: auto;">
                 @elseif($branding['logo'] ?? false)
                 <img src="{{ $branding['logo'] }}" alt="{{ $branding['app_name'] ?? config('app.name') }}">
                 @else
@@ -30,12 +30,12 @@
                     </svg>
                 </div>
                 @endif
-                <h3 style="margin-top: 8px; font-size: 1.25rem; font-weight: 600; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.2;">{{ $orgName }}</h3>
+                <h3 style="margin-top: 0.5rem; font-size: 1.1rem; font-weight: 600; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.2;">{{ $orgName }}</h3>
             </div>
 
             <!-- Header -->
-            <div class="form-header" style="margin-top: 1rem; margin-bottom: 1rem;">
-                <h2>আপনার অ্যাকাউন্টে লগ ইন করুন</h2>
+            <div class="form-header" style="margin-top: 0.75rem; margin-bottom: 1rem;">
+                <h2 style="font-size: 1.25rem; margin: 0;">আপনার অ্যাকাউন্টে লগ ইন করুন</h2>
             </div>
 
             <!-- Error/Success Messages -->
@@ -62,11 +62,11 @@
             @endif
 
             <!-- Login Form -->
-            <form method="POST" action="{{ route('tyro-login.login.submit') }}">
+            <form method="POST" action="{{ route('tyro-login.login.submit') }}" style="margin-top: 0.5rem;">
                 @csrf
 
                 <!-- Email/Phone Field -->
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 1rem;">
                     <label for="email" class="form-label">ফোন নম্বর</label>
                     <input type="text" id="email" name="email" class="form-input @error('email') is-invalid @enderror" value="{{ old('email') }}" required autocomplete="tel" autofocus placeholder="01700000000">
                     @error('email')
@@ -75,7 +75,7 @@
                 </div>
 
                 <!-- Password Field -->
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 1rem;">
                     <label for="password" class="form-label">পাসওয়ার্ড</label>
                     <input type="password" id="password" name="password" class="form-input @error('password') is-invalid @enderror" required autocomplete="current-password" placeholder="পাসওয়ার্ড">
                     @error('password')
@@ -84,7 +84,7 @@
                 </div>
 
                 <!-- Remember Me & Forgot Password -->
-                <div class="form-options">
+                <div class="form-options" style="margin-bottom: 1rem;">
                     @if($features['remember_me'] ?? true)
                     <div class="checkbox-group">
                         <input type="checkbox" id="remember" name="remember" class="checkbox-input" {{ old('remember') ? 'checked' : '' }}>
