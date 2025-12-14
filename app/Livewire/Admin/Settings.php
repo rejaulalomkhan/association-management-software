@@ -21,6 +21,12 @@ class Settings extends Component
     public $organization_logo;
     public $new_logo;
 
+    // Bank Account Fields
+    public $bank_name;
+    public $bank_account_number;
+    public $bank_branch;
+    public $bank_account_holder;
+
     public $paymentMethods = [];
     public $newMethodName = '';
     public $newMethodNameBn = '';
@@ -39,6 +45,12 @@ class Settings extends Component
         $this->organization_address = $settings['organization_address'];
         $this->organization_phone = $settings['organization_phone'];
         $this->organization_logo = $settings['organization_logo'];
+
+        // Load bank account details
+        $this->bank_name = $settingsService->get('bank_name', '');
+        $this->bank_account_number = $settingsService->get('bank_account_number', '');
+        $this->bank_branch = $settingsService->get('bank_branch', '');
+        $this->bank_account_holder = $settingsService->get('bank_account_holder', '');
 
         $this->loadPaymentMethods();
     }
@@ -74,6 +86,12 @@ class Settings extends Component
         $settingsService->set('monthly_fee', $this->monthly_fee);
         $settingsService->set('organization_address', $this->organization_address);
         $settingsService->set('organization_phone', $this->organization_phone);
+
+        // Save bank account details
+        $settingsService->set('bank_name', $this->bank_name);
+        $settingsService->set('bank_account_number', $this->bank_account_number);
+        $settingsService->set('bank_branch', $this->bank_branch);
+        $settingsService->set('bank_account_holder', $this->bank_account_holder);
 
         $this->successMessage = 'সেটিংস সফলভাবে সংরক্ষিত হয়েছে!';
         $this->new_logo = null;

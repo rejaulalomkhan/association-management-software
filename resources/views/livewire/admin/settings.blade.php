@@ -101,6 +101,56 @@
         </form>
     </div>
 
+    <!-- Bank Account Settings -->
+    <div class="p-6 bg-white rounded-lg shadow">
+        <h2 class="mb-4 text-xl font-semibold text-gray-800">ব্যাংক একাউন্ট তথ্য</h2>
+
+        <form wire:submit.prevent="saveSettings" class="space-y-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                    <label class="block mb-1 text-sm font-medium text-gray-700">ব্যাংকের নাম</label>
+                    <input type="text" wire:model="bank_name"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="যেমন: সোনালী ব্যাংক">
+                    @error('bank_name') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-sm font-medium text-gray-700">একাউন্ট নম্বর</label>
+                    <input type="text" wire:model="bank_account_number"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="যেমন: 1234567890">
+                    @error('bank_account_number') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                    <label class="block mb-1 text-sm font-medium text-gray-700">শাখা</label>
+                    <input type="text" wire:model="bank_branch"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="যেমন: মিরপুর শাখা">
+                    @error('bank_branch') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-sm font-medium text-gray-700">একাউন্ট হোল্ডারের নাম</label>
+                    <input type="text" wire:model="bank_account_holder"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="যেমন: প্রজন্ম উন্নয়ন মিশন">
+                    @error('bank_account_holder') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit"
+                    class="px-6 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    সংরক্ষণ করুন
+                </button>
+            </div>
+        </form>
+    </div>
+
     <!-- Payment Methods -->
     <div class="p-6 bg-white rounded-lg shadow">
         <h2 class="mb-4 text-xl font-semibold text-gray-800">পেমেন্ট মাধ্যম</h2>
