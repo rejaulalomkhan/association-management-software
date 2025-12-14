@@ -135,7 +135,20 @@
         {{-- Registration Form --}}
         <div class="max-w-4xl mx-auto">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-                <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 text-center">সদস্য নিবন্ধন</h2>
+                <!-- Logo -->
+                <div class="flex justify-center mb-6">
+                    @php
+                        $orgLogo = app(\App\Services\SettingsService::class)->get('organization_logo');
+                        $orgName = app(\App\Services\SettingsService::class)->get('organization_name', config('app.name'));
+                    @endphp
+                    @if($orgLogo)
+                        <img src="{{ asset('storage/' . $orgLogo) }}" alt="{{ $orgName }}" style="max-height: 80px; width: auto;">
+                    @endif
+                </div>
+
+                <!-- Header -->
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 text-center">{{ $orgName }}</h2>
+                <h3 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-2 text-center">সদস্য নিবন্ধন</h3>
                 <p class="text-center text-gray-600 dark:text-gray-400 mb-8">নিচের ফর্মটি পূরণ করে আপনার নিবন্ধন আবেদন জমা দিন</p>
 
                 <form wire:submit.prevent="register" x-data="{ showPassword: false, showPasswordConfirmation: false }">
