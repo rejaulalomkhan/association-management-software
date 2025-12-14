@@ -13,6 +13,12 @@ class Register extends Component
 {
     use WithFileUploads;
 
+    public $showTerms = true;
+    public $termsAccepted = false;
+    public $showPassword = false;
+    public $showPasswordConfirmation = false;
+    public $sameAddress = false;
+
     public $name;
     public $phone;
     public $password;
@@ -23,8 +29,8 @@ class Register extends Component
     public $present_address;
     public $blood_group;
     public $profession;
-    public $religion;
-    public $nationality;
+    public $religion = 'ইসলাম';
+    public $nationality = 'Bangladeshi';
     public $position;
     public $profile_pic;
 
@@ -43,6 +49,31 @@ class Register extends Component
         'position' => 'nullable|string',
         'profile_pic' => 'nullable|image|max:2048', // 2MB Max
     ];
+
+    public function acceptTerms()
+    {
+        $this->validate([
+            'termsAccepted' => 'accepted'
+        ], [
+            'termsAccepted.accepted' => 'আপনাকে অবশ্যই শর্তাবলী মেনে নিতে হবে।'
+        ]);
+
+        $this->showTerms = false;
+    }
+
+    public function updatedSameAddress($value)
+    {
+        if ($value) {
+            $this->permanent_address = $this->present_address;
+        }
+    }
+
+    public function updatedPresentAddress($value)
+    {
+        if ($this->sameAddress) {
+            $this->permanent_address = $value;
+        }
+    }
 
     public function register()
     {
