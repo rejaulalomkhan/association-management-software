@@ -5,8 +5,8 @@
     @if(in_array($layout, ['split-left', 'split-right']))
     <div class="background-panel" style="background-image: url('{{ $backgroundImage }}');">
         <div class="background-panel-content">
-            <h1>{{ $pageContent['background_title'] ?? 'Forgot Your Password?' }}</h1>
-            <p>{{ $pageContent['background_description'] ?? 'No worries! Enter your email and we\'ll send you a link to reset your password.' }}</p>
+            <h1>{{ $pageContent['background_title'] ?? 'পাসওয়ার্ড ভুলে গেছেন?' }}</h1>
+            <p>{{ $pageContent['background_description'] ?? 'কোন সমস্যা নেই! আপনার ইমেইল লিখুন এবং আমরা আপনাকে পাসওয়ার্ড রিসেট করার লিংক পাঠাবো।' }}</p>
         </div>
     </div>
     @endif
@@ -33,8 +33,8 @@
 
             <!-- Header -->
             <div class="form-header">
-                <h2>{{ $pageContent['title'] ?? 'Forgot Password?' }}</h2>
-                <p>{{ $pageContent['subtitle'] ?? 'Enter your email and we\'ll send you a reset link.' }}</p>
+                <h2>{{ $pageContent['title'] ?? 'পাসওয়ার্ড ভুলে গেছেন?' }}</h2>
+                <p>{{ $pageContent['subtitle'] ?? 'আপনার ইমেইল লিখুন এবং আমরা আপনাকে রিসেট লিংক পাঠাবো।' }}</p>
             </div>
 
             <!-- Success Message -->
@@ -59,7 +59,7 @@
 
                 <!-- Email Field -->
                 <div class="form-group">
-                    <label for="email" class="form-label">Email</label>
+                    <label for="email" class="form-label">ইমেইল</label>
                     <input type="email" id="email" name="email" class="form-input @error('email') is-invalid @enderror" value="{{ old('email') }}" required autocomplete="email" autofocus placeholder="email@example.com">
                     @error('email')
                     <span class="error-message">{{ $message }}</span>
@@ -68,15 +68,15 @@
 
                 <!-- Submit Button -->
                 <button type="submit" class="btn btn-primary">
-                    Send Reset Link
+                    রিসেট লিংক পাঠান
                 </button>
             </form>
 
             <!-- Back to Login -->
             <div class="form-footer">
                 <p>
-                    Remember your password?
-                    <a href="{{ route('tyro-login.login') }}" class="form-link">Back to Login</a>
+                    পাসওয়ার্ড মনে আছে?
+                    <a href="{{ route('tyro-login.login') }}" class="form-link">লগ ইন পেজে ফিরে যান</a>
                 </p>
             </div>
         </div>
@@ -84,6 +84,12 @@
 </div>
 
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@100..900&display=swap');
+
+    * {
+        font-family: 'Noto Serif Bengali', serif !important;
+    }
+
     .success-message {
         background-color: #ecfdf5;
         border: 1px solid #a7f3d0;
