@@ -78,22 +78,22 @@
             </div>
 
                 <!-- Profile Dropdown -->
-                <div class="flex items-center space-x-4" x-data="{ profileOpen: false, notificationOpen: false }">
+                <div class="flex items-center space-x-2 sm:space-x-4" x-data="{ profileOpen: false, notificationOpen: false }">
                     <!-- Panel Switcher Button -->
                     @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('accountant'))
                         @if(request()->routeIs('admin.*') || request()->routeIs('accountant.*'))
-                            <a href="{{ route('member.profile') }}" wire:navigate class="hidden sm:inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <a href="{{ route('member.profile') }}" wire:navigate class="inline-flex items-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+                                <svg class="w-4 h-4 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
-                                সদস্য প্যানেল
+                                <span class="hidden sm:inline">সদস্য প্যানেল</span>
                             </a>
                         @else
-                            <a href="{{ auth()->user()->hasRole('admin') ? route('admin.dashboard') : route('accountant.dashboard') }}" wire:navigate class="hidden sm:inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <a href="{{ auth()->user()->hasRole('admin') ? route('admin.dashboard') : route('accountant.dashboard') }}" wire:navigate class="inline-flex items-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                                <svg class="w-4 h-4 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                                 </svg>
-                                {{ auth()->user()->hasRole('admin') ? 'এডমিন প্যানেল' : 'একাউন্টেন্ট প্যানেল' }}
+                                <span class="hidden sm:inline">{{ auth()->user()->hasRole('admin') ? 'এডমিন প্যানেল' : 'একাউন্টেন্ট প্যানেল' }}</span>
                             </a>
                         @endif
                     @endif
