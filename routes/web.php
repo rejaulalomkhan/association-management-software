@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Auth\Register;
+use App\Livewire\Auth\PendingStatus;
 use App\Livewire\Member\Dashboard as MemberDashboard;
 use App\Livewire\Member\EditProfile;
 use App\Livewire\Member\Profile;
@@ -33,6 +34,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/register', Register::class)->name('register');
+Route::get('/pending-status/{phone?}', PendingStatus::class)->name('pending-status');
 
 Route::middleware(['auth', 'roles:member,accountant,admin'])->prefix('member')->name('member.')->group(function () {
     Route::get('/dashboard', MemberDashboard::class)->name('dashboard');
