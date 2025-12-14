@@ -5,8 +5,8 @@
     @if(in_array($layout, ['split-left', 'split-right']))
     <div class="background-panel" style="background-image: url('{{ $backgroundImage }}');">
         <div class="background-panel-content">
-            <h1>{{ $pageContent['background_title'] ?? 'Welcome Back!' }}</h1>
-            <p>{{ $pageContent['background_description'] ?? 'Sign in to access your account and continue where you left off. We\'re glad to see you again.' }}</p>
+            <h1>{{ $pageContent['background_title'] ?? 'স্বাগতম!' }}</h1>
+            <p>{{ $pageContent['background_description'] ?? 'আপনার অ্যাকাউন্টে প্রবেশ করতে সাইন ইন করুন। আপনাকে আবার দেখে আমরা আনন্দিত।' }}</p>
         </div>
     </div>
     @endif
@@ -33,8 +33,8 @@
 
             <!-- Header -->
             <div class="form-header">
-                <h2>Log in to your account</h2>
-                <p>Enter your email and password below to log in</p>
+                <h2>আপনার অ্যাকাউন্টে লগ ইন করুন</h2>
+                <p>লগ ইন করতে নিচে আপনার ফোন এবং পাসওয়ার্ড লিখুন</p>
             </div>
 
             <!-- Error/Success Messages -->
@@ -66,7 +66,7 @@
 
                 <!-- Email/Phone Field -->
                 <div class="form-group">
-                    <label for="email" class="form-label">Phone</label>
+                    <label for="email" class="form-label">ফোন নম্বর</label>
                     <input type="text" id="email" name="email" class="form-input @error('email') is-invalid @enderror" value="{{ old('email') }}" required autocomplete="tel" autofocus placeholder="01700000000">
                     @error('email')
                     <span class="error-message">{{ $message }}</span>
@@ -75,8 +75,8 @@
 
                 <!-- Password Field -->
                 <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="password" class="form-input @error('password') is-invalid @enderror" required autocomplete="current-password" placeholder="Password">
+                    <label for="password" class="form-label">পাসওয়ার্ড</label>
+                    <input type="password" id="password" name="password" class="form-input @error('password') is-invalid @enderror" required autocomplete="current-password" placeholder="পাসওয়ার্ড">
                     @error('password')
                     <span class="error-message">{{ $message }}</span>
                     @enderror
@@ -87,24 +87,24 @@
                     @if($features['remember_me'] ?? true)
                     <div class="checkbox-group">
                         <input type="checkbox" id="remember" name="remember" class="checkbox-input" {{ old('remember') ? 'checked' : '' }}>
-                        <label for="remember" class="checkbox-label">Remember me</label>
+                        <label for="remember" class="checkbox-label">আমাকে মনে রাখুন</label>
                     </div>
                     @else
                     <div></div>
                     @endif
 
                     @if($features['forgot_password'] ?? true)
-                    <a href="{{ route('tyro-login.password.request') }}" class="form-link">Forgot password?</a>
+                    <a href="{{ route('tyro-login.password.request') }}" class="form-link">পাসওয়ার্ড ভুলে গেছেন?</a>
                     @endif
                 </div>
 
                 <!-- Captcha -->
                 @if($captchaEnabled ?? false)
                 <div class="form-group captcha-group">
-                    <label for="captcha_answer" class="form-label">{{ $captchaConfig['label'] ?? 'Security Check' }}</label>
+                    <label for="captcha_answer" class="form-label">{{ $captchaConfig['label'] ?? 'নিরাপত্তা যাচাই' }}</label>
                     <div class="captcha-container">
                         <span class="captcha-question">{{ $captchaQuestion }}</span>
-                        <input type="number" id="captcha_answer" name="captcha_answer" class="form-input captcha-input @error('captcha_answer') is-invalid @enderror" required autocomplete="off" placeholder="{{ $captchaConfig['placeholder'] ?? 'Enter the answer' }}">
+                        <input type="number" id="captcha_answer" name="captcha_answer" class="form-input captcha-input @error('captcha_answer') is-invalid @enderror" required autocomplete="off" placeholder="{{ $captchaConfig['placeholder'] ?? 'উত্তর লিখুন' }}">
                     </div>
                     @error('captcha_answer')
                     <span class="error-message">{{ $message }}</span>
@@ -114,7 +114,7 @@
 
                 <!-- Submit Button -->
                 <button type="submit" class="btn btn-primary">
-                    Log in
+                    লগ ইন করুন
                 </button>
             </form>
 
@@ -122,8 +122,8 @@
             @if($registrationEnabled ?? true)
             <div class="form-footer">
                 <p>
-                    Don't have an account?
-                    <a href="{{ route('register') }}" class="form-link">Sign up</a>
+                    কোন অ্যাকাউন্ট নেই?
+                    <a href="{{ route('register') }}" class="form-link">নিবন্ধন করুন</a>
                 </p>
             </div>
             @endif
@@ -132,6 +132,12 @@
 </div>
 
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@100..900&display=swap');
+
+    * {
+        font-family: 'Noto Serif Bengali', serif !important;
+    }
+
     .captcha-group {
         margin-bottom: 1.25rem;
     }
