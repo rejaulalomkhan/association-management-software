@@ -42,6 +42,7 @@ Route::middleware(['auth', 'roles:member,accountant,admin'])->prefix('member')->
     Route::get('/profile/edit', ProfileEdit::class)->name('profile.edit');
     Route::get('/payment', SubmitPayment::class)->name('payment');
     Route::get('/history', PaymentHistory::class)->name('history');
+    Route::get('/bank-deposits', \App\Livewire\Member\BankDeposits::class)->name('bank-deposits');
     Route::get('/notifications', Notifications::class)->name('notifications');
     Route::get('/payments/{payment}/receipt-preview', [PaymentReceiptController::class, 'preview'])
         ->name('payments.receipt.preview');
@@ -52,6 +53,7 @@ Route::middleware(['auth', 'role:accountant'])->prefix('accountant')->name('acco
     Route::get('/profile', Profile::class)->name('profile');
     Route::get('/profile/edit', ProfileEdit::class)->name('profile.edit');
     Route::get('/transactions', AccountantTransactions::class)->name('transactions');
+    Route::get('/bank-deposits', \App\Livewire\Member\BankDeposits::class)->name('bank-deposits');
     Route::get('/approve/{payment}', function() { return 'Approve page coming soon'; })->name('approve');
 });
 
@@ -63,6 +65,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/members', MemberList::class)->name('members');
     Route::get('/members/add', AddMember::class)->name('members.add');
     Route::get('/transactions', Transactions::class)->name('transactions');
+    Route::get('/bank-deposits', \App\Livewire\Member\BankDeposits::class)->name('bank-deposits');
     Route::get('/roles', RoleManagement::class)->name('roles');
     Route::get('/privileges', PrivilegeManagement::class)->name('privileges');
     Route::get('/user-roles', UserRoleAssignment::class)->name('user-roles');

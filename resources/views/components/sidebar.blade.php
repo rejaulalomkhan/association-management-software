@@ -60,6 +60,15 @@
                 @endif
             </a>
 
+            <a href="{{ route('admin.bank-deposits') }}" wire:navigate
+               class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150
+                      {{ request()->routeIs('admin.bank-deposits') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
+                <span class="flex-1">ব্যাংক জমা</span>
+            </a>
+
             <!-- Separator -->
             <div class="my-2 border-t border-gray-200 dark:border-gray-700"></div>
 
@@ -135,6 +144,15 @@
                         {{ $pendingPayments > 9 ? '9+' : $pendingPayments }}
                     </span>
                 @endif
+            </a>
+
+            <a href="{{ route('accountant.bank-deposits') }}" wire:navigate
+               class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150
+                      {{ request()->routeIs('accountant.bank-deposits') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
+                <span class="flex-1">ব্যাংক জমা</span>
             </a>
             @endif
 
