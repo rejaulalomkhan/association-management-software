@@ -17,9 +17,10 @@
             <div class="logo-container">
                 @php
                     $orgLogo = app(\App\Services\SettingsService::class)->get('organization_logo');
+                    $orgName = app(\App\Services\SettingsService::class)->get('organization_name', config('app.name'));
                 @endphp
                 @if($orgLogo)
-                <img src="{{ asset('storage/' . $orgLogo) }}" alt="{{ app(\App\Services\SettingsService::class)->get('organization_name', config('app.name')) }}" style="max-height: 60px; width: auto;">
+                <img src="{{ asset('storage/' . $orgLogo) }}" alt="{{ $orgName }}" style="max-height: 60px; width: auto;">
                 @elseif($branding['logo'] ?? false)
                 <img src="{{ $branding['logo'] }}" alt="{{ $branding['app_name'] ?? config('app.name') }}">
                 @else
@@ -29,12 +30,12 @@
                     </svg>
                 </div>
                 @endif
+                <h3 style="margin-top: 8px; font-size: 1.25rem; font-weight: 600; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.2;">{{ $orgName }}</h3>
             </div>
 
             <!-- Header -->
-            <div class="form-header">
+            <div class="form-header" style="margin-top: 1rem; margin-bottom: 1rem;">
                 <h2>আপনার অ্যাকাউন্টে লগ ইন করুন</h2>
-                <p>লগ ইন করতে নিচে আপনার ফোন এবং পাসওয়ার্ড লিখুন</p>
             </div>
 
             <!-- Error/Success Messages -->
