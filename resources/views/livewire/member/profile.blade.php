@@ -28,16 +28,14 @@
         }">
             <!-- Personal Balance Button -->
             <button @click="togglePersonal()" 
-                class="relative overflow-hidden flex items-center justify-start h-12 px-4 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-pink-500 to-pink-600">
+                class="relative overflow-hidden flex items-center justify-start h-10 px-4 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-pink-500 to-pink-600">
                 
                 <!-- Currency Icon (slides left to right) -->
                 <div class="flex items-center justify-center w-5 h-5 flex-shrink-0 transition-all duration-400 ease-in-out"
                      :class="showPersonal ? 'translate-x-[calc(100vw/2-80px)]' : 'translate-x-0'">
-                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
-                    </svg>
+                    <span class="inline-flex items-center justify-center w-5 h-5 text-white font-bold text-base relative -top-px"> ৳</span>
                 </div>
-                
+                 
                 <!-- Default Text (fades out when balance shows) -->
                 <span class="ml-2 text-sm font-semibold text-white transition-opacity duration-300"
                       :class="showPersonal ? 'opacity-0' : 'opacity-100'">
@@ -53,7 +51,7 @@
 
             <!-- Bank Balance Button -->
             <button @click="toggleBank()" 
-                class="relative overflow-hidden flex items-center justify-start h-12 px-4 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-blue-500 to-blue-600">
+                class="relative overflow-hidden flex items-center justify-start h-10 px-4 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-blue-500 to-blue-600">
                 
                 <!-- Bank Icon (slides left to right) -->
                 <div class="flex items-center justify-center w-5 h-5 flex-shrink-0 transition-all duration-400 ease-in-out"
@@ -66,7 +64,7 @@
                 <!-- Default Text (fades out when balance shows) -->
                 <span class="ml-2 text-sm font-semibold text-white transition-opacity duration-300"
                       :class="showBank ? 'opacity-0' : 'opacity-100'">
-                    ব্যাংক ব্যালেন্স দেখুন
+                    ব্যাংক ব্যালেন্স
                 </span>
                 
                 <!-- Balance Amount (fades in, positioned center-left) -->
