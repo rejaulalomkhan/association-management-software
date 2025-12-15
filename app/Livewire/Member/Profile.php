@@ -217,6 +217,9 @@ class Profile extends Component
             ->where('status', 'pending')
             ->count();
 
+        // Get bank balance
+        $bankBalance = \App\Models\BankDeposit::getTotalBalance();
+
         // Get organization established year from settings
         $settingsService = app(SettingsService::class);
         $establishedYear = (int) $settingsService->get('organization_established_year', 2024);
@@ -269,6 +272,7 @@ class Profile extends Component
             'dueMonths' => $dueMonths,
             'pendingAmount' => $pendingAmount,
             'pendingMonths' => $pendingMonths,
+            'bankBalance' => $bankBalance,
             'years' => $years,
             'monthlyData' => $monthlyData,
         ])->layout('layouts.app');

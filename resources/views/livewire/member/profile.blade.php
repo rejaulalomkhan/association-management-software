@@ -13,6 +13,70 @@
             </div>
         @endif
 
+        <!-- Balance Check Buttons (Fintech UX Pattern) -->
+        <div class="mb-3 grid grid-cols-2 gap-2 px-2 sm:px-0" x-data="{ 
+            showPersonal: false, 
+            showBank: false,
+            togglePersonal() {
+                this.showPersonal = true;
+                setTimeout(() => this.showPersonal = false, 4000);
+            },
+            toggleBank() {
+                this.showBank = true;
+                setTimeout(() => this.showBank = false, 4000);
+            }
+        }">
+            <!-- Personal Balance Button -->
+            <button @click="togglePersonal()" 
+                class="relative overflow-hidden flex items-center justify-start h-12 px-4 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-pink-500 to-pink-600">
+                
+                <!-- Currency Icon (slides left to right) -->
+                <div class="flex items-center justify-center w-5 h-5 flex-shrink-0 transition-all duration-400 ease-in-out"
+                     :class="showPersonal ? 'translate-x-[calc(100vw/2-80px)]' : 'translate-x-0'">
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                    </svg>
+                </div>
+                
+                <!-- Default Text (fades out when balance shows) -->
+                <span class="ml-2 text-sm font-semibold text-white transition-opacity duration-300"
+                      :class="showPersonal ? 'opacity-0' : 'opacity-100'">
+                    ব্যালেন্স দেখুন
+                </span>
+                
+                <!-- Balance Amount (fades in, positioned center-left) -->
+                <div class="absolute left-4 text-base font-bold text-white transition-opacity duration-400"
+                     :class="showPersonal ? 'opacity-100' : 'opacity-0'">
+                    {{ number_format($totalPaid, 2) }} ৳
+                </div>
+            </button>
+
+            <!-- Bank Balance Button -->
+            <button @click="toggleBank()" 
+                class="relative overflow-hidden flex items-center justify-start h-12 px-4 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-blue-500 to-blue-600">
+                
+                <!-- Bank Icon (slides left to right) -->
+                <div class="flex items-center justify-center w-5 h-5 flex-shrink-0 transition-all duration-400 ease-in-out"
+                     :class="showBank ? 'translate-x-[calc(100vw/2-80px)]' : 'translate-x-0'">
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M4 10h3v7H4zm6.5 0h3v7h-3zM2 19h20v3H2zm15-9h3v7h-3zm-5-9L2 6v2h20V6z"/>
+                    </svg>
+                </div>
+                
+                <!-- Default Text (fades out when balance shows) -->
+                <span class="ml-2 text-sm font-semibold text-white transition-opacity duration-300"
+                      :class="showBank ? 'opacity-0' : 'opacity-100'">
+                    ব্যাংক ব্যালেন্স দেখুন
+                </span>
+                
+                <!-- Balance Amount (fades in, positioned center-left) -->
+                <div class="absolute left-4 text-base font-bold text-white transition-opacity duration-400"
+                     :class="showBank ? 'opacity-100' : 'opacity-0'">
+                    {{ number_format($bankBalance, 2) }} ৳
+                </div>
+            </button>
+        </div>
+
         <!-- Profile Card -->
         <div class="mb-4 overflow-hidden bg-white shadow-sm dark:bg-gray-800 rounded-none sm:rounded-lg w-full">
             <div class="p-2 sm:p-6 w-full">
@@ -698,3 +762,9 @@
     </div>
     @endif
 </div>
+                    <!-- Edit Icon Button (Top Right) -->
+                    <a href="{{ role_route('profile.edit') }}" wire:navigate class="absolute top-2 right-2 z-10 flex items-center justify-center w-8 h-8 text-white bg-blue-600 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors shadow-lg">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </a>
