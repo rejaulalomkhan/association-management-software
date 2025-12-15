@@ -12,24 +12,10 @@ class MemberList extends Component
 
     public $search = '';
     public $statusFilter = 'active';
-    public $selectedMember = null;
-    public $showMemberProfile = false;
 
     public function updatingSearch()
     {
         $this->resetPage();
-    }
-
-    public function viewMemberProfile($userId)
-    {
-        $this->selectedMember = User::with(['payments', 'roles'])->find($userId);
-        $this->showMemberProfile = true;
-    }
-
-    public function closeProfile()
-    {
-        $this->showMemberProfile = false;
-        $this->selectedMember = null;
     }
 
     public function render()

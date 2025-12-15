@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Helpers\NotificationHelper;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class Transactions extends Component
 {
@@ -153,14 +152,35 @@ class Transactions extends Component
 
         $transactions = $query->orderBy('created_at', 'desc')->get();
 
-        $pdf = Pdf::loadView('pdf.transactions-report', [
+        // Configure mPDF
+        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+        $fontDirs = $defaultConfig['fontDir'];
+        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+        $path = public_path() . "/fonts";
+        
+        $mpdf = new \Mpdf\Mpdf([
+            'format' => 'A4',
+            'orientation' => 'P',
+            'fontDir' => array_merge($fontDirs, [$path]),
+            'fontdata' => $fontData + [
+                'solaimanlipi' => [
+                    'R' => 'SolaimanLipi.ttf',
+                    'useOTL' => 0xFF,
+                ],
+            ],
+            'default_font' => 'solaimanlipi'
+        ]);
+
+        $html = view('pdf.transactions-report', [
             'transactions' => $transactions,
             'month' => $this->selectedMonth,
             'year' => $this->selectedYear,
-        ]);
+        ])->render();
+        $mpdf->WriteHTML($html);
 
-        return response()->streamDownload(function() use ($pdf) {
-            echo $pdf->stream();
+        return response()->streamDownload(function() use ($mpdf) {
+            echo $mpdf->Output('', 'S');
         }, 'transactions-report-' . date('Y-m-d') . '.pdf');
     }
 
@@ -179,14 +199,33 @@ class Transactions extends Component
             return;
         }
 
-        $pdf = Pdf::loadView('pdf.payment-receipt', [
-            'payment' => $payment,
+        // Configure mPDF
+        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+        $fontDirs = $defaultConfig['fontDir'];
+        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+        $path = public_path() . "/fonts";
+        
+        $mpdf = new \Mpdf\Mpdf([
+            'format' => 'A4',
+            'orientation' => 'P',
+            'fontDir' => array_merge($fontDirs, [$path]),
+            'fontdata' => $fontData + [
+                'solaimanlipi' => [
+                    'R' => 'SolaimanLipi.ttf',
+                    'useOTL' => 0xFF,
+                ],
+            ],
+            'default_font' => 'solaimanlipi'
         ]);
+
+        $html = view('pdf.payment-receipt', ['payment' => $payment])->render();
+        $mpdf->WriteHTML($html);
 
         $fileName = 'receipt-' . ($payment->transaction_id ?: ($payment->id)) . '.pdf';
 
-        return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->output();
+        return response()->streamDownload(function () use ($mpdf) {
+            echo $mpdf->Output('', 'S');
         }, $fileName);
     }
 

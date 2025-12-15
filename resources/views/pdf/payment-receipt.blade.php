@@ -4,16 +4,21 @@
     <meta charset="UTF-8">
     <title>পেমেন্ট রিসিপ্ট</title>
     <style>
-        /* 'bangla' is the logical font name configured in config/dompdf.php */
-        body { font-family: 'bangla', 'DejaVu Sans', sans-serif; font-size: 12px; line-height: 1.6; color: #333; padding: 20px; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .header h1 { font-size: 20px; margin-bottom: 5px; }
-        .header p { font-size: 12px; }
-        .section { margin-bottom: 15px; }
-        .section h3 { font-size: 14px; margin-bottom: 8px; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 4px; }
-        .label { font-weight: bold; }
-        .footer { margin-top: 25px; text-align: center; font-size: 11px; color: #666; border-top: 1px solid #ddd; padding-top: 8px; }
+        body { 
+            font-family: 'solaimanlipi', sans-serif; 
+            font-size: 14px; 
+            line-height: 1.8; 
+            color: #333; 
+            padding: 20px; 
+        }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .header h1 { font-size: 22px; margin-bottom: 5px; font-weight: bold; }
+        .header p { font-size: 13px; }
+        .section { margin-bottom: 18px; }
+        .section h3 { font-size: 16px; margin-bottom: 10px; font-weight: bold; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+        .row { margin-bottom: 6px; }
+        .label { font-weight: bold; display: inline-block; width: 180px; }
+        .footer { margin-top: 30px; text-align: center; font-size: 11px; color: #666; border-top: 1px solid #ddd; padding-top: 10px; }
     </style>
 </head>
 <body>

@@ -65,6 +65,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/pending-registrations', PendingRegistrations::class)->name('pending-registrations');
     Route::get('/members', MemberList::class)->name('members');
     Route::get('/members/add', AddMember::class)->name('members.add');
+    Route::get('/members/view/{memberId}', \App\Livewire\Admin\ViewMemberProfile::class)->name('members.view');
     Route::get('/member-certificate/{memberId}', MemberCertificate::class)->name('member-certificate');
     Route::get('/transactions', Transactions::class)->name('transactions');
     Route::get('/bank-deposits', \App\Livewire\Member\BankDeposits::class)->name('bank-deposits');

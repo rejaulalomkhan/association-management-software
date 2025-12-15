@@ -6,7 +6,6 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Auth;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class PaymentHistory extends Component
 {
@@ -69,9 +68,33 @@ class PaymentHistory extends Component
             return;
         }
 
-        $pdf = Pdf::loadView('pdf.receipt', ['payment' => $payment]);
-        return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->output();
+        // Configure mPDF with Bangla font support
+        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+        $fontDirs = $defaultConfig['fontDir'];
+
+        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+
+        $path = public_path() . "/fonts";
+        
+        $mpdf = new \Mpdf\Mpdf([
+            'format' => 'A4',
+            'orientation' => 'P',
+            'fontDir' => array_merge($fontDirs, [$path]),
+            'fontdata' => $fontData + [
+                'solaimanlipi' => [
+                    'R' => 'SolaimanLipi.ttf',
+                    'useOTL' => 0xFF,
+                ],
+            ],
+            'default_font' => 'solaimanlipi'
+        ]);
+
+        $html = view('pdf.payment-receipt', ['payment' => $payment])->render();
+        $mpdf->WriteHTML($html);
+
+        return response()->streamDownload(function () use ($mpdf) {
+            echo $mpdf->Output('', 'S');
         }, 'receipt-' . $payment->transaction_id . '.pdf');
     }
 

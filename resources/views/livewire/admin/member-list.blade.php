@@ -41,7 +41,7 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach($members as $member)
-                    <tr class="cursor-pointer hover:bg-gray-50" wire:click="viewMemberProfile({{ $member->id }})">
+                    <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($member->profile_pic)
                                 <img src="{{ asset('storage/' . $member->profile_pic) }}" alt="{{ $member->name }}"
@@ -75,10 +75,11 @@
                         </td>
                         <td class="px-6 py-4 text-sm whitespace-nowrap">
                             <div class="flex items-center gap-2">
-                                <button wire:click.stop="viewMemberProfile({{ $member->id }})"
-                                    class="text-indigo-600 hover:text-indigo-900">
-                                    বিস্তারিত →
-                                </button>
+                                <a href="{{ route('admin.members.view', $member->id) }}" 
+                                   wire:navigate
+                                   class="text-indigo-600 hover:text-indigo-900">
+                                    প্রোফাইল →
+                                </a>
                                 @if($member->status === 'active')
                                 <a href="{{ route('admin.member-certificate', $member->id) }}" 
                                    target="_blank"
@@ -109,119 +110,4 @@
         </div>
         @endif
     </div>
-
-    <!-- Member Profile Modal -->
-    @if($showMemberProfile && $selectedMember)
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
-                <div class="flex items-start justify-between mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">সদস্যের প্রোফাইল</h2>
-                    <button wire:click="closeProfile" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Profile Header -->
-                <div class="flex items-center p-4 mb-6 space-x-4 rounded-lg bg-gradient-to-r from-indigo-50 to-blue-50">
-                    @if($selectedMember->profile_pic)
-                        <img src="{{ asset('storage/' . $selectedMember->profile_pic) }}" alt="{{ $selectedMember->name }}"
-                            class="object-cover w-20 h-20 rounded-full ring-4 ring-white">
-                    @else
-                        <div class="flex items-center justify-center w-20 h-20 bg-indigo-200 rounded-full ring-4 ring-white">
-                            <span class="text-2xl font-bold text-indigo-700">{{ substr($selectedMember->name, 0, 2) }}</span>
-                        </div>
-                    @endif
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-900">{{ $selectedMember->name }}</h3>
-                        <p class="font-medium text-indigo-600">{{ $selectedMember->membership_id ?? 'No ID' }}</p>
-                        <p class="text-sm text-gray-600">{{ $selectedMember->profession ?? 'পেশা উল্লেখ নেই' }}</p>
-                    </div>
-                </div>
-
-                <!-- Personal Info -->
-                <div class="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2">
-                    <div class="p-3 rounded bg-gray-50">
-                        <label class="text-xs font-medium text-gray-500">পিতার নাম</label>
-                        <p class="font-medium text-gray-900">{{ $selectedMember->father_name }}</p>
-                    </div>
-                    <div class="p-3 rounded bg-gray-50">
-                        <label class="text-xs font-medium text-gray-500">জন্ম তারিখ</label>
-                        <p class="font-medium text-gray-900">{{ $selectedMember->dob ? \Carbon\Carbon::parse($selectedMember->dob)->format('d M Y') : 'N/A' }}</p>
-                    </div>
-                    <div class="p-3 rounded bg-gray-50">
-                        <label class="text-xs font-medium text-gray-500">ফোন</label>
-                        <p class="font-medium text-gray-900">{{ $selectedMember->phone }}</p>
-                    </div>
-                    <div class="p-3 rounded bg-gray-50">
-                        <label class="text-xs font-medium text-gray-500">রক্তের গ্রুপ</label>
-                        <p class="font-medium text-gray-900">{{ $selectedMember->blood_group ?? 'N/A' }}</p>
-                    </div>
-                </div>
-
-                <!-- Payment Summary -->
-                <div class="mb-6">
-                    <h4 class="mb-3 text-lg font-semibold text-gray-800">পেমেন্ট সামারি</h4>
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="p-4 border border-green-200 rounded-lg bg-green-50">
-                            <p class="text-sm font-medium text-green-600">মোট পরিশোধিত</p>
-                            <p class="text-2xl font-bold text-green-700">৳{{ number_format($selectedMember->payments->where('status', 'approved')->sum('amount'), 2) }}</p>
-                            <p class="text-xs text-green-600">{{ $selectedMember->payments->where('status', 'approved')->count() }} মাস</p>
-                        </div>
-                        <div class="p-4 border border-yellow-200 rounded-lg bg-yellow-50">
-                            <p class="text-sm font-medium text-yellow-600">অপেক্ষমাণ</p>
-                            <p class="text-2xl font-bold text-yellow-700">৳{{ number_format($selectedMember->payments->where('status', 'pending')->sum('amount'), 2) }}</p>
-                            <p class="text-xs text-yellow-600">{{ $selectedMember->payments->where('status', 'pending')->count() }} মাস</p>
-                        </div>
-                        <div class="p-4 border border-red-200 rounded-lg bg-red-50">
-                            <p class="text-sm font-medium text-red-600">প্রত্যাখ্যাত</p>
-                            <p class="text-2xl font-bold text-red-700">৳{{ number_format($selectedMember->payments->where('status', 'rejected')->sum('amount'), 2) }}</p>
-                            <p class="text-xs text-red-600">{{ $selectedMember->payments->where('status', 'rejected')->count() }} মাস</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Transactions -->
-                <div>
-                    <h4 class="mb-3 text-lg font-semibold text-gray-800">সাম্প্রতিক লেনদেন</h4>
-                    @if($selectedMember->payments->count() > 0)
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-2 text-xs font-medium text-left text-gray-500">মাস</th>
-                                    <th class="px-4 py-2 text-xs font-medium text-left text-gray-500">পরিমাণ</th>
-                                    <th class="px-4 py-2 text-xs font-medium text-left text-gray-500">মাধ্যম</th>
-                                    <th class="px-4 py-2 text-xs font-medium text-left text-gray-500">অবস্থা</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                @foreach($selectedMember->payments->take(5) as $payment)
-                                <tr>
-                                    <td class="px-4 py-2 text-sm">{{ $payment->month }} {{ $payment->year }}</td>
-                                    <td class="px-4 py-2 text-sm font-medium">৳{{ number_format($payment->amount, 2) }}</td>
-                                    <td class="px-4 py-2 text-sm">{{ $payment->method }}</td>
-                                    <td class="px-4 py-2">
-                                        <span class="px-2 py-1 text-xs rounded-full
-                                            @if($payment->status === 'approved') bg-green-100 text-green-800
-                                            @elseif($payment->status === 'pending') bg-yellow-100 text-yellow-800
-                                            @else bg-red-100 text-red-800 @endif">
-                                            {{ $payment->status === 'approved' ? 'অনুমোদিত' : ($payment->status === 'pending' ? 'অপেক্ষমাণ' : 'প্রত্যাখ্যাত') }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    @else
-                    <p class="py-4 text-center text-gray-500">কোনো লেনদেন নেই</p>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
 </div>
