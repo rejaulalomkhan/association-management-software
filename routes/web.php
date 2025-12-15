@@ -21,6 +21,7 @@ use App\Livewire\Admin\RoleManagement;
 use App\Livewire\Admin\PrivilegeManagement;
 use App\Livewire\Admin\UserRoleAssignment;
 use App\Livewire\Admin\ProfileEdit as AdminProfileEdit;
+use App\Livewire\Admin\MemberCertificate;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Member\PaymentReceiptController;
 
@@ -64,6 +65,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/pending-registrations', PendingRegistrations::class)->name('pending-registrations');
     Route::get('/members', MemberList::class)->name('members');
     Route::get('/members/add', AddMember::class)->name('members.add');
+    Route::get('/member-certificate/{memberId}', MemberCertificate::class)->name('member-certificate');
     Route::get('/transactions', Transactions::class)->name('transactions');
     Route::get('/bank-deposits', \App\Livewire\Member\BankDeposits::class)->name('bank-deposits');
     Route::get('/roles', RoleManagement::class)->name('roles');
