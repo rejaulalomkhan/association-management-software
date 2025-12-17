@@ -22,6 +22,18 @@
 
     <!-- Livewire Styles -->
     @livewireStyles
+
+    <!-- PWA Meta Tags -->
+    @laravelPWA
+    
+    <!-- iOS Specific -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="{{ config('app.name') }}">
+    <link rel="apple-touch-icon" href="/images/icons/icon-152x152.png">
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#3b82f6">
 </head>
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
     <!-- Global Livewire Loading Indicator -->
@@ -344,6 +356,9 @@
     </div>
 
     <x-toast />
+
+    <!-- PWA Install Prompt -->
+    <livewire:pwa-install-prompt />
 
     <!-- Livewire Scripts -->
     @livewireScripts

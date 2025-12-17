@@ -13,6 +13,18 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- PWA Meta Tags -->
+    @laravelPWA
+    
+    <!-- iOS Specific -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="{{ config('app.name') }}">
+    <link rel="apple-touch-icon" href="/images/icons/icon-152x152.png">
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#3b82f6">
 </head>
 <body class="font-sans text-gray-900 antialiased">
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
