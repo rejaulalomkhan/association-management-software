@@ -25,6 +25,9 @@
     
     <!-- Theme Color -->
     <meta name="theme-color" content="#3b82f6">
+
+    <!-- Livewire Styles -->
+    @livewireStyles
 </head>
 <body class="font-sans text-gray-900 antialiased">
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
@@ -32,5 +35,11 @@
             {{ $slot }}
         </div>
     </div>
+
+    <!-- PWA Install Prompt -->
+    @livewire('pwa-install-prompt')
+
+    <!-- Livewire Scripts -->
+    @livewireScripts
 </body>
 </html>
