@@ -156,7 +156,8 @@ class SubmitPayment extends Component
 
     public function updatedPaymentYear()
     {
-        $this->selectedMonths = [];
+        // When year changes, reload unpaid months for that year
+        $this->selectedMonths = $this->getUnpaidMonthsForYear($this->paymentYear);
         $this->updatePaymentAmount();
     }
 

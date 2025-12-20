@@ -296,7 +296,7 @@
                         <!-- Payment Method -->
                         <div>
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">পেমেন্ট মাধ্যম *</label>
-                            <select wire:model="payment_method_id" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <select wire:model.live="payment_method_id" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500">
                                 <option value="">নির্বাচন করুন</option>
                                 @foreach($paymentMethods as $method)
                                     <option value="{{ $method->id }}">{{ $method->name_bn ?? $method->name }}</option>
