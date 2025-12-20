@@ -1,8 +1,19 @@
 <div class="p-6">
     <!-- Header -->
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">লেনদেন ব্যবস্থাপনা</h1>
-        <p class="mt-1 text-gray-600">সকল পেমেন্ট লেনদেন দেখুন এবং পরিচালনা করুন</p>
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">লেনদেন ব্যবস্থাপনা</h1>
+            <p class="mt-1 text-gray-600">সকল পেমেন্ট লেনদেন দেখুন এবং পরিচালনা করুন</p>
+        </div>
+        
+        @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('super-admin') || auth()->user()->hasRole('accountant'))
+            <a href="{{ route('member.payment') }}" wire:navigate class="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 shadow-sm">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                পেমেন্ট যুক্ত করুন
+            </a>
+        @endif
     </div>
 
     <!-- Filters -->
