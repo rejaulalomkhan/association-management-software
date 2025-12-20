@@ -76,6 +76,32 @@
                     @endif
                 </div>
 
+                <!-- Validation Errors Summary -->
+                @if ($errors->any())
+                    <div x-data="{ show: true }" 
+                         x-init="$nextTick(() => { 
+                             if (show) { 
+                                 $el.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
+                                 window.scrollBy(0, -20);
+                             } 
+                         })"
+                         class="p-4 mb-6 border-l-4 border-red-500 bg-red-50 dark:bg-red-900/30 dark:border-red-600">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 mr-2 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="mb-2 text-sm font-semibold text-red-800 dark:text-red-200">ফর্ম সাবমিট করতে সমস্যা হয়েছে। নিচের ত্রুটিগুলো সংশোধন করুন:</p>
+                                <ul class="space-y-1 text-xs text-red-700 list-disc list-inside dark:text-red-300">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 <form wire:submit.prevent="submitPayment" class="space-y-6">
                     <!-- User Selection -->
                     <div>
