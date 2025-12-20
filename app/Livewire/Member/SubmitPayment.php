@@ -180,9 +180,10 @@ class SubmitPayment extends Component
         $establishedYear = (int) $settingsService->get('organization_established_year', 2024);
         $establishedMonth = (int) $settingsService->get('organization_established_month', 1);
 
-        // Paid months based on month/year columns to avoid double payments
-        $paidMonths = Payment::where('user_id', $this->selectedUserId)
-            ->where('status', 'approved')
+        // Paid or pending months based on month/year columns to avoid double payments
+        // Include both 'approved' and 'pending' to prevent duplicate submissions
+        $paidOrPendingMonths = Payment::where('user_id', $this->selectedUserId)
+            ->whereIn('status', ['approved', 'pending'])
             ->where('year', $year)
             ->pluck('month')
             ->map(function ($monthName) {
@@ -198,7 +199,7 @@ class SubmitPayment extends Component
         $unpaidMonths = [];
 
         if ($this->payment_type === 'current') {
-            if ($year == $currentYear && !in_array($currentMonth, $paidMonths)) {
+            if ($year == $currentYear && !in_array($currentMonth, $paidOrPendingMonths)) {
                 $unpaidMonths = [$currentMonth];
             }
         } elseif ($this->payment_type === 'overdue') {
@@ -216,7 +217,7 @@ class SubmitPayment extends Component
             }
 
             for ($m = $startMonth; $m <= $endMonth; $m++) {
-                if (!in_array($m, $paidMonths)) {
+                if (!in_array($m, $paidOrPendingMonths)) {
                     $unpaidMonths[] = $m;
                 }
             }
@@ -226,13 +227,13 @@ class SubmitPayment extends Component
                 $endMonth = 12;
 
                 for ($m = $startMonth; $m <= $endMonth; $m++) {
-                    if (!in_array($m, $paidMonths)) {
+                    if (!in_array($m, $paidOrPendingMonths)) {
                         $unpaidMonths[] = $m;
                     }
                 }
             } elseif ($year == $currentYear + 1) {
                 for ($m = 1; $m <= 12; $m++) {
-                    if (!in_array($m, $paidMonths)) {
+                    if (!in_array($m, $paidOrPendingMonths)) {
                         $unpaidMonths[] = $m;
                     }
                 }

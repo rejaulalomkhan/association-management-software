@@ -1,8 +1,6 @@
 var staticCacheName = "pwa-v" + new Date().getTime();
 var filesToCache = [
     '/offline',
-    '/css/app.css',
-    '/js/app.js',
     '/images/icons/icon-72x72.png',
     '/images/icons/icon-96x96.png',
     '/images/icons/icon-128x128.png',
@@ -19,7 +17,12 @@ self.addEventListener("install", event => {
     event.waitUntil(
         caches.open(staticCacheName)
             .then(cache => {
-                return cache.addAll(filesToCache);
+                // Add files one by one and ignore errors for missing files
+                return Promise.allSettled(
+                    filesToCache.map(url => 
+                        cache.add(url).catch(err => console.log('Failed to cache:', url))
+                    )
+                );
             })
     )
 });
@@ -40,13 +43,18 @@ self.addEventListener('activate', event => {
 
 // Serve from Cache
 self.addEventListener("fetch", event => {
+    // Skip chrome extension requests
+    if (event.request.url.startsWith('chrome-extension://')) {
+        return;
+    }
+    
     event.respondWith(
         caches.match(event.request)
             .then(response => {
                 return response || fetch(event.request);
             })
             .catch(() => {
-                return caches.match('offline');
+                return caches.match('/offline');
             })
     )
 });
