@@ -7,8 +7,10 @@
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 md:text-3xl">পেমেন্ট সাবমিট করুন</h1>
                     <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">আপনার পেমেন্ট তথ্য প্রদান করুন। অনুমোদনের পর মূল হিসেবে যুক্ত হবে।</p>
                 </div>
-                <a href="{{ route('member.profile') }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
-                    ← ফিরে যান
+                <a href="{{ route('member.profile') }}" class="flex items-center justify-center w-10 h-10 text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600" title="ফিরে যান">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
                 </a>
             </div>
         </div>
