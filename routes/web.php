@@ -22,6 +22,9 @@ use App\Livewire\Admin\PrivilegeManagement;
 use App\Livewire\Admin\UserRoleAssignment;
 use App\Livewire\Admin\ProfileEdit as AdminProfileEdit;
 use App\Livewire\Admin\MemberCertificate;
+use App\Livewire\DocumentList;
+use App\Livewire\DocumentView;
+use App\Livewire\Admin\SubmitDocument;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Member\PaymentReceiptController;
 
@@ -49,6 +52,12 @@ Route::middleware(['auth', 'roles:member,accountant,admin'])->prefix('member')->
         ->name('payments.receipt.preview');
 });
 
+// Document routes (accessible to all authenticated users)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/documents', DocumentList::class)->name('documents.list');
+    Route::get('/documents/{id}', DocumentView::class)->name('documents.view');
+});
+
 Route::middleware(['auth', 'role:accountant'])->prefix('accountant')->name('accountant.')->group(function () {
     Route::get('/dashboard', AccountantDashboard::class)->name('dashboard');
     Route::get('/profile', Profile::class)->name('profile');
@@ -73,4 +82,5 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/privileges', PrivilegeManagement::class)->name('privileges');
     Route::get('/user-roles', UserRoleAssignment::class)->name('user-roles');
     Route::get('/settings', Settings::class)->name('settings');
+    Route::get('/documents/submit', SubmitDocument::class)->name('documents.submit');
 });

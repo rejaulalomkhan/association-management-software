@@ -78,6 +78,15 @@
                 <span class="flex-1">টাকা জমা দেয়া</span>
             </a>
 
+            <a href="{{ route('documents.list') }}" wire:navigate
+               class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150
+                      {{ request()->routeIs('documents.*') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span class="flex-1">নথি সমূহ</span>
+            </a>
+
             <!-- Separator -->
             <div class="my-2 border-t border-gray-200 dark:border-gray-700"></div>
 
@@ -205,6 +214,15 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>
                 </svg>
                 ব্যাংক ট্রানজেকশন
+            </a>
+
+            <a href="{{ route('documents.list') }}" wire:navigate
+               class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150
+                      {{ request()->routeIs('documents.*') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                নথি সমূহ
             </a>
 
             <a href="{{ route('member.history') }}" wire:navigate

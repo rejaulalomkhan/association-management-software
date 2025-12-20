@@ -204,12 +204,13 @@
 
                     <!-- Year + Month Selection (for overdue and advance) -->
                     @if($payment_type !== 'current')
-                    <div class="grid gap-4" style="grid-template-columns: 3fr 5fr;">
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-[3fr_5fr]">
                         <!-- Year Selection -->
                         <div wire:loading.class="opacity-50 pointer-events-none" wire:loading.attr="aria-busy" wire:target="payment_type">
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">সাল নির্বাচন করুন *</label>
                             <div class="relative">
                                 <select wire:model.live="paymentYear" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                    <option value="">সাল সিলেক্ট করুন</option>
                                     @foreach($paymentYears as $year)
                                         <option value="{{ $year }}">{{ $year }}</option>
                                     @endforeach
