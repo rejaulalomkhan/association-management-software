@@ -156,8 +156,9 @@ class SubmitPayment extends Component
 
     public function updatedPaymentYear()
     {
-        // When year changes, reload unpaid months for that year
-        $this->selectedMonths = $this->getUnpaidMonthsForYear($this->paymentYear);
+        // When year changes, clear selected months and update amount
+        // Don't auto-select months - let user choose manually
+        $this->selectedMonths = [];
         $this->updatePaymentAmount();
     }
 
@@ -346,13 +347,16 @@ class SubmitPayment extends Component
             'payment_proof.max' => 'স্ক্রিনশট সর্বোচ্চ ২ এমবি হতে পারবে।',
         ]);
 
-        // যদি ট্রানজেকশন আইডি দেওয়া থাকে এবং শুধু এক মাস নির্বাচন করা হয়,
-        // সেক্ষেত্রে আগের রেকর্ড আছে কিনা চেক করি। একসাথে একাধিক মাসের জন্য
-        // একই ট্রানজেকশন আইডি ব্যবহার করা যাবে।
-        if ($this->payment_reference && count($this->selectedMonths) === 1) {
+        // If Hand Cash (ID = 1) is selected, auto-generate transaction ID
+        if ($this->payment_method_id == 1) {
+            $this->payment_reference = 'CASH-' . date('YmdHis') . '-' . $this->selectedUserId;
+        }
+
+        // Check for duplicate transaction ID (only if not Hand Cash and reference is provided)
+        if ($this->payment_reference && $this->payment_method_id != 1) {
             $txExists = Payment::where('transaction_id', $this->payment_reference)->exists();
             if ($txExists) {
-                $this->addError('payment_reference', 'এই ট্রানজেকশন আইডি আগে থেকেই ব্যবহার হয়েছে।');
+                $this->addError('payment_reference', 'এই ট্রানজেকশন আইডি আগে থেকেই ব্যবহার হয়েছে। অনুগ্রহ করে অন্য একটি ব্যবহার করুন।');
                 return;
             }
         }

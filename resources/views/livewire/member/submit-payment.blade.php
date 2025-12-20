@@ -332,12 +332,14 @@
                             @error('payment_method_id') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                         </div>
 
-                        <!-- Reference Number -->
+                        <!-- Reference Number (Hidden for Hand Cash) -->
+                        @if($payment_method_id != 1)
                         <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">রেফারেন্স নাম্বার</label>
-                            <input type="text" wire:model="payment_reference" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="ট্রানজেকশন আইডি বা রেফারেন্স নাম্বার">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">ট্রানজেকশন আইডি / রেফারেন্স নাম্বার</label>
+                            <input type="text" wire:model="payment_reference" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="ট্রানজেকশন আইডি বা রেফারেন্স নাম্বার লিখুন">
                             @error('payment_reference') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                         </div>
+                        @endif
 
                         <!-- Proof Screenshot (Optional) -->
                         <div x-data="{ fileName: '', previewUrl: '' }">
