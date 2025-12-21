@@ -39,7 +39,7 @@ class Dashboard extends Component
         }
 
         $paidMembers = $paidMembersQuery->orderBy('processed_at', 'desc')
-            ->limit(10)
+            ->limit(20)
             ->get();
 
         // Get unpaid members logic
@@ -61,7 +61,7 @@ class Dashboard extends Component
                 ->pluck('user_id')
                 ->toArray();
 
-            $unpaidMembers = $allActiveMembers->whereNotIn('id', $paidMemberIds)->take(10);
+            $unpaidMembers = $allActiveMembers->whereNotIn('id', $paidMemberIds)->take(20);
 
             // Attach due info for unpaid members
             $unpaidMembers = $unpaidMembers->map(function ($member) use ($memberService) {
@@ -70,6 +70,23 @@ class Dashboard extends Component
                 $member->due_amount = $dues['total_due'];
                 return $member;
             });
+        }
+
+        // Bank deposits stats
+        $bankDepositsTotal = \App\Models\BankDeposit::sum('amount');
+        $bankDepositsCount = \App\Models\BankDeposit::count();
+        
+        // Filtered bank deposits (for selected month/year)
+        $bankDepositsFiltered = 0;
+        if ($month && $year) {
+            // Get month number from month name
+            $monthNumber = date('n', strtotime($month));
+            $bankDepositsFiltered = \App\Models\BankDeposit::where('year', $year)
+                ->where('month', $monthNumber)
+                ->sum('amount');
+        } elseif ($year) {
+            $bankDepositsFiltered = \App\Models\BankDeposit::where('year', $year)
+                ->sum('amount');
         }
 
         $stats = [
@@ -87,6 +104,10 @@ class Dashboard extends Component
             'pending_count' => $summary['pending_count'],
             'collection_rate' => $summary['collection_rate'],
             'lifetime_collection' => Payment::where('status', 'approved')->sum('amount'),
+            'bank_deposits_total' => $bankDepositsTotal,
+            'bank_deposits_count' => $bankDepositsCount,
+            'bank_deposits_filtered' => $bankDepositsFiltered,
+            'total_documents' => \App\Models\Document::count(),
         ];
 
         return view('livewire.admin.dashboard', [

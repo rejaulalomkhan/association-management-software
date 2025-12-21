@@ -51,117 +51,170 @@
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
+    <div class="grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
         <!-- Total Members -->
-        <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl group hover:-translate-y-1">
-            <div class="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 transition-transform bg-blue-500 rounded-full opacity-10 group-hover:scale-150"></div>
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
-                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-md dark:bg-gray-800 rounded-xl hover:shadow-lg group hover:-translate-y-0.5">
+            <div class="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 transition-transform bg-blue-500 rounded-full opacity-10 group-hover:scale-150"></div>
+            <div class="p-3 md:p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                        <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                         </svg>
                     </div>
-                    <span class="flex items-center text-xs font-medium text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400 px-2.5 py-0.5 rounded-full">
-                        সক্রিয়
-                    </span>
                 </div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">মোট সদস্য</p>
-                <h3 class="mt-1 text-3xl font-bold text-gray-900 dark:text-white">{{ $stats['total_members'] }}</h3>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">মোট সদস্য</p>
+                <h3 class="mt-1 text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total_members'] }}</h3>
             </div>
-            <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-500 to-blue-600"></div>
         </div>
 
         <!-- Lifetime Collection -->
-        <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl group hover:-translate-y-1">
-            <div class="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 transition-transform bg-purple-500 rounded-full opacity-10 group-hover:scale-150"></div>
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
-                        <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-md dark:bg-gray-800 rounded-xl hover:shadow-lg group hover:-translate-y-0.5">
+            <div class="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 transition-transform bg-purple-500 rounded-full opacity-10 group-hover:scale-150"></div>
+            <div class="p-3 md:p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+                        <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
-                    <span class="text-xs font-medium text-purple-600 bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400 px-2.5 py-0.5 rounded-full">
-                        সর্বমোট
-                    </span>
                 </div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">মোট সংগ্রহ</p>
-                <h3 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">৳{{ number_format($stats['lifetime_collection']) }}</h3>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">মোট সংগ্রহ</p>
+                <h3 class="mt-1 text-base md:text-lg font-bold text-gray-900 dark:text-white">৳{{ number_format($stats['lifetime_collection'], 0) }}</h3>
             </div>
-            <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-indigo-600"></div>
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-purple-500 to-indigo-600"></div>
         </div>
 
         <!-- Filtered Collection -->
-        <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl group hover:-translate-y-1">
-            <div class="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 transition-transform bg-green-500 rounded-full opacity-10 group-hover:scale-150"></div>
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-green-50 dark:bg-green-900/30 rounded-xl">
-                        <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-md dark:bg-gray-800 rounded-xl hover:shadow-lg group hover:-translate-y-0.5">
+            <div class="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 transition-transform bg-green-500 rounded-full opacity-10 group-hover:scale-150"></div>
+            <div class="p-3 md:p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="p-2 bg-green-50 dark:bg-green-900/30 rounded-lg">
+                        <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
-                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        {{ $selectedMonth ? \App\Helpers\BanglaHelper::getBanglaMonth($selectedMonth) : ($selectedYear ? $selectedYear : 'সব সময়') }}
-                    </span>
                 </div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">ফিল্টারকৃত সংগ্রহ</p>
-                <div class="flex items-baseline gap-2 mt-1">
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white">৳{{ number_format($stats['total_paid']) }}</h3>
-                </div>
-                <p class="text-xs text-gray-500 mt-1">{{ $stats['paid_count'] }} টি পেমেন্ট</p>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+                    @if($selectedMonth && $selectedYear)
+                        {{ \App\Helpers\BanglaHelper::getBanglaMonth($selectedMonth) }} {{ $selectedYear }}
+                    @elseif($selectedYear)
+                        {{ $selectedYear }} সংগ্রহ
+                    @else
+                        সংগ্রহ (সব)
+                    @endif
+                </p>
+                <h3 class="mt-1 text-base md:text-lg font-bold text-gray-900 dark:text-white">৳{{ number_format($stats['total_paid'], 0) }}</h3>
+                <p class="text-[10px] text-gray-500 mt-0.5">{{ $stats['paid_count'] }} পেমেন্ট</p>
             </div>
-            <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-emerald-600"></div>
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-green-500 to-emerald-600"></div>
         </div>
 
         <!-- Unpaid This Month -->
-        <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl group hover:-translate-y-1">
-            <div class="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 transition-transform bg-red-500 rounded-full opacity-10 group-hover:scale-150"></div>
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-red-50 dark:bg-red-900/30 rounded-xl">
-                        <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-md dark:bg-gray-800 rounded-xl hover:shadow-lg group hover:-translate-y-0.5">
+            <div class="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 transition-transform bg-red-500 rounded-full opacity-10 group-hover:scale-150"></div>
+            <div class="p-3 md:p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="p-2 bg-red-50 dark:bg-red-900/30 rounded-lg">
+                        <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
-                    @if($selectedMonth && $selectedYear)
-                    <span class="text-xs font-medium text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 px-2.5 py-0.5 rounded-full">
-                        {{ round($stats['collection_rate'], 1) }}% সংগৃহীত
-                    </span>
-                    @endif
                 </div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    {{ $selectedMonth && $selectedYear ? 'এই মাসে বকেয়া (সদস্য)' : 'বকেয়া' }}
-                </p>
-                <h3 class="mt-1 text-3xl font-bold text-gray-900 dark:text-white">
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">বকেয়া সদস্য</p>
+                <h3 class="mt-1 text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                     {{ $selectedMonth && $selectedYear ? $stats['unpaid_count'] : '-' }}
                 </h3>
-                @if(!($selectedMonth && $selectedYear))
-                    <p class="text-xs text-gray-400 mt-1">মাস ও বছর সিলেক্ট করুন</p>
-                @endif
             </div>
-            <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-pink-600"></div>
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-red-500 to-pink-600"></div>
         </div>
 
         <!-- Pending Approvals -->
-        <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-lg dark:bg-gray-800 rounded-2xl hover:shadow-xl group hover:-translate-y-1">
-            <div class="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 transition-transform bg-yellow-500 rounded-full opacity-10 group-hover:scale-150"></div>
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-xl">
-                        <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-md dark:bg-gray-800 rounded-xl hover:shadow-lg group hover:-translate-y-0.5">
+            <div class="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 transition-transform bg-yellow-500 rounded-full opacity-10 group-hover:scale-150"></div>
+            <div class="p-3 md:p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="p-2 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
+                        <svg class="w-4 h-4 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
-                    <span class="text-xs font-medium text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400 px-2.5 py-0.5 rounded-full">
-                        নিবন্ধন: {{ $stats['pending_registrations'] }}
-                    </span>
                 </div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">অপেক্ষমাণ</p>
-                <h3 class="mt-1 text-3xl font-bold text-gray-900 dark:text-white">{{ $stats['pending_count'] }}</h3>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">অপেক্ষমাণ</p>
+                <h3 class="mt-1 text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['pending_count'] }}</h3>
             </div>
-            <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 to-orange-600"></div>
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-yellow-500 to-orange-600"></div>
+        </div>
+
+        <!-- Bank Deposits Total -->
+        <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-md dark:bg-gray-800 rounded-xl hover:shadow-lg group hover:-translate-y-0.5">
+            <div class="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 transition-transform bg-indigo-500 rounded-full opacity-10 group-hover:scale-150"></div>
+            <div class="p-3 md:p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                        <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">ব্যাংক জমা</p>
+                <h3 class="mt-1 text-base md:text-lg font-bold text-gray-900 dark:text-white">৳{{ number_format($stats['bank_deposits_total'], 0) }}</h3>
+                <p class="text-[10px] text-gray-500 mt-0.5">{{ $stats['bank_deposits_count'] }} টি</p>
+            </div>
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-indigo-500 to-blue-600"></div>
+        </div>
+
+        <!-- Filtered Bank Deposits -->
+        <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-md dark:bg-gray-800 rounded-xl hover:shadow-lg group hover:-translate-y-0.5">
+            <div class="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 transition-transform bg-cyan-500 rounded-full opacity-10 group-hover:scale-150"></div>
+            <div class="p-3 md:p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="p-2 bg-cyan-50 dark:bg-cyan-900/30 rounded-lg">
+                        <svg class="w-4 h-4 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+                    @if($selectedMonth && $selectedYear)
+                        ব্যাংক {{ \App\Helpers\BanglaHelper::getBanglaMonth($selectedMonth) }} {{ $selectedYear }}
+                    @elseif($selectedYear)
+                        ব্যাংক {{ $selectedYear }}
+                    @else
+                        ব্যাংক (ফিল্টার)
+                    @endif
+                </p>
+                <h3 class="mt-1 text-base md:text-lg font-bold text-gray-900 dark:text-white">
+                    @if($selectedMonth || $selectedYear)
+                        ৳{{ number_format($stats['bank_deposits_filtered'], 0) }}
+                    @else
+                        -
+                    @endif
+                </h3>
+                @if(!($selectedMonth || $selectedYear))
+                    <p class="text-[10px] text-gray-400 mt-0.5">মাস/বছর সিলেক্ট করুন</p>
+                @endif
+            </div>
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-cyan-500 to-blue-600"></div>
+        </div>
+
+        <!-- Total Documents -->
+        <div class="relative overflow-hidden transition-all duration-300 bg-white shadow-md dark:bg-gray-800 rounded-xl hover:shadow-lg group hover:-translate-y-0.5">
+            <div class="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 transition-transform bg-teal-500 rounded-full opacity-10 group-hover:scale-150"></div>
+            <div class="p-3 md:p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="p-2 bg-teal-50 dark:bg-teal-900/30 rounded-lg">
+                        <svg class="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">মোট নথি</p>
+                <h3 class="mt-1 text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total_documents'] }}</h3>
+            </div>
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-teal-500 to-cyan-600"></div>
         </div>
     </div>
 
