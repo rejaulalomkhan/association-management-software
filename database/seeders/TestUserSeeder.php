@@ -15,7 +15,7 @@ class TestUserSeeder extends Seeder
         $admin = User::find(1);
         if ($admin) {
             $admin->update([
-                'phone' => '01700000000',
+                'phone' => '01916628339',
                 'password' => Hash::make('password'),
             ]);
             // Assign admin role

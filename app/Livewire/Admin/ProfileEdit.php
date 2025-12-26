@@ -96,15 +96,15 @@ class ProfileEdit extends Component
         $user->name = $this->name;
         $user->email = $this->email;
         $user->phone = $this->phone;
-        $user->father_name = $this->father_name;
-        $user->dob = $this->dob;
-        $user->permanent_address = $this->permanent_address;
-        $user->present_address = $this->present_address;
-        $user->profession = $this->profession;
-        $user->religion = $this->religion;
-        $user->nationality = $this->nationality;
-        $user->position = $this->position;
-        $user->blood_group = $this->blood_group;
+        $user->father_name = $this->father_name ?: null;
+        $user->dob = $this->dob ?: null;
+        $user->permanent_address = $this->permanent_address ?: null;
+        $user->present_address = $this->present_address ?: null;
+        $user->profession = $this->profession ?: null;
+        $user->religion = $this->religion ?: null;
+        $user->nationality = $this->nationality ?: null;
+        $user->position = $this->position ?: null;
+        $user->blood_group = $this->blood_group ?: null;
 
         // Handle profile picture upload
         if ($this->new_profile_pic) {
