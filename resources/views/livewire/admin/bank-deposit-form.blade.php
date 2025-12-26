@@ -25,7 +25,7 @@
                 <!-- Transaction Type -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ট্রানজেকশন টাইপ</label>
-                    <div class="flex gap-4">
+                    <div class="flex flex-wrap gap-4">
                         <label class="flex items-center">
                             <input type="radio" wire:model.live="transactionType" value="deposit" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
                             <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">টাকা জমা</span>
@@ -33,6 +33,14 @@
                         <label class="flex items-center">
                             <input type="radio" wire:model.live="transactionType" value="withdrawal" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
                             <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">টাকা উত্তোলন</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" wire:model.live="transactionType" value="deduction" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">ব্যাংক কর্তন</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" wire:model.live="transactionType" value="profit" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">ব্যাংক মুনাফা</span>
                         </label>
                     </div>
                     @error('transactionType') <span class="text-sm text-red-600 dark:text-red-400">{{ $message }}</span> @enderror

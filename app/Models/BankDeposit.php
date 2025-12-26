@@ -96,12 +96,14 @@ class BankDeposit extends Model
 
     /**
      * Calculate balance after transaction
+     * - deposit and profit: add to balance
+     * - withdrawal and deduction: subtract from balance
      */
     public static function calculateBalanceAfter($amount, $transactionType)
     {
         $currentBalance = self::getTotalBalance();
         
-        if ($transactionType === 'deposit') {
+        if (in_array($transactionType, ['deposit', 'profit'])) {
             return $currentBalance + $amount;
         } else {
             return $currentBalance - $amount;

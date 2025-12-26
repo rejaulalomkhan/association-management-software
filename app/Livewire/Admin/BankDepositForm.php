@@ -25,7 +25,7 @@ class BankDepositForm extends Component
     public $showForm = false;
 
     protected $rules = [
-        'transactionType' => 'required|in:deposit,withdrawal',
+        'transactionType' => 'required|in:deposit,withdrawal,deduction,profit',
         'month' => 'required|integer|min:1|max:12',
         'year' => 'required|integer',
         'amount' => 'required|numeric|min:0.01',
@@ -127,8 +127,8 @@ class BankDepositForm extends Component
             }
         }
 
-        // Check if withdrawal and verify sufficient balance
-        if ($this->transactionType === 'withdrawal') {
+        // Check if withdrawal or deduction and verify sufficient balance
+        if (in_array($this->transactionType, ['withdrawal', 'deduction'])) {
             $currentBalance = BankDeposit::getTotalBalance();
             if ($this->amount > $currentBalance) {
                 session()->flash('error', 'অপর্যাপ্ত ব্যালেন্স! বর্তমান ব্যালেন্স: ৳' . number_format($currentBalance, 2));
@@ -162,9 +162,13 @@ class BankDepositForm extends Component
         ]);
 
         // Dispatch browser event for notification
-        $this->dispatch('notify', message: $this->transactionType === 'deposit' 
-            ? 'ব্যাংক জমা সফলভাবে এন্ট্রি হয়েছে!' 
-            : 'ব্যাংক উত্তোলন সফলভাবে এন্ট্রি হয়েছে!')->to('member.bank-deposits');
+        $messages = [
+            'deposit' => 'ব্যাংক জমা সফলভাবে এন্ট্রি হয়েছে!',
+            'withdrawal' => 'ব্যাংক উত্তোলন সফলভাবে এন্ট্রি হয়েছে!',
+            'deduction' => 'ব্যাংক কর্তন সফলভাবে এন্ট্রি হয়েছে!',
+            'profit' => 'ব্যাংক মুনাফা সফলভাবে এন্ট্রি হয়েছে!',
+        ];
+        $this->dispatch('notify', message: $messages[$this->transactionType])->to('member.bank-deposits');
 
         $this->resetForm();
         $this->showForm = false;

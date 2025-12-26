@@ -117,17 +117,25 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                                             জমা
                                         </span>
-                                    @else
+                                    @elseif($deposit->transaction_type === 'withdrawal')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
                                             উত্তোলন
+                                        </span>
+                                    @elseif($deposit->transaction_type === 'deduction')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                                            ব্যাংক কর্তন
+                                        </span>
+                                    @elseif($deposit->transaction_type === 'profit')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                            ব্যাংক মুনাফা
                                         </span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                     {{ $deposit->month_name }}, {{ $deposit->year }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium {{ $deposit->transaction_type === 'deposit' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                                    {{ $deposit->transaction_type === 'withdrawal' ? '-' : '+' }}৳{{ number_format($deposit->amount, 2) }}
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium {{ in_array($deposit->transaction_type, ['deposit', 'profit']) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                                    {{ in_array($deposit->transaction_type, ['withdrawal', 'deduction']) ? '-' : '+' }}৳{{ number_format($deposit->amount, 2) }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold text-gray-900 dark:text-gray-100">
                                     ৳{{ number_format($deposit->balance_after, 2) }}

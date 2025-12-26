@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('bank_deposits', function (Blueprint $table) {
             $table->id();
-            $table->enum('transaction_type', ['deposit', 'withdrawal'])->default('deposit');
+            $table->enum('transaction_type', ['deposit', 'withdrawal', 'deduction', 'profit'])->default('deposit');
             $table->decimal('amount', 15, 2); // Transaction amount (always positive)
             $table->decimal('balance_after', 15, 2); // Running balance after this transaction
             $table->integer('month'); // 1-12

@@ -14,14 +14,16 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('transaction_id')->unique()->nullable();
-            $table->date('month_year');
+            $table->string('transaction_id')->nullable()->index();
+            $table->string('month', 20); // January, February, etc.
+            $table->integer('year'); // 2025, 2026
             $table->decimal('amount', 10, 2);
             $table->string('method');
+            $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods');
             $table->text('description')->nullable();
-            $table->string('screenshot_path')->nullable();
+            $table->text('admin_note')->nullable();
+            $table->string('proof_path')->nullable();
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-            $table->timestamp('submitted_at');
             $table->timestamp('processed_at')->nullable();
             $table->foreignId('processed_by')->nullable()->constrained('users');
             $table->timestamps();
