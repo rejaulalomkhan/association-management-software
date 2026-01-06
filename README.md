@@ -258,6 +258,14 @@ chmod -R 775 storage bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
 ```
 
+## Developer
+
+**Rejaul Alom Khan (Arman Azij)**
+
+- 📧 Email: [armanazij@gmail.com](mailto:armanazij@gmail.com)
+- 📱 Phone: [+8801916628339](tel:+8801916628339)
+- 👤 Facebook: [fb.com/armanaazij](https://fb.com/armanaazij)
+
 ## Support
 
 For issues and questions, please contact the development team.
