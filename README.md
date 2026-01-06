@@ -2,6 +2,32 @@
 
 A comprehensive web-based management system for the Projonmo Unnayan Mission organization, built with Laravel 12, Livewire 3, and Tailwind CSS v4.
 
+## Screenshots
+
+### Member Profile (Light Mode)
+![Member Profile - Light Mode](screenshots/member-profile-light.png)
+*Member profile page showing personal details, ID card, and monthly payment records*
+
+### Admin Dashboard (Light Mode)
+![Admin Dashboard - Light Mode](screenshots/admin-dashboard-light.png)
+*Admin dashboard with organization statistics, member lists, and payment overview*
+
+### Dark Mode Toggle
+![Dark Mode Toggle](screenshots/dark-mode-toggle.png)
+*Profile dropdown menu showing the dark mode toggle option*
+
+### Admin Dashboard (Dark Mode)
+![Admin Dashboard - Dark Mode](screenshots/admin-dashboard-dark.png)
+*Admin dashboard with dark theme applied - professional dark aesthetic*
+
+### Member Profile (Dark Mode)
+![Member Profile - Dark Mode](screenshots/member-profile-dark.png)
+*Member profile page in dark mode with theme persistence*
+
+### Payment Submission
+![Payment Submission](screenshots/payment-submission.png)
+*Payment submission interface with multiple payment methods*
+
 ## Features
 
 ### 🔐 Authentication & Authorization
