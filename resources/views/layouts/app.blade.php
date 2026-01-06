@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -275,6 +275,19 @@
 
                             <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
 
+                            <!-- Theme Toggle -->
+                            <button type="button" @click="toggleTheme()" class="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <svg class="w-4 h-4 mr-3 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                </svg>
+                                <svg class="w-4 h-4 mr-3 moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                                </svg>
+                                <span class="theme-text">ডার্ক মোড</span>
+                            </button>
+
+                            <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+
                             <!-- Logout -->
                             <form method="POST" action="{{ route('tyro-login.logout') }}">
                                 @csrf
@@ -372,5 +385,80 @@
 
     <!-- Livewire Scripts -->
     @livewireScripts
+
+    <!-- Theme Toggle Script -->
+    <script>
+        // Theme management functions (synced with tyro-login)
+        function getTheme() {
+            if (localStorage.getItem('tyro-login-theme')) {
+                return localStorage.getItem('tyro-login-theme');
+            }
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        function setTheme(theme) {
+            localStorage.setItem('tyro-login-theme', theme);
+            document.documentElement.classList.remove('light', 'dark');
+            document.documentElement.classList.add(theme);
+            
+            // Update body class for Tailwind dark mode
+            if (theme === 'dark') {
+                document.body.classList.add('dark');
+            } else {
+                document.body.classList.remove('dark');
+            }
+            
+            updateThemeUI();
+        }
+
+        function toggleTheme() {
+            const currentTheme = getTheme();
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        function updateThemeUI() {
+            const isDark = getTheme() === 'dark';
+            const sunIcons = document.querySelectorAll('.sun-icon');
+            const moonIcons = document.querySelectorAll('.moon-icon');
+            const themeTexts = document.querySelectorAll('.theme-text');
+
+            sunIcons.forEach(icon => {
+                icon.style.display = isDark ? 'block' : 'none';
+            });
+
+            moonIcons.forEach(icon => {
+                icon.style.display = isDark ? 'none' : 'block';
+            });
+
+            themeTexts.forEach(text => {
+                text.textContent = isDark ? 'লাইট মোড' : 'ডার্ক মোড';
+            });
+        }
+
+        // Apply theme on load
+        setTheme(getTheme());
+
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('tyro-login-theme')) {
+                setTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+    </script>
+
+    <style>
+        .sun-icon {
+            display: none;
+        }
+        .moon-icon {
+            display: block;
+        }
+        html.dark .sun-icon {
+            display: block;
+        }
+        html.dark .moon-icon {
+            display: none;
+        }
+    </style>
 </body>
 </html>
