@@ -1,59 +1,271 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Projonmo Unnayan Mission - Association Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive web-based management system for the Projonmo Unnayan Mission organization, built with Laravel 12, Livewire 3, and Tailwind CSS v4.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 🔐 Authentication & Authorization
+- Custom registration system with terms & conditions
+- Phone number-based authentication
+- Role-based access control (Admin, Accountant, Member)
+- Pending registration approval workflow
+- Powered by [Tyro](https://github.com/hasinhayder/tyro) and [Tyro Login](https://github.com/hasinhayder/tyro-login)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 👥 Member Management
+- Member registration with detailed profile information
+- Profile picture upload
+- Membership ID generation
+- Member status tracking (Active, Inactive, Pending)
+- Member certificate generation (PDF)
+- Member list with search and filtering
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 💰 Payment & Transactions
+- Monthly payment submission by members
+- Payment approval workflow
+- Payment history tracking
+- Transaction receipts (PDF download)
+- Bank deposit management
+- Payment method tracking (bKash, Nagad, Rocket, Bank Transfer)
 
-## Learning Laravel
+### 📊 Dashboard & Reports
+- Role-specific dashboards (Admin, Accountant, Member)
+- Payment statistics and summaries
+- Due payment tracking
+- Transaction reports with filtering
+- Export reports to PDF
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 📄 Document Management
+- Document upload and categorization
+- Document viewing and download
+- Document list with search
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 🎨 UI/UX Features
+- **Dark Mode Support** - Toggle between light and dark themes
+- Responsive design (Mobile, Tablet, Desktop)
+- Bengali language interface
+- PWA (Progressive Web App) support
+- Real-time notifications
+- Toast notifications for user feedback
 
-## Laravel Sponsors
+### 🔔 Notifications
+- Payment approval notifications
+- Payment rejection notifications
+- Custom notification system
+- Real-time notification badge
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Tech Stack
 
-### Premium Partners
+- **Backend**: Laravel 12
+- **Frontend**: Livewire 3, Alpine.js
+- **Styling**: Tailwind CSS v4
+- **Database**: MySQL
+- **PDF Generation**: mPDF
+- **Authentication**: Tyro Login Package
+- **Authorization**: Tyro Package
+- **PWA**: Laravel PWA Package
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Requirements
 
-## Contributing
+- PHP 8.2 or higher
+- Composer
+- Node.js & NPM
+- MySQL 5.7 or higher
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Installation
 
-## Code of Conduct
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd projonmo
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+2. **Install PHP dependencies**
+   ```bash
+   composer install
+   ```
 
-## Security Vulnerabilities
+3. **Install Node dependencies**
+   ```bash
+   npm install
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+4. **Environment setup**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+5. **Configure database**
+   
+   Edit `.env` file and set your database credentials:
+   ```
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=projonmo
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
+
+6. **Run migrations**
+   ```bash
+   php artisan migrate
+   ```
+
+7. **Seed database (optional)**
+   ```bash
+   php artisan db:seed
+   ```
+
+8. **Create storage link**
+   ```bash
+   php artisan storage:link
+   ```
+
+9. **Build assets**
+   ```bash
+   npm run build
+   ```
+
+10. **Start development server**
+    ```bash
+    php artisan serve
+    ```
+    
+    In a separate terminal:
+    ```bash
+    npm run dev
+    ```
+
+## Configuration
+
+### Organization Settings
+
+Configure your organization details in the Admin Settings page:
+- Organization Name
+- Organization Logo
+- Established Year
+- Monthly Payment Amount
+- Payment Methods
+
+### Dark Mode
+
+The application supports dark mode with theme persistence. Users can toggle between light and dark themes from the profile dropdown menu. The theme preference is stored in localStorage and syncs with the login page.
+
+**Technical Implementation:**
+- Tailwind CSS v4 with `@variant dark (.dark &);` directive
+- JavaScript theme management functions
+- localStorage key: `tyro-login-theme`
+
+### PWA Configuration
+
+The application is PWA-enabled. Users can install it on their devices for a native app-like experience.
+
+## Deployment
+
+### Production Build
+
+1. **Build assets for production**
+   ```bash
+   npm run build
+   ```
+
+2. **Optimize Laravel**
+   ```bash
+   php artisan config:cache
+   php artisan route:cache
+   php artisan view:cache
+   ```
+
+3. **Set proper permissions**
+   ```bash
+   chmod -R 775 storage bootstrap/cache
+   ```
+
+### cPanel Deployment
+
+1. Upload all files to your cPanel public_html directory
+2. Run composer install on the server:
+   ```bash
+   composer install --optimize-autoloader --no-dev
+   ```
+3. Clear caches:
+   ```bash
+   php artisan config:clear
+   php artisan cache:clear
+   php artisan route:clear
+   php artisan view:clear
+   ```
+4. Set up environment variables in `.env`
+5. Run migrations:
+   ```bash
+   php artisan migrate --force
+   ```
+
+## Default Roles
+
+The system comes with three default roles:
+
+1. **Admin** - Full system access
+2. **Accountant** - Payment and transaction management
+3. **Member** - Limited access to personal profile and payments
+
+## File Structure
+
+```
+├── app/
+│   ├── Helpers/          # Helper functions
+│   ├── Livewire/         # Livewire components
+│   ├── Models/           # Eloquent models
+│   └── Services/         # Business logic services
+├── resources/
+│   ├── css/              # Stylesheets
+│   ├── js/               # JavaScript files
+│   └── views/            # Blade templates
+├── public/
+│   ├── fonts/            # Bengali fonts
+│   └── storage/          # Public storage link
+└── database/
+    ├── migrations/       # Database migrations
+    └── seeders/          # Database seeders
+```
+
+## Troubleshooting
+
+### Dark Mode Not Working
+
+If dark mode is not working after deployment:
+
+1. Ensure `@variant dark (.dark &);` is in `resources/css/app.css`
+2. Rebuild assets: `npm run build`
+3. Clear browser cache (Ctrl+Shift+R)
+4. Check that the CSS file size increased after rebuild
+
+### PDF Download Errors
+
+If PDF downloads fail with "Class not found" errors:
+
+1. Run `composer install` on the server
+2. Ensure mPDF package is installed: `composer require mpdf/mpdf`
+3. Clear caches
+
+### Permission Issues
+
+If you encounter permission errors:
+
+```bash
+chmod -R 775 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
+```
+
+## Support
+
+For issues and questions, please contact the development team.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is proprietary software developed for Projonmo Unnayan Mission.
+
+---
+
+**Developed with ❤️ using Laravel & Livewire**
