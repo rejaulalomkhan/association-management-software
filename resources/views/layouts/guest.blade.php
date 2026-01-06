@@ -7,6 +7,15 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
+    <!-- Favicon -->
+    @php
+        $faviconLogo = app(\App\Services\SettingsService::class)->get('organization_logo');
+    @endphp
+    @if($faviconLogo && file_exists(storage_path('app/public/' . $faviconLogo)))
+        <link rel="icon" type="image/png" href="{{ asset('storage/' . $faviconLogo) }}">
+        <link rel="shortcut icon" type="image/png" href="{{ asset('storage/' . $faviconLogo) }}">
+    @endif
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
