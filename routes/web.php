@@ -151,5 +151,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/privileges', PrivilegeManagement::class)->name('privileges');
     Route::get('/user-roles', UserRoleAssignment::class)->name('user-roles');
     Route::get('/settings', Settings::class)->name('settings');
+    Route::get('/roadmap', \App\Livewire\Admin\Roadmap::class)->name('roadmap');
     Route::get('/documents/submit', SubmitDocument::class)->name('documents.submit');
 });

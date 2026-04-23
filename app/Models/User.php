@@ -40,10 +40,41 @@ class User extends Authenticatable
         'religion',
         'nationality',
         'position',
+        'monthly_fee',
         'profile_pic',
         'status',
         'joined_at',
     ];
+
+    /**
+     * Resolve the monthly fee that actually applies to this member.
+     *
+     * Priority:
+     *   1. The per-member override stored on `users.monthly_fee` (if > 0)
+     *   2. The organization-wide default from `settings.monthly_fee`
+     *
+     * This is the single source of truth for dues calculation, payment
+     * forms, WhatsApp reminders and receipts – never read settings
+     * directly when a specific member is in context.
+     */
+    public function effectiveMonthlyFee(): float
+    {
+        $custom = $this->monthly_fee;
+        if ($custom !== null && (float) $custom > 0) {
+            return (float) $custom;
+        }
+
+        return (float) app(\App\Services\SettingsService::class)
+            ->getMonthlyFee();
+    }
+
+    /**
+     * True when this member has a custom fee that differs from default.
+     */
+    public function hasCustomMonthlyFee(): bool
+    {
+        return $this->monthly_fee !== null && (float) $this->monthly_fee > 0;
+    }
 
     /**
      * Ensure the user has a unique verification token and return it.
@@ -132,6 +163,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'monthly_fee' => 'decimal:2',
         ];
     }
 }

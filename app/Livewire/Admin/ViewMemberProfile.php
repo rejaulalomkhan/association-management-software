@@ -16,6 +16,10 @@ class ViewMemberProfile extends Component
     public $memberId;
     public $selectedYear;
 
+    // Custom-fee editor state (only admins render this).
+    public bool $editingFee = false;
+    public ?string $customFeeInput = null;
+
     public function mount($memberId)
     {
         $this->memberId = $memberId;
@@ -28,11 +32,82 @@ class ViewMemberProfile extends Component
         
         // Set default year to current year
         $this->selectedYear = date('Y');
+
+        $this->customFeeInput = $this->member->monthly_fee !== null
+            ? (string) (int) $this->member->monthly_fee
+            : null;
     }
 
     public function updatedSelectedYear()
     {
         // This will automatically re-render when year changes
+    }
+
+    /**
+     * Guard: only admins can mutate a member's fee override.
+     */
+    private function assertAdmin(): void
+    {
+        $user = auth()->user();
+        $slugs = collect($user?->tyroRoleSlugs() ?? []);
+        $isAdmin = $slugs->contains(fn ($s) => in_array($s, ['admin', 'super-admin']));
+        abort_unless($isAdmin, 403, 'এই অপারেশনটি শুধুমাত্র এডমিনের জন্য।');
+    }
+
+    public function startEditFee(): void
+    {
+        $this->assertAdmin();
+        $this->editingFee = true;
+    }
+
+    public function cancelEditFee(): void
+    {
+        $this->editingFee = false;
+        $this->customFeeInput = $this->member->monthly_fee !== null
+            ? (string) (int) $this->member->monthly_fee
+            : null;
+    }
+
+    public function saveCustomFee(): void
+    {
+        $this->assertAdmin();
+
+        $this->validate([
+            'customFeeInput' => 'nullable|numeric|min:0|max:9999999',
+        ], [
+            'customFeeInput.numeric' => 'ফি অবশ্যই একটি সংখ্যা হতে হবে।',
+            'customFeeInput.min'     => 'ফি ০ এর কম হতে পারবেনা।',
+        ]);
+
+        $value = $this->customFeeInput;
+        // Treat blank or 0 as "use settings default" → store NULL so the
+        // helper falls back to organization-wide monthly_fee.
+        if ($value === null || $value === '' || (float) $value <= 0) {
+            $this->member->monthly_fee = null;
+        } else {
+            $this->member->monthly_fee = (float) $value;
+        }
+
+        $this->member->save();
+        $this->member->refresh();
+
+        $this->customFeeInput = $this->member->monthly_fee !== null
+            ? (string) (int) $this->member->monthly_fee
+            : null;
+
+        $this->editingFee = false;
+        session()->flash('message', 'কাস্টম মাসিক ফি সংরক্ষণ করা হয়েছে।');
+    }
+
+    public function resetCustomFee(): void
+    {
+        $this->assertAdmin();
+        $this->member->monthly_fee = null;
+        $this->member->save();
+        $this->member->refresh();
+        $this->customFeeInput = null;
+        $this->editingFee = false;
+        session()->flash('message', 'ডিফল্ট মাসিক ফি পুনরায় চালু করা হয়েছে।');
     }
 
     public function render()
@@ -121,6 +196,10 @@ class ViewMemberProfile extends Component
             ];
         }
 
+        $effectiveFee  = $this->member->effectiveMonthlyFee();
+        $defaultFee    = app(\App\Services\SettingsService::class)->getMonthlyFee();
+        $hasCustomFee  = $this->member->hasCustomMonthlyFee();
+
         return view('livewire.admin.view-member-profile', [
             'transactions' => $transactions,
             'totalPaid' => $totalPaid,
@@ -132,6 +211,9 @@ class ViewMemberProfile extends Component
             'bankBalance' => $bankBalance,
             'years' => $years,
             'monthlyData' => $monthlyData,
+            'effectiveFee' => $effectiveFee,
+            'defaultFee' => $defaultFee,
+            'hasCustomFee' => $hasCustomFee,
         ])->layout('layouts.app');
     }
 }

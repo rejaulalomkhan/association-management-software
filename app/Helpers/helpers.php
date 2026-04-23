@@ -86,6 +86,28 @@ if (!function_exists('org_email')) {
     }
 }
 
+if (!function_exists('org_monthly_fee')) {
+    /**
+     * Resolve the monthly fee for a given member (or the org default).
+     *
+     * Pass a `User` instance to get that member's effective fee (custom
+     * override if set, otherwise the settings default). Pass nothing to
+     * get the organization-wide default.
+     *
+     * This is the single helper front-end Blade views should use for
+     * rendering "monthly fee" amounts, so the override rule stays
+     * consistent across the entire app.
+     */
+    function org_monthly_fee(?\App\Models\User $user = null): float
+    {
+        if ($user instanceof \App\Models\User) {
+            return $user->effectiveMonthlyFee();
+        }
+
+        return (float) org_settings()->getMonthlyFee();
+    }
+}
+
 if (!function_exists('user_role')) {
     /**
      * Get the current user's primary role name

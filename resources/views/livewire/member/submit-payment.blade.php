@@ -313,6 +313,12 @@
                                 <div>
                                     <p class="text-sm font-semibold text-green-800 dark:text-green-200">পেমেন্ট পরিমাণ</p>
                                     <p class="text-xs text-green-600 dark:text-green-400 mt-0.5">{{ count($selectedMonths) }} মাস × ৳{{ number_format($monthlyFee, 0) }}</p>
+                                    @if($hasCustomFee)
+                                        <span class="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 text-[10px] font-semibold text-amber-800 bg-amber-100 dark:bg-amber-900 dark:text-amber-200 rounded-full">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                                            কাস্টম ফি (ডিফল্ট ৳{{ number_format($defaultMonthlyFee, 0) }})
+                                        </span>
+                                    @endif
                                 </div>
                                 <div class="text-right">
                                     <p class="text-4xl font-bold text-green-600 dark:text-green-300">৳{{ number_format($payment_amount, 0) }}</p>

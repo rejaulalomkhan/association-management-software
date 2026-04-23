@@ -41,7 +41,9 @@ class MemberService
         $orgStart = Carbon::parse($this->settingsService->getOrganizationStartDate());
         // For due calculation, always start from organization start month
         $memberJoined = $orgStart;
-        $monthlyFee = $this->settingsService->getMonthlyFee();
+        // Use the member's effective monthly fee — per-member override
+        // falls back to organization-wide settings default automatically.
+        $monthlyFee = $user->effectiveMonthlyFee();
 
         // Always start counting from organization start date
         $startDate = $orgStart;
@@ -99,6 +101,7 @@ class MemberService
         $memberJoined = $user->joined_at ? Carbon::parse($user->joined_at) : Carbon::now();
         $startDate = $orgStart->greaterThan($memberJoined) ? $orgStart : $memberJoined;
         $currentDate = Carbon::now();
+        $monthlyFee = $user->effectiveMonthlyFee();
 
         // Get all paid month-year combinations
         $paidMonths = $user->payments()
@@ -119,7 +122,7 @@ class MemberService
                     'month' => $month,
                     'year' => $year,
                     'month_bn' => $this->getMonthNameBn($month),
-                    'amount' => $this->settingsService->getMonthlyFee(),
+                    'amount' => $monthlyFee,
                 ];
             }
 

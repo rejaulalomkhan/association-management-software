@@ -1,6 +1,6 @@
 <div class="flex flex-col h-full">
     <div class="flex-1 overflow-y-auto py-4">
-        <nav class="space-y-1 px-2" x-data="{ settingsOpen: {{ request()->routeIs('admin.settings', 'admin.roles', 'admin.privileges', 'admin.user-roles') ? 'true' : 'false' }} }">
+        <nav class="space-y-1 px-2" x-data="{ settingsOpen: {{ request()->routeIs('admin.settings', 'admin.roles', 'admin.privileges', 'admin.user-roles', 'admin.roadmap') ? 'true' : 'false' }} }">
             
             @if(request()->routeIs('admin.*') && auth()->user()->hasRole('admin'))
             <!-- Admin Section -->
@@ -103,7 +103,7 @@
             <div class="relative">
                 <button @click="settingsOpen = !settingsOpen"
                         class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150
-                               {{ request()->routeIs('admin.settings', 'admin.roles', 'admin.privileges') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                               {{ request()->routeIs('admin.settings', 'admin.roles', 'admin.privileges', 'admin.roadmap') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
@@ -131,6 +131,12 @@
                        class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors duration-150
                               {{ request()->routeIs('admin.privileges') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
                         প্রিভিলেজ
+                    </a>
+                    <a href="{{ route('admin.roadmap') }}" wire:navigate
+                       class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors duration-150
+                              {{ request()->routeIs('admin.roadmap') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                        <span class="flex-1">রোডম্যাপ / প্লান</span>
+                        <span class="inline-flex items-center px-1.5 py-0.5 text-[9px] font-bold text-indigo-700 bg-indigo-100 rounded dark:bg-indigo-900 dark:text-indigo-200">নতুন</span>
                     </a>
                 </div>
             </div>

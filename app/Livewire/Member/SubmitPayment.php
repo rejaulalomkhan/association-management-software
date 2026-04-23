@@ -278,12 +278,30 @@ class SubmitPayment extends Component
         return max(0, $totalMonths - $paidMonths);
     }
 
+    /**
+     * Resolve the monthly fee for the member currently selected on the form.
+     *
+     * Falls back to the organization default if no member is selected yet
+     * (e.g. very first render before `mount()` finishes).
+     */
+    private function currentMonthlyFee(): float
+    {
+        if ($this->selectedUserId) {
+            $user = User::find($this->selectedUserId);
+            if ($user) {
+                return $user->effectiveMonthlyFee();
+            }
+        }
+
+        return (float) app(SettingsService::class)->getMonthlyFee();
+    }
+
     public function getTotalOverdueInfo()
     {
         $settingsService = app(SettingsService::class);
         $establishedYear = (int) $settingsService->get('organization_established_year', 2024);
         $establishedMonth = (int) $settingsService->get('organization_established_month', 1);
-        $monthlyFee = (float) $settingsService->get('monthly_fee', 500);
+        $monthlyFee = $this->currentMonthlyFee();
 
         $establishmentDate = \Carbon\Carbon::create($establishedYear, $establishedMonth, 1);
         $lastMonthDate = \Carbon\Carbon::now()->subMonth()->endOfMonth();
@@ -305,8 +323,7 @@ class SubmitPayment extends Component
 
     private function updatePaymentAmount()
     {
-        $settingsService = app(SettingsService::class);
-        $monthlyFee = (float) $settingsService->get('monthly_fee', 500);
+        $monthlyFee = $this->currentMonthlyFee();
         $this->payment_amount = count($this->selectedMonths) * $monthlyFee;
     }
 
@@ -385,8 +402,7 @@ class SubmitPayment extends Component
             }
         }
 
-        $settingsService = app(SettingsService::class);
-        $monthlyFee = (float) $settingsService->get('monthly_fee', 500);
+        $monthlyFee = $this->currentMonthlyFee();
 
         $proofPath = null;
         if ($this->payment_proof) {
@@ -443,7 +459,11 @@ class SubmitPayment extends Component
         }
 
         $paymentMethods = PaymentMethod::active()->get();
-        $monthlyFee = (float) $settingsService->get('monthly_fee', 500);
+        $monthlyFee = $this->currentMonthlyFee();
+        $defaultMonthlyFee = (float) $settingsService->get('monthly_fee', 500);
+        $hasCustomFee = $this->selectedUserId
+            ? (bool) optional(User::find($this->selectedUserId))->hasCustomMonthlyFee()
+            : false;
 
         $banglaMonthNames = [
             1 => 'জানুয়ারি', 2 => 'ফেব্রুয়ারি', 3 => 'মার্চ', 4 => 'এপ্রিল',
@@ -463,6 +483,8 @@ class SubmitPayment extends Component
             'paymentMethods' => $paymentMethods,
             'paymentYears' => $paymentYears,
             'monthlyFee' => $monthlyFee,
+            'defaultMonthlyFee' => $defaultMonthlyFee,
+            'hasCustomFee' => $hasCustomFee,
             'banglaMonthNames' => $banglaMonthNames,
             'overdueInfo' => $overdueInfo,
         ])->layout('layouts.app');
