@@ -136,103 +136,174 @@ class MemberService
     }
 
     /**
-     * Yearly dues calculation.
+     * Yearly dues calculation (smart monthly-equivalent coverage).
      *
-     * A year is considered paid when either:
-     *   (a) an approved yearly-term payment exists for that year, or
-     *   (b) all 12 months of that year have approved monthly-term payments
-     *       (covers the "switched from monthly to yearly" case).
+     * Business rules:
+     *  - Organization start year is partial: [start_month..12]
+     *  - Every following year (including current year) expects [1..12]
+     *  - If an approved yearly row exists for a year, that whole year is paid
+     *  - If a pending yearly row exists for a year, that whole year is pending
+     *  - Otherwise, monthly rows are counted month-by-month
+     *
+     * This keeps yearly members aligned with the user's expectation:
+     * if 2026 has only Jan-Apr paid, then May-Dec remains due (8 months).
      */
     private function calculateYearlyDues(User $user): array
     {
         $orgStartYear  = (int) $this->settingsService->getOrganizationEstablishedYear();
-        $currentYear   = (int) Carbon::now()->year;
+        $orgStartMonth = (int) ($this->settingsService->get('organization_established_month', 1));
+        if ($orgStartMonth < 1 || $orgStartMonth > 12) {
+            $orgStartMonth = 1;
+        }
+        $now           = Carbon::now();
+        $currentYear   = (int) $now->year;
+        $monthlyFee    = $user->effectiveMonthlyFee();
         $yearlyFee     = $user->effectiveYearlyFee();
 
-        $totalYears    = max(0, $currentYear - $orgStartYear + 1);
+        // Approved yearly rows (fully covers that year).
+        $paidYearsSet = array_flip(array_map('intval',
+            $user->payments()
+                ->where('status', 'approved')
+                ->where('term', PaymentTerm::YEARLY)
+                ->pluck('year')->unique()->values()->toArray()
+        ));
 
-        // Already-paid yearly rows (approved).
-        $paidYearRows = $user->payments()
-            ->where('status', 'approved')
-            ->where('term', PaymentTerm::YEARLY)
-            ->pluck('year')
-            ->unique()
-            ->values()
-            ->toArray();
-        $paidYearsSet = array_flip(array_map('intval', $paidYearRows));
+        // Pending yearly rows (awaiting admin approval).
+        $pendingYearsSet = array_flip(array_map('intval',
+            $user->payments()
+                ->where('status', 'pending')
+                ->where('term', PaymentTerm::YEARLY)
+                ->pluck('year')->unique()->values()->toArray()
+        ));
 
-        // Years fully covered by 12 monthly payments.
-        $monthlyByYear = $user->payments()
+        // Approved monthly rows grouped by year -> list of month-numbers.
+        $monthlyApproved = $user->payments()
             ->where('status', 'approved')
             ->where('term', PaymentTerm::MONTHLY)
-            ->selectRaw('year, COUNT(*) AS c')
-            ->groupBy('year')
-            ->pluck('c', 'year')
-            ->toArray();
-
-        $pendingYearRows = $user->payments()
+            ->get(['year', 'month']);
+        // Pending monthly rows grouped by year -> list of month-numbers.
+        $monthlyPending = $user->payments()
             ->where('status', 'pending')
-            ->where('term', PaymentTerm::YEARLY)
-            ->pluck('year')
-            ->unique()
-            ->values()
-            ->toArray();
-        $pendingYearsSet = array_flip(array_map('intval', $pendingYearRows));
+            ->where('term', PaymentTerm::MONTHLY)
+            ->get(['year', 'month']);
 
-        $paidYears   = 0;
-        $unpaidYears = [];
+        $approvedMonthlyByYear = [];
+        foreach ($monthlyApproved as $row) {
+            $mNum = $this->englishMonthToNumber((string) $row->month);
+            if ($mNum === null) {
+                continue;
+            }
+            $approvedMonthlyByYear[(int) $row->year][$mNum] = true;
+        }
+        $pendingMonthlyByYear = [];
+        foreach ($monthlyPending as $row) {
+            $mNum = $this->englishMonthToNumber((string) $row->month);
+            if ($mNum === null) {
+                continue;
+            }
+            $pendingMonthlyByYear[(int) $row->year][$mNum] = true;
+        }
+
+        $paidYears    = 0;
         $pendingYears = 0;
+        $unpaidYears  = [];
+        $unpaidYearMonths = [];
+        $totalMonths  = 0;
+        $paidMonths   = 0;
+        $pendingMonths = 0;
+        $unpaidMonths  = 0;
 
         for ($y = $orgStartYear; $y <= $currentYear; $y++) {
-            $isPaid = isset($paidYearsSet[$y])
-                || ((int) ($monthlyByYear[$y] ?? 0) >= 12);
+            // Only org-start year is partial. Current year is treated as full-year.
+            $winStart = ($y === $orgStartYear) ? $orgStartMonth : 1;
+            $winEnd   = 12;
+            if ($winStart > $winEnd) {
+                continue;
+            }
+            $requiredMonths = $winEnd - $winStart + 1;
+            $totalMonths += $requiredMonths;
 
-            if ($isPaid) {
+            if (isset($paidYearsSet[$y])) {
                 $paidYears++;
+                $paidMonths += $requiredMonths;
                 continue;
             }
 
             if (isset($pendingYearsSet[$y])) {
                 $pendingYears++;
+                $pendingMonths += $requiredMonths;
                 continue;
             }
 
-            $unpaidYears[] = $y;
+            $yearUnpaidMonths = 0;
+            for ($m = $winStart; $m <= $winEnd; $m++) {
+                if (isset($approvedMonthlyByYear[$y][$m])) {
+                    $paidMonths++;
+                    continue;
+                }
+                if (isset($pendingMonthlyByYear[$y][$m])) {
+                    $pendingMonths++;
+                    continue;
+                }
+                $unpaidMonths++;
+                $yearUnpaidMonths++;
+            }
+
+            if ($yearUnpaidMonths > 0) {
+                $unpaidYears[] = $y;
+                $unpaidYearMonths[$y] = $yearUnpaidMonths;
+            } else {
+                // Fully covered by approved/pending monthly rows.
+                $paidYears++;
+            }
         }
 
         $unpaidYearsCount = count($unpaidYears);
-        $totalDue      = $unpaidYearsCount * $yearlyFee;
-        $totalPaid     = $paidYears * $yearlyFee;
-        $totalPending  = $pendingYears * $yearlyFee;
+        $totalDue      = $unpaidMonths * (float) $monthlyFee;
+        $totalPaid     = $paidMonths * (float) $monthlyFee;
+        $totalPending  = $pendingMonths * (float) $monthlyFee;
 
-        $hasAnyDue  = $unpaidYearsCount > 0;
+        $hasAnyDue  = $unpaidMonths > 0;
         $allCleared = !$hasAnyDue;
 
         return [
             'term'                 => PaymentTerm::YEARLY,
-            // Monthly-shaped keys kept so existing UI (which reads
-            // `unpaid_months`, `total_due`, etc.) keeps working —
-            // "months" become "years" semantically for yearly members.
-            'total_months'         => $totalYears,
-            'paid_months'          => $paidYears,
-            'unpaid_months'        => $unpaidYearsCount,
-            'pending_months'       => $pendingYears,
-            'monthly_fee'          => $yearlyFee,   // fee per period
+            // Keep monthly-shaped keys truly month-based for consistent UI.
+            'total_months'         => $totalMonths,
+            'paid_months'          => $paidMonths,
+            'unpaid_months'        => $unpaidMonths,
+            'pending_months'       => $pendingMonths,
+            'monthly_fee'          => $monthlyFee,
             'total_due'            => $totalDue,
             'total_paid'           => $totalPaid,
             'total_pending'        => $totalPending,
-            'start_date'           => Carbon::create($orgStartYear, 1, 1),
-            'current_month'        => Carbon::now()->format('F'),
+            'start_date'           => Carbon::create($orgStartYear, $orgStartMonth, 1),
+            'current_month'        => $now->format('F'),
             'current_year'         => $currentYear,
             'has_due'              => $hasAnyDue,
-            'only_current_month_due' => $hasAnyDue && $unpaidYearsCount === 1 && $paidYears === ($totalYears - 1),
+            'only_current_month_due' => false,
             'all_cleared'          => $allCleared,
             // Yearly-specific extras:
             'unpaid_years'         => $unpaidYears,
             'paid_years'           => $paidYears,
             'unpaid_years_count'   => $unpaidYearsCount,
             'yearly_fee'           => $yearlyFee,
+            'unpaid_year_months'   => $unpaidYearMonths,
         ];
+    }
+
+    /**
+     * Map an English month name ("January", "February", …) to 1..12.
+     * Returns null for anything unrecognised.
+     */
+    private function englishMonthToNumber(string $name): ?int
+    {
+        static $map = [
+            'January' => 1, 'February' => 2, 'March' => 3, 'April' => 4,
+            'May' => 5, 'June' => 6, 'July' => 7, 'August' => 8,
+            'September' => 9, 'October' => 10, 'November' => 11, 'December' => 12,
+        ];
+        return $map[$name] ?? null;
     }
 
     /**
@@ -298,13 +369,14 @@ class MemberService
     private function getUnpaidYears(User $user): array
     {
         $dues = $this->calculateYearlyDues($user);
-        $yearlyFee = $user->effectiveYearlyFee();
+        $monthlyFee = $user->effectiveMonthlyFee();
 
         $out = [];
         foreach ($dues['unpaid_years'] ?? [] as $year) {
+            $missingMonths = (int) (($dues['unpaid_year_months'][$year] ?? 12));
             $out[] = [
                 'year'     => (int) $year,
-                'amount'   => $yearlyFee,
+                'amount'   => $missingMonths * $monthlyFee,
                 // Purely for backwards compatibility with callers that
                 // expect these keys — a yearly "period" has no single month.
                 'month'    => 'January',

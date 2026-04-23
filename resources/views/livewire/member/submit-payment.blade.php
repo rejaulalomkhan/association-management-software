@@ -184,7 +184,7 @@
                         </div>
                         <p class="text-xs text-blue-800 dark:text-blue-200">
                             এই সদস্যের জন্য বছরভিত্তিক পেমেন্ট চালু। এক বা একাধিক বছর একসাথে পরিশোধ করতে পারবেন।
-                            প্রতি বছর <span class="font-semibold">৳{{ number_format($yearlyFee ?? 0, 0) }}</span>।
+                            নির্বাচিত বছরের বাকি মাস অনুযায়ী প্রোরাটা হিসাব হবে (সর্বোচ্চ প্রতি বছর ৳{{ number_format($yearlyFee ?? 0, 0) }})।
                         </p>
                     </div>
 
@@ -373,7 +373,7 @@
                                 <div>
                                     <p class="text-sm font-semibold {{ ($paymentTerm ?? 'monthly') === 'yearly' ? 'text-blue-800 dark:text-blue-200' : 'text-green-800 dark:text-green-200' }}">পেমেন্ট পরিমাণ</p>
                                     @if(($paymentTerm ?? 'monthly') === 'yearly')
-                                        <p class="text-xs mt-0.5 text-blue-600 dark:text-blue-400">{{ count($selectedYears) }} বছর × ৳{{ number_format($yearlyFee ?? 0, 0) }}</p>
+                                        <p class="text-xs mt-0.5 text-blue-600 dark:text-blue-400">{{ count($selectedYears) }} বছরের বকেয়া (প্রোরাটা)</p>
                                     @else
                                         <p class="text-xs mt-0.5 text-green-600 dark:text-green-400">{{ count($selectedMonths) }} মাস × ৳{{ number_format($monthlyFee, 0) }}</p>
                                     @endif

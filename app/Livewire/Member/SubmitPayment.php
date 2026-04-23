@@ -343,9 +343,11 @@ class SubmitPayment extends Component
     }
 
     /**
-     * List of years that are currently unpaid for the selected yearly
-     * member. "Paid" means either a yearly-term approved/pending payment
-     * row OR all 12 months covered by monthly-term approved payments.
+     * List of years a yearly-term member can still pay for.
+     *
+     * Business rule mirrors MemberService yearly-dues:
+     * - only org-start year is partial (start_month..12)
+     * - every next year expects full 12 months (including current year)
      *
      * @return array<int, int>
      */
@@ -355,42 +357,86 @@ class SubmitPayment extends Component
             return [];
         }
 
-        $orgStartYear = (int) app(SettingsService::class)->getOrganizationEstablishedYear();
+        $settings      = app(SettingsService::class);
+        $orgStartYear  = (int) $settings->getOrganizationEstablishedYear();
+        $orgStartMonth = (int) $settings->get('organization_established_month', 1);
+        if ($orgStartMonth < 1 || $orgStartMonth > 12) {
+            $orgStartMonth = 1;
+        }
         $currentYear  = (int) date('Y');
         if ($orgStartYear > $currentYear) {
             return [];
         }
 
-        // Fully-covered years via yearly-term approved/pending rows.
-        $yearlyRows = Payment::where('user_id', $this->selectedUserId)
-            ->whereIn('status', ['approved', 'pending'])
-            ->where('term', \App\Enums\PaymentTerm::YEARLY)
-            ->pluck('year')
-            ->unique()
-            ->map(fn ($y) => (int) $y)
-            ->toArray();
-
-        // Years covered by a complete set of 12 monthly-term approved rows.
-        $monthlyFullYears = Payment::where('user_id', $this->selectedUserId)
-            ->where('status', 'approved')
-            ->where('term', \App\Enums\PaymentTerm::MONTHLY)
-            ->selectRaw('year, COUNT(*) AS c')
-            ->groupBy('year')
-            ->havingRaw('COUNT(*) >= 12')
-            ->pluck('year')
-            ->map(fn ($y) => (int) $y)
-            ->toArray();
-
-        $coveredYears = array_flip(array_merge($yearlyRows, $monthlyFullYears));
-
         $unpaid = [];
-        // Show up to next-year ahead so yearly members can prepay too.
+        // Include next-year so the member can prepay in advance.
         for ($y = $orgStartYear; $y <= $currentYear + 1; $y++) {
-            if (!isset($coveredYears[$y])) {
+            if ($this->getYearlyDueAmountForYear($y) > 0) {
                 $unpaid[] = $y;
             }
         }
+
         return $unpaid;
+    }
+
+    /**
+     * Due amount for a single yearly-billing year, with month-level
+     * proration for partially-paid years.
+     */
+    private function getYearlyDueAmountForYear(int $year): float
+    {
+        if (!$this->selectedUserId) {
+            return 0.0;
+        }
+
+        $settings      = app(SettingsService::class);
+        $orgStartYear  = (int) $settings->getOrganizationEstablishedYear();
+        $orgStartMonth = (int) $settings->get('organization_established_month', 1);
+        if ($orgStartMonth < 1 || $orgStartMonth > 12) {
+            $orgStartMonth = 1;
+        }
+        $currentYear = (int) date('Y');
+        $monthlyFee  = $this->currentMonthlyFee();
+
+        if ($year < $orgStartYear || $year > ($currentYear + 1)) {
+            return 0.0;
+        }
+
+        // Year-level rows settle the whole year.
+        $hasYearlyRow = Payment::where('user_id', $this->selectedUserId)
+            ->where('year', $year)
+            ->where('term', \App\Enums\PaymentTerm::YEARLY)
+            ->whereIn('status', ['approved', 'pending'])
+            ->exists();
+        if ($hasYearlyRow) {
+            return 0.0;
+        }
+
+        $startMonth = ($year === $orgStartYear) ? $orgStartMonth : 1;
+        $endMonth   = 12;
+        if ($startMonth > $endMonth) {
+            return 0.0;
+        }
+
+        $paidOrPendingMonths = Payment::where('user_id', $this->selectedUserId)
+            ->where('year', $year)
+            ->where('term', \App\Enums\PaymentTerm::MONTHLY)
+            ->whereIn('status', ['approved', 'pending'])
+            ->pluck('month')
+            ->map(fn ($monthName) => $this->getMonthNumberFromEnglishName((string) $monthName))
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        $missing = 0;
+        for ($m = $startMonth; $m <= $endMonth; $m++) {
+            if (!in_array($m, $paidOrPendingMonths, true)) {
+                $missing++;
+            }
+        }
+
+        return $missing * $monthlyFee;
     }
 
     public function getTotalOverdueInfo()
@@ -398,15 +444,15 @@ class SubmitPayment extends Component
         // Yearly members don't have a "monthly overdue" concept; their dues
         // are always computed as whole years outstanding.
         if ($this->currentPaymentTerm() === \App\Enums\PaymentTerm::YEARLY) {
-            $unpaid = $this->getUnpaidYearsList();
-            // Exclude the future pre-pay year (currentYear + 1) from "overdue".
-            $currentYear = (int) date('Y');
-            $overdueYears = array_values(array_filter($unpaid, fn ($y) => (int) $y <= $currentYear));
-
+            $user = $this->selectedUserId ? User::find($this->selectedUserId) : null;
+            if (!$user) {
+                return ['months' => 0, 'amount' => 0, 'years' => []];
+            }
+            $dues = app(\App\Services\MemberService::class)->calculateOutstandingDues($user);
             return [
-                'months' => count($overdueYears),          // reused "months" key for UI compatibility
-                'amount' => count($overdueYears) * $this->currentYearlyFee(),
-                'years'  => $overdueYears,
+                'months' => (int) ($dues['unpaid_months'] ?? 0),
+                'amount' => (float) ($dues['total_due'] ?? 0),
+                'years'  => (array) ($dues['unpaid_years'] ?? []),
             ];
         }
 
@@ -436,7 +482,11 @@ class SubmitPayment extends Component
     private function updatePaymentAmount()
     {
         if ($this->currentPaymentTerm() === \App\Enums\PaymentTerm::YEARLY) {
-            $this->payment_amount = count($this->selectedYears) * $this->currentYearlyFee();
+            $total = 0.0;
+            foreach ($this->selectedYears as $year) {
+                $total += $this->getYearlyDueAmountForYear((int) $year);
+            }
+            $this->payment_amount = $total;
             return;
         }
 
@@ -492,8 +542,6 @@ class SubmitPayment extends Component
             }
         }
 
-        $yearlyFee = $this->currentYearlyFee();
-
         $proofPath = null;
         if ($this->payment_proof) {
             $proofPath = $this->payment_proof->store('payment_proofs', 'public');
@@ -515,12 +563,17 @@ class SubmitPayment extends Component
                 continue;
             }
 
+            $dueAmountForYear = $this->getYearlyDueAmountForYear($year);
+            if ($dueAmountForYear <= 0) {
+                continue;
+            }
+
             Payment::create([
                 'user_id'           => $this->selectedUserId,
                 'month'             => 'January', // canonical placeholder for yearly
                 'year'              => $year,
                 'term'              => \App\Enums\PaymentTerm::YEARLY,
-                'amount'            => $yearlyFee,
+                'amount'            => $dueAmountForYear,
                 'method'            => optional(PaymentMethod::find($this->payment_method_id))->name ?? 'manual',
                 'payment_method_id' => $this->payment_method_id,
                 'description'       => $this->payment_note,
