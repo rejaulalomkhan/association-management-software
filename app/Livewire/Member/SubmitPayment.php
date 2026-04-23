@@ -157,8 +157,13 @@ class SubmitPayment extends Component
     public function updatedPaymentYear()
     {
         // When year changes, clear selected months and update amount
-        // Don't auto-select months - let user choose manually
         $this->selectedMonths = [];
+        
+        // For overdue payments, auto-select all unpaid months for the new year
+        if ($this->payment_type === 'overdue' && $this->paymentYear) {
+            $this->selectedMonths = $this->getUnpaidMonthsForYear($this->paymentYear);
+        }
+        
         $this->updatePaymentAmount();
     }
 
@@ -307,6 +312,15 @@ class SubmitPayment extends Component
 
     public function submitPayment()
     {
+        // Debug logging
+        \Log::info('Payment submission started', [
+            'payment_type' => $this->payment_type,
+            'paymentYear' => $this->paymentYear,
+            'selectedMonths' => $this->selectedMonths,
+            'payment_amount' => $this->payment_amount,
+            'payment_method_id' => $this->payment_method_id,
+        ]);
+
         // Prevent submitting payment for current month if already paid
         if ($this->payment_type === 'current') {
             $currentMonth = (int) date('n');
@@ -324,7 +338,7 @@ class SubmitPayment extends Component
             }
         }
 
-        $this->validate([
+        $validationRules = [
             'selectedUserId' => 'required|exists:users,id',
             'payment_amount' => 'required|numeric|min:1',
             'payment_method_id' => 'required|exists:payment_methods,id',
@@ -332,7 +346,14 @@ class SubmitPayment extends Component
             'payment_reference' => 'nullable|string|max:255',
             'payment_note' => 'nullable|string|max:500',
             'payment_proof' => 'nullable|image|max:2048',
-        ], [
+        ];
+
+        // Add paymentYear validation for overdue and advance payments
+        if ($this->payment_type !== 'current') {
+            $validationRules['paymentYear'] = 'required|integer|min:2020|max:2030';
+        }
+
+        $this->validate($validationRules, [
             'selectedUserId.required' => 'কোন সদস্যের জন্য পেমেন্ট দিচ্ছেন তা নির্বাচন করুন।',
             'selectedUserId.exists' => 'নির্বাচিত সদস্যটি সিস্টেমে পাওয়া যায়নি।',
             'payment_amount.required' => 'পেমেন্ট এর পরিমাণ প্রয়োজন।',
@@ -341,11 +362,14 @@ class SubmitPayment extends Component
             'payment_method_id.exists' => 'নির্বাচিত পেমেন্ট মাধ্যমটি সিস্টেমে পাওয়া যায়নি।',
             'selectedMonths.required' => 'কমপক্ষে একটি মাস নির্বাচন করুন।',
             'selectedMonths.min' => 'কমপক্ষে একটি মাস নির্বাচন করুন।',
+            'paymentYear.required' => 'সাল নির্বাচন করুন।',
             'payment_reference.max' => 'রেফারেন্স নাম্বার সর্বোচ্চ ২৫৫ অক্ষরের হতে পারবে।',
             'payment_note.max' => 'নোট সর্বোচ্চ ৫০০ অক্ষরের হতে পারবে।',
             'payment_proof.image' => 'স্ক্রিনশট বা ছবি ফরম্যাট ভুল হয়েছে।',
             'payment_proof.max' => 'স্ক্রিনশট সর্বোচ্চ ২ এমবি হতে পারবে।',
         ]);
+
+        \Log::info('Validation passed');
 
         // If Hand Cash (ID = 1) is selected, auto-generate transaction ID
         if ($this->payment_method_id == 1) {

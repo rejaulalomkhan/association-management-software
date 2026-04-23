@@ -50,6 +50,8 @@ Route::middleware(['auth', 'roles:member,accountant,admin'])->prefix('member')->
     Route::get('/notifications', Notifications::class)->name('notifications');
     Route::get('/payments/{payment}/receipt-preview', [PaymentReceiptController::class, 'preview'])
         ->name('payments.receipt.preview');
+    Route::get('/payments/{payment}/receipt-download', [PaymentReceiptController::class, 'download'])
+        ->name('payments.receipt.download');
 });
 
 // Document routes (accessible to all authenticated users)

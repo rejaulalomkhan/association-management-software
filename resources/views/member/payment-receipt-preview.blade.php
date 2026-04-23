@@ -1,122 +1,190 @@
 @extends('layouts.receipt')
 
 @section('content')
+@php
+    // Calculate payment summary
+    $memberService = app(\App\Services\MemberService::class);
+    $paymentSummary = $memberService->calculateOutstandingDues($payment->user);
+    $settingsService = app(\App\Services\SettingsService::class);
+    $orgName = $settingsService->get('organization_name', config('app.name'));
+    $orgLogo = $settingsService->get('organization_logo');
+    $logoPath = $orgLogo ? asset('storage/' . $orgLogo) : null;
+    $profilePic = $payment->user->profile_pic;
+    $profilePath = $profilePic ? asset('storage/' . $profilePic) : null;
+@endphp
+
 <div class="min-h-screen py-10 bg-gray-100">
-    <div class="max-w-3xl p-8 mx-auto bg-white rounded-lg shadow-md">
-        {{-- Header: Logo + Organization Info --}}
-        <div class="pb-4 mb-6 text-center border-b">
-            @if(file_exists(public_path('logo.png')))
-                <img src="{{ asset('logo.png') }}" alt="Logo" class="mx-auto mb-2" style="height:60px;">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg" style="font-family: 'Roboto', sans-serif;">
+        
+        <!-- Title Section -->
+        <div class="p-6 border-b-2" style="background: #f8f9fa; border-color: #2196F3;">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center" style="width: 60%;">
+                    <div class="mr-3">
+                        @if($logoPath && file_exists(public_path('storage/' . $orgLogo)))
+                            <img src="{{ $logoPath }}" alt="Logo" class="rounded-full" style="width: 50px; height: 50px; object-fit: cover;">
+                        @else
+                            <div class="flex items-center justify-center text-white bg-green-500 rounded-full" style="width: 50px; height: 50px; font-size: 24px; font-weight: bold;">
+                                প্র
+                            </div>
+                        @endif
+                    </div>
+                    <div>
+                        <h1 class="font-medium" style="font-size: 1.5em; color: #1976D2;">পেইড পেমেন্ট রশিদ</h1>
+                        <p class="text-gray-600" style="font-size: 0.95em; margin-top: 3px;">রিসিপ্ট #{{ $payment->id }}</p>
+                    </div>
+                </div>
+                <div class="text-right" style="width: 40%;">
+                    <p class="text-gray-600" style="font-size: 0.95em;">ইস্যু তারিখ: {{ optional($payment->created_at)->format('d M, Y') }}</p>
+                    <p class="text-gray-600" style="font-size: 0.95em; margin-top: 3px;">অনুমোদনের তারিখ: {{ optional($payment->processed_at)->format('d M, Y') ?? 'পেন্ডিং' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header Section -->
+        <div class="p-8 border-b border-gray-200">
+            <div class="flex items-start justify-between gap-6">
+                <div style="width: 50%;">
+                    <h2 class="mb-2 font-medium" style="font-size: 1.1em; color: #1976D2;">পেমেন্ট প্রদানকারী</h2>
+                    <div class="flex items-center">
+                        <div class="mr-3">
+                            @if($profilePath && file_exists(public_path('storage/' . $profilePic)))
+                                <img src="{{ $profilePath }}" alt="Profile" class="rounded-full" style="width: 70px; height: 70px; object-fit: cover;">
+                            @else
+                                <div class="flex items-center justify-center text-white rounded-full" style="width: 70px; height: 70px; font-size: 28px; font-weight: bold; background: #2196F3;">
+                                    {{ mb_substr($payment->user->name, 0, 1) }}
+                                </div>
+                            @endif
+                        </div>
+                        <div>
+                            <h2 class="mb-1 font-medium" style="font-size: 1.2em; color: #222;">{{ $payment->user->name }}</h2>
+                            <p class="text-gray-600" style="font-size: 0.95em;">
+                                Email: {{ $payment->user->email }}<br>
+                                Phone: {{ $payment->user->phone }}<br>
+                                সদস্য আইডি: {{ $payment->user->membership_id }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div style="width: 50%;">
+                    <h2 class="mb-2 font-medium" style="font-size: 1.1em; color: #1976D2;">পেমেন্ট গ্রহণকারী</h2>
+                    <div class="flex items-center">
+                        <div class="mr-4">
+                            @if($logoPath && file_exists(public_path('storage/' . $orgLogo)))
+                                <img src="{{ $logoPath }}" alt="Logo" class="rounded-full" style="width: 70px; height: 70px; object-fit: cover;">
+                            @else
+                                <div class="flex items-center justify-center text-white bg-green-500 rounded-full" style="width: 70px; height: 70px; font-size: 32px; font-weight: bold;">
+                                    প্র
+                                </div>
+                            @endif
+                        </div>
+                        <div>
+                            <h2 class="mb-1 font-medium" style="font-size: 1.3em; color: #222;">{{ $orgName }}</h2>
+                            <p class="text-gray-600" style="font-size: 0.95em;">
+                                Email: info@projonmo.org<br>
+                                Phone: +880 1XXX-XXXXXX
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Info Section -->
+        <div class="p-8">
+            <p class="mb-6" style="font-size: 1em;"><strong>পেমেন্ট বিবরণ:</strong> {{ \App\Helpers\BanglaHelper::getBanglaMonth($payment->month) }} {{ $payment->year }} মাসের সদস্যপদ ফি
+            @if($payment->description)
+                <br><span class="text-gray-600" style="font-size: 0.95em;">নোট: {{ $payment->description }}</span>
+            @endif
+            </p>
+
+            <!-- Payment Details Table -->
+            <table class="w-full mb-6 overflow-hidden border border-gray-200 rounded-lg" style="border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #2196F3; color: white; border: 1px solid #1976D2;">
+                        <th class="px-4 py-3 font-medium text-left border border-blue-700" style="font-size: 1.1em; width: 50%;">বিবরণ</th>
+                        <th class="px-4 py-3 font-medium text-left border border-blue-700" style="font-size: 1.1em; width: 25%;">মাস/বছর</th>
+                        <th class="px-4 py-3 font-medium text-right border border-blue-700" style="font-size: 1.1em; width: 25%;">টাকা</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border border-gray-200">
+                        <td class="px-4 py-3 border border-gray-200" style="font-size: 1em; color: #333;">{{ \App\Helpers\BanglaHelper::getBanglaMonth($payment->month) }} {{ $payment->year }} - সদস্যপদ ফি</td>
+                        <td class="px-4 py-3 border border-gray-200" style="font-size: 1em; color: #333;">{{ \App\Helpers\BanglaHelper::getBanglaMonth($payment->month) }} {{ $payment->year }}</td>
+                        <td class="px-4 py-3 text-right border border-gray-200" style="font-size: 1em; color: #333;">৳{{ number_format($payment->amount, 2) }}</td>
+                    </tr>
+                    
+                    <tr style="background: #E3F2FD; border: 1px solid #90caf9;">
+                        <td colspan="2" class="px-4 py-3 font-medium border border-blue-200" style="font-size: 1.1em; color: #1976D2;">এই পেমেন্টের পরিমাণ</td>
+                        <td class="px-4 py-3 font-medium text-right border border-blue-200" style="font-size: 1.1em; color: #1976D2;">৳{{ number_format($payment->amount, 2) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Payment Summary - Right Side -->
+            <div class="flex justify-end mb-6">
+                <div style="width: 50%;">
+                    <table class="w-full border border-gray-200 rounded-lg" style="border-collapse: collapse;">
+                        <tr style="background: #f5f5f5;">
+                            <td class="px-4 py-2 border border-gray-200" style="font-size: 1em;">মোট পেমেন্ট সংখ্যা</td>
+                            <td class="px-4 py-2 text-right border border-gray-200" style="font-size: 1em;">{{ $paymentSummary['paid_months'] }} টি</td>
+                        </tr>
+                        <tr style="background: #f5f5f5;">
+                            <td class="px-4 py-2 border border-gray-200" style="font-size: 1em;">মোট জমাকৃত টাকা</td>
+                            <td class="px-4 py-2 text-right border border-gray-200" style="font-size: 1em;">৳{{ number_format($paymentSummary['total_paid'], 2) }}</td>
+                        </tr>
+                        @if($paymentSummary['unpaid_months'] > 0)
+                        <tr style="background: #fff3cd;">
+                            <td class="px-4 py-2 border border-gray-200" style="font-size: 1em;">বকেয়া মাস</td>
+                            <td class="px-4 py-2 text-right border border-gray-200" style="font-size: 1em;">{{ $paymentSummary['unpaid_months'] }} টি</td>
+                        </tr>
+                        <tr style="background: #fff3cd;">
+                            <td class="px-4 py-2 border border-gray-200" style="font-size: 1em;">বকেয়া টাকা</td>
+                            <td class="px-4 py-2 text-right border border-gray-200" style="font-size: 1em;">৳{{ number_format($paymentSummary['total_due'], 2) }}</td>
+                        </tr>
+                        @endif
+                    </table>
+                </div>
+            </div>
+
+            @if($payment->paymentMethod)
+            <div class="py-4 border-t border-b border-gray-200">
+                <p style="font-size: 1em;">
+                    <strong>পেমেন্ট মাধ্যম:</strong> {{ $payment->paymentMethod->name }}
+                    @if($payment->transaction_id)
+                        | <strong>লেনদেন আইডি:</strong> {{ $payment->transaction_id }}
+                    @endif
+                    @if($payment->paymentMethod->account_number)
+                        | <strong>অ্যাকাউন্ট:</strong> {{ $payment->paymentMethod->account_number }}
+                    @endif
+                    @if($payment->processed_at)
+                        | <strong>তারিখ:</strong> {{ $payment->processed_at->format('d M, Y') }}
+                    @endif
+                    | <strong>স্ট্যাটাস:</strong> 
+                    @if ($payment->status === 'approved')
+                        <span class="text-green-600">অনুমোদিত</span>
+                    @elseif ($payment->status === 'pending')
+                        <span class="text-yellow-600">পেন্ডিং</span>
+                    @elseif ($payment->status === 'rejected')
+                        <span class="text-red-600">বাতিল</span>
+                    @endif
+                </p>
+            </div>
             @endif
 
-            <h1 class="mb-1 text-xl font-bold">
-                {{ config('app.name') }}
-            </h1>
-            <p class="text-xs leading-4 text-gray-600">
-                {{ config('app.address_line_1', 'ঠিকানা লাইন ১') }}<br>
-                {{ config('app.address_line_2', 'ঠিকানা লাইন ২') }}
-            </p>
-        </div>
-
-        {{-- Title + Meta --}}
-        <div class="flex items-start justify-between mb-4">
-            <div>
-                <h2 class="text-lg font-semibold">পেমেন্ট রিসিপ্ট (প্রিভিউ)</h2>
-                <p class="mt-1 text-xs text-gray-500">সাবমিট করা পেমেন্টের বিস্তারিত তথ্য</p>
+            @if($payment->admin_note)
+            <div class="mt-5">
+                <p style="font-size: 1em;"><strong>অ্যাডমিন নোট:</strong> {{ $payment->admin_note }}</p>
             </div>
-            <div class="text-xs text-right text-gray-600">
-                <div>রিসিপ্ট নং: <span class="font-semibold">{{ $payment->id }}</span></div>
-                <div>তারিখ: {{ optional($payment->created_at)->format('d/m/Y') }}</div>
+            @endif
+
+            <div class="mt-6 text-center">
+                <p style="color: #1976D2; font-size: 1.05em;"><strong>ধন্যবাদ!</strong> আপনার পেমেন্ট সফলভাবে গৃহীত এবং অনুমোদিত হয়েছে। 
+                @if($payment->approver)
+                    অনুমোদনকারী: {{ $payment->approver->name }}
+                @endif
+                </p>
             </div>
-        </div>
-
-        {{-- Member Info --}}
-        <div class="p-4 mb-4 border rounded-md">
-            <h3 class="pb-1 mb-2 text-sm font-semibold border-b">সদস্য তথ্য</h3>
-            <div class="space-y-1 text-sm">
-                <div><span class="font-semibold">নাম:</span> {{ $payment->user->name }}</div>
-                <div><span class="font-semibold">মেম্বার আইডি:</span> {{ $payment->user->membership_id }}</div>
-            </div>
-        </div>
-
-        {{-- Payment Info --}}
-        <div class="p-4 mb-4 border rounded-md">
-            <h3 class="pb-1 mb-2 text-sm font-semibold border-b">পেমেন্ট তথ্য</h3>
-            <table class="w-full text-sm border-separate" style="border-spacing: 0 4px;">
-                <tr>
-                    <td class="w-32 py-1 font-semibold align-top">মাস/বছর</td>
-                    <td class="py-1">
-                        {{ \App\Helpers\BanglaHelper::getBanglaMonth($payment->month) }} {{ $payment->year }}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="py-1 font-semibold align-top">পরিমাণ</td>
-                    <td class="py-1">৳{{ number_format($payment->amount, 2) }}</td>
-                </tr>
-                <tr>
-                    <td class="py-1 font-semibold align-top">পেমেন্ট মাধ্যম</td>
-                    <td class="py-1">{{ optional($payment->paymentMethod)->name }}</td>
-                </tr>
-                <tr>
-                    <td class="py-1 font-semibold align-top">ট্রানজেকশন আইডি</td>
-                    <td class="py-1">{{ $payment->transaction_id ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="py-1 font-semibold align-top">স্ট্যাটাস</td>
-                    <td class="py-1">
-                        @if ($payment->status === 'approved')
-                            অনুমোদিত
-                        @elseif ($payment->status === 'pending')
-                            পেন্ডিং
-                        @elseif ($payment->status === 'rejected')
-                            বাতিল
-                        @else
-                            {{ ucfirst($payment->status) }}
-                        @endif
-                    </td>
-                </tr>
-                <tr>
-                    <td class="py-1 font-semibold align-top">সাবমিটের তারিখ</td>
-                    <td class="py-1">{{ optional($payment->created_at)->format('d/m/Y H:i') }}</td>
-                </tr>
-                <tr>
-                    <td class="py-1 font-semibold align-top">অনুমোদনের তারিখ</td>
-                    <td class="py-1">{{ optional($payment->processed_at)->format('d/m/Y H:i') ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="py-1 font-semibold align-top">অনুমোদনকারী</td>
-                    <td class="py-1">{{ optional($payment->approver)->name ?? '-' }}</td>
-                </tr>
-            </table>
-        </div>
-
-        {{-- Notes --}}
-        @if ($payment->description)
-            <div class="p-4 mb-4 border rounded-md">
-                <h3 class="pb-1 mb-2 text-sm font-semibold border-b">মেম্বারের নোট</h3>
-                <p class="text-sm leading-relaxed">{{ $payment->description }}</p>
-            </div>
-        @endif
-
-        @if ($payment->admin_note)
-            <div class="p-4 mb-4 border rounded-md">
-                <h3 class="pb-1 mb-2 text-sm font-semibold border-b">অ্যাডমিন নোট</h3>
-                <p class="text-sm leading-relaxed">{{ $payment->admin_note }}</p>
-            </div>
-        @endif
-
-        {{-- Footer + Actions --}}
-        <div class="flex items-center justify-between mt-6">
-            <p class="text-[11px] text-gray-500">
-                এই রিসিপ্টটি সিস্টেম দ্বারা স্বয়ংক্রিয়ভাবে তৈরি করা হয়েছে।
-            </p>
-
-            {{-- PDF ডাউনলোডের জন্য পরে তুমি route সেট করবে --}}
-            <a href="#"
-               class="inline-flex items-center px-4 py-2 text-xs font-medium text-white bg-indigo-600 rounded cursor-not-allowed hover:bg-indigo-700"
-               title="PDF ডাউনলোড (backend এখনও কনফিগার করা হয়নি)">
-                PDF ডাউনলোড
-            </a>
         </div>
     </div>
 </div>

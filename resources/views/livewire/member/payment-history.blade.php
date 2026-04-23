@@ -134,10 +134,11 @@
                                     বিস্তারিত
                                 </button>
                                 @if($payment->status === 'approved')
-                                    <button wire:click="downloadReceipt({{ $payment->id }})"
+                                    <a href="{{ route('member.payments.receipt.download', $payment->id) }}"
+                                        target="_blank"
                                         class="text-green-600 hover:text-green-900">
                                         রসিদ
-                                    </button>
+                                    </a>
                                 @elseif($payment->status === 'rejected')
                                     <button wire:click="editRejectedPayment({{ $payment->id }})"
                                         class="inline-flex items-center px-2 py-1 text-xs font-medium text-white bg-orange-600 rounded hover:bg-orange-700 transition-colors">
@@ -300,13 +301,14 @@
                     বন্ধ করুন
                 </button>
                 @if($selectedPayment->status === 'approved')
-                <button wire:click="downloadReceipt({{ $selectedPayment->id }})"
+                <a href="{{ route('member.payments.receipt.download', $selectedPayment->id) }}"
+                    target="_blank"
                     class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
-                    রসিদ ডাউনলোড করুন
-                </button>
+                    রসিদ দেখুন
+                </a>
                 @endif
             </div>
         </div>
