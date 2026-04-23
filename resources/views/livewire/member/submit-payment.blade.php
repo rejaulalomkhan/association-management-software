@@ -52,12 +52,16 @@
                             <div>
                                 <p class="text-sm font-semibold text-orange-800 dark:text-orange-200">
                                     <span class="font-bold">{{ $selectedUserName }}</span> এর পূর্বের
-                                    <span class="font-bold">{{ $overdueMonths }} মাসের</span>
+                                    <span class="font-bold">{{ $overdueMonths }} {{ ($paymentTerm ?? 'monthly') === 'yearly' ? 'বছরের' : 'মাসের' }}</span>
                                     <span class="font-bold">৳{{ number_format($overdueAmount, 0) }}</span>
                                     টাকা বকেয়া রয়েছে
                                 </p>
                                 <p class="mt-1 text-xs text-orange-600 dark:text-orange-400">
-                                    বকেয়া পরিশোধের জন্য নিচে "বকেয়া" অপশন নির্বাচন করুন
+                                    @if(($paymentTerm ?? 'monthly') === 'yearly')
+                                        নিচে বছর নির্বাচন করে পরিশোধ করুন
+                                    @else
+                                        বকেয়া পরিশোধের জন্য নিচে "বকেয়া" অপশন নির্বাচন করুন
+                                    @endif
                                 </p>
                             </div>
                         </div>
@@ -166,6 +170,61 @@
                         @error('selectedUserId') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                     </div>
 
+                    @if(($paymentTerm ?? 'monthly') === 'yearly')
+                    <!-- =========================================
+                         Yearly-term panel
+                         ========================================= -->
+                    <div class="p-4 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-600 rounded-r">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-blue-800 bg-blue-100 dark:bg-blue-900 dark:text-blue-200 rounded-full border border-blue-200 dark:border-blue-700">বাৎসরিক</span>
+                            <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-100">বাৎসরিক পেমেন্ট</h3>
+                            @if($hasCustomTerm ?? false)
+                                <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-amber-800 bg-amber-100 dark:bg-amber-900 dark:text-amber-200 rounded-full">কাস্টম টার্ম</span>
+                            @endif
+                        </div>
+                        <p class="text-xs text-blue-800 dark:text-blue-200">
+                            এই সদস্যের জন্য বছরভিত্তিক পেমেন্ট চালু। এক বা একাধিক বছর একসাথে পরিশোধ করতে পারবেন।
+                            প্রতি বছর <span class="font-semibold">৳{{ number_format($yearlyFee ?? 0, 0) }}</span>।
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">কোন বছরের পেমেন্ট? *</label>
+                        @if(empty($unpaidYearsList))
+                            <div class="p-4 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900 dark:border-green-700">
+                                <p class="text-sm font-semibold text-green-800 dark:text-green-200">
+                                    সকল বছরের পেমেন্ট সম্পন্ন হয়েছে। কোনো বাৎসরিক বকেয়া নেই।
+                                </p>
+                            </div>
+                        @else
+                            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                                @foreach($unpaidYearsList as $yr)
+                                    @php $isFuture = (int) $yr > (int) date('Y'); @endphp
+                                    <label class="flex items-center justify-between px-3 py-2.5 border-2 rounded-lg cursor-pointer transition-all
+                                        {{ in_array((int) $yr, array_map('intval', $selectedYears)) ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 shadow-sm' : 'border-gray-300 dark:border-gray-600 hover:border-blue-300' }}">
+                                        <span class="flex items-center gap-2">
+                                            <input type="checkbox" wire:model.live="selectedYears" value="{{ $yr }}"
+                                                class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                            <span class="text-sm font-semibold {{ in_array((int) $yr, array_map('intval', $selectedYears)) ? 'text-blue-700 dark:text-blue-200' : 'text-gray-700 dark:text-gray-300' }}">
+                                                {{ $yr }}
+                                            </span>
+                                        </span>
+                                        @if($isFuture)
+                                            <span class="text-[10px] font-semibold text-purple-700 bg-purple-100 dark:bg-purple-900 dark:text-purple-200 px-1.5 py-0.5 rounded">অগ্রিম</span>
+                                        @endif
+                                    </label>
+                                @endforeach
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                নির্বাচিত: <span class="font-semibold text-blue-600">{{ count($selectedYears) }} টি বছর</span>
+                            </p>
+                        @endif
+                        @error('selectedYears') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    </div>
+                    @else
+                    <!-- =========================================
+                         Monthly-term panel (original)
+                         ========================================= -->
                     <!-- Payment Type Selection -->
                     <div>
                         <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">পেমেন্ট ধরন *</label>
@@ -291,12 +350,13 @@
                         </div>
                     </div>
                     @endif
+                    @endif {{-- end monthly/yearly term branch --}}
 
                     <!-- Payment Details Section with Padding -->
                     <div class="p-4 space-y-6 bg-gray-50 rounded-lg dark:bg-gray-700/30 sm:p-6">
                         <!-- Payment Amount Display -->
                         <!-- Loading skeleton -->
-                        <div wire:loading wire:target="payment_type,selectedMonths,paymentYear,selectedUserId" class="relative p-5 overflow-hidden border-2 border-gray-200 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 dark:border-gray-600 animate-pulse">
+                        <div wire:loading wire:target="payment_type,selectedMonths,selectedYears,paymentYear,selectedUserId" class="relative p-5 overflow-hidden border-2 border-gray-200 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 dark:border-gray-600 animate-pulse">
                             <div class="flex items-center justify-between">
                                 <div class="flex-1">
                                     <div class="w-24 h-4 mb-2 bg-gray-300 rounded dark:bg-gray-600"></div>
@@ -307,12 +367,16 @@
                         </div>
 
                         <!-- Actual content -->
-                        <div wire:loading.remove wire:target="payment_type,selectedMonths,paymentYear,selectedUserId" class="relative p-5 overflow-hidden border-2 border-green-300 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 dark:border-green-700 shadow-sm">
-                            <div class="absolute top-0 right-0 w-32 h-32 bg-green-200 rounded-full opacity-20 -mr-16 -mt-16 dark:bg-green-700"></div>
+                        <div wire:loading.remove wire:target="payment_type,selectedMonths,selectedYears,paymentYear,selectedUserId" class="relative p-5 overflow-hidden border-2 {{ ($paymentTerm ?? 'monthly') === 'yearly' ? 'border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 dark:border-blue-700' : 'border-green-300 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 dark:border-green-700' }} rounded-xl shadow-sm">
+                            <div class="absolute top-0 right-0 w-32 h-32 rounded-full opacity-20 -mr-16 -mt-16 {{ ($paymentTerm ?? 'monthly') === 'yearly' ? 'bg-blue-200 dark:bg-blue-700' : 'bg-green-200 dark:bg-green-700' }}"></div>
                             <div class="relative flex items-center justify-between">
                                 <div>
-                                    <p class="text-sm font-semibold text-green-800 dark:text-green-200">পেমেন্ট পরিমাণ</p>
-                                    <p class="text-xs text-green-600 dark:text-green-400 mt-0.5">{{ count($selectedMonths) }} মাস × ৳{{ number_format($monthlyFee, 0) }}</p>
+                                    <p class="text-sm font-semibold {{ ($paymentTerm ?? 'monthly') === 'yearly' ? 'text-blue-800 dark:text-blue-200' : 'text-green-800 dark:text-green-200' }}">পেমেন্ট পরিমাণ</p>
+                                    @if(($paymentTerm ?? 'monthly') === 'yearly')
+                                        <p class="text-xs mt-0.5 text-blue-600 dark:text-blue-400">{{ count($selectedYears) }} বছর × ৳{{ number_format($yearlyFee ?? 0, 0) }}</p>
+                                    @else
+                                        <p class="text-xs mt-0.5 text-green-600 dark:text-green-400">{{ count($selectedMonths) }} মাস × ৳{{ number_format($monthlyFee, 0) }}</p>
+                                    @endif
                                     @if($hasCustomFee)
                                         <span class="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 text-[10px] font-semibold text-amber-800 bg-amber-100 dark:bg-amber-900 dark:text-amber-200 rounded-full">
                                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
@@ -321,7 +385,7 @@
                                     @endif
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-4xl font-bold text-green-600 dark:text-green-300">৳{{ number_format($payment_amount, 0) }}</p>
+                                    <p class="text-4xl font-bold {{ ($paymentTerm ?? 'monthly') === 'yearly' ? 'text-blue-600 dark:text-blue-300' : 'text-green-600 dark:text-green-300' }}">৳{{ number_format($payment_amount, 0) }}</p>
                                 </div>
                             </div>
                         </div>

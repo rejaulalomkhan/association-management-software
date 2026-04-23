@@ -16,6 +16,7 @@ class Settings extends Component
     public $organization_established_year;
     public $organization_established_month;
     public $monthly_fee;
+    public $payment_term;
     public $organization_address;
     public $organization_phone;
     public $organization_email;
@@ -50,6 +51,8 @@ class Settings extends Component
         $this->organization_established_year = $settings['organization_established_year'];
         $this->organization_established_month = $settings['organization_established_month'];
         $this->monthly_fee = $settings['monthly_fee'];
+        $this->payment_term = \App\Enums\PaymentTerm::coerce((string) ($settings['payment_term'] ?? ''))
+            ?? \App\Enums\PaymentTerm::MONTHLY;
         $this->organization_address = $settings['organization_address'];
         $this->organization_phone = $settings['organization_phone'];
         $this->organization_email = $settings['organization_email'] ?? '';
@@ -94,6 +97,7 @@ class Settings extends Component
             'organization_established_year' => 'required|integer|min:2000|max:2100',
             'organization_established_month' => 'required|integer|min:1|max:12',
             'monthly_fee' => 'required|numeric|min:0',
+            'payment_term' => 'required|in:' . implode(',', \App\Enums\PaymentTerm::all()),
             'organization_address' => 'nullable|string',
             'organization_phone' => 'nullable|string|max:20',
             'organization_email' => 'nullable|email|max:255',
@@ -111,6 +115,7 @@ class Settings extends Component
         $settingsService->set('organization_established_year', $this->organization_established_year);
         $settingsService->set('organization_established_month', $this->organization_established_month);
         $settingsService->set('monthly_fee', $this->monthly_fee);
+        $settingsService->set('payment_term', $this->payment_term);
         $settingsService->set('organization_address', $this->organization_address);
         $settingsService->set('organization_phone', $this->organization_phone);
         $settingsService->set('organization_email', $this->organization_email);

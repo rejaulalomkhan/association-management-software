@@ -20,6 +20,11 @@ class ViewMemberProfile extends Component
     public bool $editingFee = false;
     public ?string $customFeeInput = null;
 
+    // Payment-term editor state.
+    // '' means "use organization-wide default (inherit)".
+    public bool $editingTerm = false;
+    public string $customTermInput = '';
+
     public function mount($memberId)
     {
         $this->memberId = $memberId;
@@ -36,6 +41,8 @@ class ViewMemberProfile extends Component
         $this->customFeeInput = $this->member->monthly_fee !== null
             ? (string) (int) $this->member->monthly_fee
             : null;
+
+        $this->customTermInput = \App\Enums\PaymentTerm::coerce((string) $this->member->payment_term) ?? '';
     }
 
     public function updatedSelectedYear()
@@ -108,6 +115,49 @@ class ViewMemberProfile extends Component
         $this->customFeeInput = null;
         $this->editingFee = false;
         session()->flash('message', 'ডিফল্ট মাসিক ফি পুনরায় চালু করা হয়েছে।');
+    }
+
+    public function startEditTerm(): void
+    {
+        $this->assertAdmin();
+        $this->editingTerm = true;
+    }
+
+    public function cancelEditTerm(): void
+    {
+        $this->editingTerm = false;
+        $this->customTermInput = \App\Enums\PaymentTerm::coerce((string) $this->member->payment_term) ?? '';
+    }
+
+    public function saveCustomTerm(): void
+    {
+        $this->assertAdmin();
+
+        $this->validate([
+            'customTermInput' => 'nullable|in:,' . implode(',', \App\Enums\PaymentTerm::all()),
+        ], [
+            'customTermInput.in' => 'অবৈধ পেমেন্ট টার্ম।',
+        ]);
+
+        $coerced = \App\Enums\PaymentTerm::coerce($this->customTermInput);
+        $this->member->payment_term = $coerced; // null → inherit from settings
+        $this->member->save();
+        $this->member->refresh();
+
+        $this->customTermInput = $coerced ?? '';
+        $this->editingTerm = false;
+        session()->flash('message', 'পেমেন্ট টার্ম সংরক্ষণ করা হয়েছে।');
+    }
+
+    public function resetCustomTerm(): void
+    {
+        $this->assertAdmin();
+        $this->member->payment_term = null;
+        $this->member->save();
+        $this->member->refresh();
+        $this->customTermInput = '';
+        $this->editingTerm = false;
+        session()->flash('message', 'ডিফল্ট পেমেন্ট টার্ম পুনরায় চালু করা হয়েছে।');
     }
 
     public function render()
@@ -196,9 +246,13 @@ class ViewMemberProfile extends Component
             ];
         }
 
-        $effectiveFee  = $this->member->effectiveMonthlyFee();
-        $defaultFee    = app(\App\Services\SettingsService::class)->getMonthlyFee();
-        $hasCustomFee  = $this->member->hasCustomMonthlyFee();
+        $effectiveFee   = $this->member->effectiveMonthlyFee();
+        $defaultFee     = app(\App\Services\SettingsService::class)->getMonthlyFee();
+        $hasCustomFee   = $this->member->hasCustomMonthlyFee();
+        $effectiveTerm  = $this->member->effectivePaymentTerm();
+        $defaultTerm    = app(\App\Services\SettingsService::class)->getPaymentTerm();
+        $hasCustomTerm  = $this->member->hasCustomPaymentTerm();
+        $effectivePeriodFee = $this->member->effectiveTermFee();
 
         return view('livewire.admin.view-member-profile', [
             'transactions' => $transactions,
@@ -214,6 +268,10 @@ class ViewMemberProfile extends Component
             'effectiveFee' => $effectiveFee,
             'defaultFee' => $defaultFee,
             'hasCustomFee' => $hasCustomFee,
+            'effectiveTerm' => $effectiveTerm,
+            'defaultTerm' => $defaultTerm,
+            'hasCustomTerm' => $hasCustomTerm,
+            'effectivePeriodFee' => $effectivePeriodFee,
         ])->layout('layouts.app');
     }
 }

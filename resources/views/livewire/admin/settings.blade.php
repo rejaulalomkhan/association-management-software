@@ -92,7 +92,20 @@
                         <label class="block mb-1 text-sm font-medium text-gray-700">মাসিক টাকা (৳)</label>
                         <input type="number" wire:model="monthly_fee" step="0.01"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <p class="mt-1 text-xs text-gray-500">এক এককের ফি। বাৎসরিক টার্মে অটো × ১২ করে বার্ষিক ফি হিসেব হবে।</p>
                         @error('monthly_fee') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-sm font-medium text-gray-700">পেমেন্ট টার্ম (ডিফল্ট)</label>
+                        <select wire:model="payment_term"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            <option value="monthly">মাসিক</option>
+                            <option value="yearly">বাৎসরিক</option>
+                        </select>
+                        <p class="mt-1 text-xs text-gray-500">
+                            সকল সদস্যের জন্য ডিফল্ট টার্ম। প্রতি সদস্যের প্রোফাইলে আলাদা টার্ম override করা যাবে।
+                        </p>
+                        @error('payment_term') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
                     </div>
                 </div>
 

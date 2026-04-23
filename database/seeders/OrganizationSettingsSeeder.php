@@ -24,10 +24,17 @@ class OrganizationSettingsSeeder extends Seeder
             ['value' => 'প্রজন্ম উন্নয়ন মিশন']
         );
 
-        // Monthly fee
+        // Monthly fee (unit / per-month equivalent)
         Setting::firstOrCreate(
             ['key' => 'monthly_fee'],
             ['value' => '500']
+        );
+
+        // Default payment term applied to every member unless overridden
+        // on a per-user basis. One of: monthly | yearly.
+        Setting::firstOrCreate(
+            ['key' => 'payment_term'],
+            ['value' => \App\Enums\PaymentTerm::MONTHLY]
         );
     }
 }

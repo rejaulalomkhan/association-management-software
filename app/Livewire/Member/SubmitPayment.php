@@ -18,6 +18,7 @@ class SubmitPayment extends Component
     public $payment_type = 'current';
     public $paymentYear;
     public $selectedMonths = [];
+    public $selectedYears = []; // For yearly-term members: years being paid for
     public $payment_amount = 0;
     public $payment_method_id;
     public $payment_reference;
@@ -174,10 +175,24 @@ class SubmitPayment extends Component
 
     public function updatedSelectedUserId()
     {
-        // When changing member, recompute smart default payment type
+        // When the selected member changes we may be switching between
+        // a monthly and yearly term — reset both state bags.
+        $this->selectedMonths = [];
+        $this->selectedYears  = [];
+        $this->payment_amount = 0;
+
+        if ($this->currentPaymentTerm() === \App\Enums\PaymentTerm::YEARLY) {
+            // Auto-pick the oldest unpaid year (if any) so the form is useful immediately.
+            $unpaid = $this->getUnpaidYearsList();
+            if (!empty($unpaid)) {
+                $this->selectedYears = [(int) $unpaid[0]];
+            }
+            $this->updatePaymentAmount();
+            return;
+        }
+
+        // Monthly flow: preserve existing smart-default logic.
         $this->payment_type = $this->determineDefaultPaymentType();
-        
-        // Trigger update logic to set state (year, months) based on the new type
         $this->updatedPaymentType();
     }
 
@@ -296,8 +311,105 @@ class SubmitPayment extends Component
         return (float) app(SettingsService::class)->getMonthlyFee();
     }
 
+    /**
+     * Effective payment term for the currently-selected member, falling
+     * back to the organization-wide default when no member is selected.
+     */
+    private function currentPaymentTerm(): string
+    {
+        if ($this->selectedUserId) {
+            $user = User::find($this->selectedUserId);
+            if ($user) {
+                return $user->effectivePaymentTerm();
+            }
+        }
+
+        return app(SettingsService::class)->getPaymentTerm();
+    }
+
+    /**
+     * Yearly fee for the currently-selected member.
+     */
+    private function currentYearlyFee(): float
+    {
+        if ($this->selectedUserId) {
+            $user = User::find($this->selectedUserId);
+            if ($user) {
+                return $user->effectiveYearlyFee();
+            }
+        }
+
+        return (float) app(SettingsService::class)->getMonthlyFee() * 12;
+    }
+
+    /**
+     * List of years that are currently unpaid for the selected yearly
+     * member. "Paid" means either a yearly-term approved/pending payment
+     * row OR all 12 months covered by monthly-term approved payments.
+     *
+     * @return array<int, int>
+     */
+    public function getUnpaidYearsList(): array
+    {
+        if (!$this->selectedUserId) {
+            return [];
+        }
+
+        $orgStartYear = (int) app(SettingsService::class)->getOrganizationEstablishedYear();
+        $currentYear  = (int) date('Y');
+        if ($orgStartYear > $currentYear) {
+            return [];
+        }
+
+        // Fully-covered years via yearly-term approved/pending rows.
+        $yearlyRows = Payment::where('user_id', $this->selectedUserId)
+            ->whereIn('status', ['approved', 'pending'])
+            ->where('term', \App\Enums\PaymentTerm::YEARLY)
+            ->pluck('year')
+            ->unique()
+            ->map(fn ($y) => (int) $y)
+            ->toArray();
+
+        // Years covered by a complete set of 12 monthly-term approved rows.
+        $monthlyFullYears = Payment::where('user_id', $this->selectedUserId)
+            ->where('status', 'approved')
+            ->where('term', \App\Enums\PaymentTerm::MONTHLY)
+            ->selectRaw('year, COUNT(*) AS c')
+            ->groupBy('year')
+            ->havingRaw('COUNT(*) >= 12')
+            ->pluck('year')
+            ->map(fn ($y) => (int) $y)
+            ->toArray();
+
+        $coveredYears = array_flip(array_merge($yearlyRows, $monthlyFullYears));
+
+        $unpaid = [];
+        // Show up to next-year ahead so yearly members can prepay too.
+        for ($y = $orgStartYear; $y <= $currentYear + 1; $y++) {
+            if (!isset($coveredYears[$y])) {
+                $unpaid[] = $y;
+            }
+        }
+        return $unpaid;
+    }
+
     public function getTotalOverdueInfo()
     {
+        // Yearly members don't have a "monthly overdue" concept; their dues
+        // are always computed as whole years outstanding.
+        if ($this->currentPaymentTerm() === \App\Enums\PaymentTerm::YEARLY) {
+            $unpaid = $this->getUnpaidYearsList();
+            // Exclude the future pre-pay year (currentYear + 1) from "overdue".
+            $currentYear = (int) date('Y');
+            $overdueYears = array_values(array_filter($unpaid, fn ($y) => (int) $y <= $currentYear));
+
+            return [
+                'months' => count($overdueYears),          // reused "months" key for UI compatibility
+                'amount' => count($overdueYears) * $this->currentYearlyFee(),
+                'years'  => $overdueYears,
+            ];
+        }
+
         $settingsService = app(SettingsService::class);
         $establishedYear = (int) $settingsService->get('organization_established_year', 2024);
         $establishedMonth = (int) $settingsService->get('organization_established_month', 1);
@@ -323,12 +435,114 @@ class SubmitPayment extends Component
 
     private function updatePaymentAmount()
     {
+        if ($this->currentPaymentTerm() === \App\Enums\PaymentTerm::YEARLY) {
+            $this->payment_amount = count($this->selectedYears) * $this->currentYearlyFee();
+            return;
+        }
+
         $monthlyFee = $this->currentMonthlyFee();
         $this->payment_amount = count($this->selectedMonths) * $monthlyFee;
     }
 
+    /**
+     * Livewire hook: recalc amount when the yearly member adjusts the
+     * year checkbox list.
+     */
+    public function updatedSelectedYears(): void
+    {
+        $this->updatePaymentAmount();
+    }
+
+    /**
+     * Submit a yearly-term payment. Each selected year becomes one
+     * approved-pending `payments` row with `term='yearly'` and
+     * `month='January'` (canonical placeholder).
+     */
+    private function submitYearlyPayment()
+    {
+        $this->validate([
+            'selectedUserId'    => 'required|exists:users,id',
+            'payment_amount'    => 'required|numeric|min:1',
+            'payment_method_id' => 'required|exists:payment_methods,id',
+            'selectedYears'     => 'required|array|min:1',
+            'selectedYears.*'   => 'integer|min:2000|max:2100',
+            'payment_reference' => 'nullable|string|max:255',
+            'payment_note'      => 'nullable|string|max:500',
+            'payment_proof'     => 'nullable|image|max:2048',
+        ], [
+            'selectedUserId.required'     => 'কোন সদস্যের জন্য পেমেন্ট দিচ্ছেন তা নির্বাচন করুন।',
+            'payment_amount.required'     => 'পেমেন্ট এর পরিমাণ প্রয়োজন।',
+            'payment_amount.min'          => 'কমপক্ষে একটি বছর নির্বাচন করুন।',
+            'payment_method_id.required'  => 'পেমেন্ট মাধ্যম নির্বাচন করুন।',
+            'selectedYears.required'      => 'কমপক্ষে একটি বছর নির্বাচন করুন।',
+            'selectedYears.min'           => 'কমপক্ষে একটি বছর নির্বাচন করুন।',
+            'payment_proof.image'         => 'স্ক্রিনশট বা ছবি ফরম্যাট ভুল হয়েছে।',
+            'payment_proof.max'           => 'স্ক্রিনশট সর্বোচ্চ ২ এমবি হতে পারবে।',
+        ]);
+
+        if ($this->payment_method_id == 1) {
+            $this->payment_reference = 'CASH-' . date('YmdHis') . '-' . $this->selectedUserId;
+        }
+
+        if ($this->payment_reference && $this->payment_method_id != 1) {
+            $txExists = Payment::where('transaction_id', $this->payment_reference)->exists();
+            if ($txExists) {
+                $this->addError('payment_reference', 'এই ট্রানজেকশন আইডি আগে থেকেই ব্যবহার হয়েছে।');
+                return;
+            }
+        }
+
+        $yearlyFee = $this->currentYearlyFee();
+
+        $proofPath = null;
+        if ($this->payment_proof) {
+            $proofPath = $this->payment_proof->store('payment_proofs', 'public');
+        }
+
+        foreach ($this->selectedYears as $year) {
+            $year = (int) $year;
+            if ($year < 2000 || $year > 2100) {
+                continue;
+            }
+
+            $alreadyExists = Payment::where('user_id', $this->selectedUserId)
+                ->where('year', $year)
+                ->where('term', \App\Enums\PaymentTerm::YEARLY)
+                ->whereIn('status', ['pending', 'approved'])
+                ->exists();
+
+            if ($alreadyExists) {
+                continue;
+            }
+
+            Payment::create([
+                'user_id'           => $this->selectedUserId,
+                'month'             => 'January', // canonical placeholder for yearly
+                'year'              => $year,
+                'term'              => \App\Enums\PaymentTerm::YEARLY,
+                'amount'            => $yearlyFee,
+                'method'            => optional(PaymentMethod::find($this->payment_method_id))->name ?? 'manual',
+                'payment_method_id' => $this->payment_method_id,
+                'description'       => $this->payment_note,
+                'transaction_id'    => $this->payment_reference,
+                'proof_path'        => $proofPath,
+                'status'            => 'pending',
+            ]);
+        }
+
+        session()->flash('success', 'বাৎসরিক পেমেন্ট সফলভাবে জমা দেওয়া হয়েছে! অনুমোদনের জন্য অপেক্ষা করুন।');
+
+        return redirect()->route('member.profile');
+    }
+
     public function submitPayment()
     {
+        // Yearly-term members take a completely different code path: one
+        // payment row per selected year, with term = 'yearly'.
+        if ($this->currentPaymentTerm() === \App\Enums\PaymentTerm::YEARLY) {
+            return $this->submitYearlyPayment();
+        }
+
         // Debug logging
         \Log::info('Payment submission started', [
             'payment_type' => $this->payment_type,
@@ -430,6 +644,7 @@ class SubmitPayment extends Component
                 'user_id' => $this->selectedUserId,
                 'month' => $monthName,
                 'year' => (int) $this->paymentYear,
+                'term' => \App\Enums\PaymentTerm::MONTHLY,
                 'amount' => $monthlyFee,
                 'method' => optional(PaymentMethod::find($this->payment_method_id))->name ?? 'manual',
                 'payment_method_id' => $this->payment_method_id,
@@ -461,9 +676,14 @@ class SubmitPayment extends Component
         $paymentMethods = PaymentMethod::active()->get();
         $monthlyFee = $this->currentMonthlyFee();
         $defaultMonthlyFee = (float) $settingsService->get('monthly_fee', 500);
-        $hasCustomFee = $this->selectedUserId
-            ? (bool) optional(User::find($this->selectedUserId))->hasCustomMonthlyFee()
-            : false;
+        $selectedMember = $this->selectedUserId ? User::find($this->selectedUserId) : null;
+        $hasCustomFee = $selectedMember ? (bool) $selectedMember->hasCustomMonthlyFee() : false;
+        $paymentTerm = $this->currentPaymentTerm();
+        $hasCustomTerm = $selectedMember ? (bool) $selectedMember->hasCustomPaymentTerm() : false;
+        $yearlyFee = $this->currentYearlyFee();
+        $unpaidYearsList = $paymentTerm === \App\Enums\PaymentTerm::YEARLY
+            ? $this->getUnpaidYearsList()
+            : [];
 
         $banglaMonthNames = [
             1 => 'জানুয়ারি', 2 => 'ফেব্রুয়ারি', 3 => 'মার্চ', 4 => 'এপ্রিল',
@@ -485,6 +705,10 @@ class SubmitPayment extends Component
             'monthlyFee' => $monthlyFee,
             'defaultMonthlyFee' => $defaultMonthlyFee,
             'hasCustomFee' => $hasCustomFee,
+            'paymentTerm' => $paymentTerm,
+            'hasCustomTerm' => $hasCustomTerm,
+            'yearlyFee' => $yearlyFee,
+            'unpaidYearsList' => $unpaidYearsList,
             'banglaMonthNames' => $banglaMonthNames,
             'overdueInfo' => $overdueInfo,
         ])->layout('layouts.app');

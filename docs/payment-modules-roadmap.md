@@ -30,6 +30,26 @@
 ### 1.5 Enhanced WhatsApp Reminder
 - Admin member profile → WhatsApp বোতাম ক্লিক করলে মেসেজে আসে: সদস্যের নাম, প্রতিষ্ঠানের নাম, effective monthly fee (কাস্টম badge সহ), বর্তমান বকেয়া।
 
+### 1.6 Payment Term — Monthly / Yearly ✅ NEW
+- নতুন enum: `App\Enums\PaymentTerm` (`monthly` | `yearly`)।
+- নতুন কলাম:
+    - `settings.payment_term`  — সংগঠন-wide ডিফল্ট।
+    - `users.payment_term`     — প্রতি-সদস্য override (NULL = inherit)।
+    - `payments.term`          — কোন ধরণের পেমেন্ট row এটি, ডিফল্ট `monthly` (ব্যাকফিল সহ)।
+- API:
+    - `User::effectivePaymentTerm()` / `hasCustomPaymentTerm()`
+    - `User::effectiveYearlyFee()`, `User::effectiveTermFee()`
+    - `SettingsService::getPaymentTerm()`
+    - Helper: `org_payment_term($user)`, `payment_term_label($term)`
+- UI:
+    - Admin → Settings → "পেমেন্ট টার্ম" dropdown (Organization tab).
+    - Admin → View Member Profile → "পেমেন্ট টার্ম" + "মাসিক ফি" কার্ড side-by-side, edit/reset সহ।
+    - `/member/payment` — যদি সদস্য yearly term হয়: year-checkbox panel, প্রতি বছর ৳(monthly_fee × 12) চার্জ।
+- Behaviour:
+    - `MemberService::calculateOutstandingDues()` term-aware: yearly সদস্যদের জন্য বছর ভিত্তিক dues রিটার্ন করে।
+    - Admin Dashboard "মাসিক বকেয়া" লিস্ট থেকে yearly সদস্য auto-excluded (যেহেতু বাৎসরিক চাঁদা আলাদা)।
+    - Yearly members-এর বছরের কোনো একটি approved yearly-row থাকলে সেই বছরের সব মাস covered ধরা হয়।
+
 ---
 
 ## 2. পরবর্তী ফিচার (Planned)
@@ -99,15 +119,8 @@ users.renewal_fee_amount            decimal  nullable
 
 ---
 
-### 2.4 Yearly Fee
-**Goal:** মাসিকের বিকল্প হিসেবে বাৎসরিক ফি কালেকশন।
-
-**Pattern:** Monthly-এর মতোই — `settings.yearly_fee`, `users.yearly_fee`, `payments.type='yearly'`, ইউনিট month-এর বদলে year।
-
-Either-or switch:
-```
-settings.billing_cycle  enum('monthly','yearly','none')  default 'monthly'
-```
+### 2.4 Yearly Fee — ✅ Shipped in 1.6
+মাসিক/বাৎসরিক টার্ম এখন `settings.payment_term` ও `users.payment_term` দিয়ে কন্ট্রোল হয়। বাৎসরিক ফি আলাদাভাবে সংরক্ষিত হয় না — এটা সর্বদা `effective_monthly_fee × 12`। ভবিষ্যতে সম্পূর্ণ স্বাধীন `yearly_fee` ওভাররাইড চাইলে এখানে যোগ করা হবে।
 
 ---
 

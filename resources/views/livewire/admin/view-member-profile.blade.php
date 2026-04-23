@@ -356,74 +356,149 @@
         @endphp
 
         @if($isAdmin)
-        <!-- Custom Monthly Fee Card (admin only) -->
-        <div class="mb-4 overflow-hidden bg-white shadow-sm dark:bg-gray-800 rounded-none sm:rounded-lg w-full">
-            <div class="p-3 sm:p-5">
-                <div class="flex items-start justify-between gap-3 flex-wrap">
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">মাসিক ফি</h3>
-                            @if($hasCustomFee)
-                                <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-amber-800 bg-amber-100 dark:bg-amber-900 dark:text-amber-200 rounded-full">কাস্টম</span>
-                            @else
-                                <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 rounded-full">ডিফল্ট</span>
-                            @endif
-                        </div>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            এই সদস্যের প্রতি মাসের ফি। কাস্টম সেট করলে সেটিংসের ডিফল্ট বাতিল হয়ে যাবে।
-                        </p>
+        <!-- Payment Term + Custom Fee Card (admin only) -->
+        <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
 
-                        @if(!$editingFee)
-                            <div class="mt-3 flex items-baseline gap-2 flex-wrap">
-                                <span class="text-2xl font-bold text-indigo-700 dark:text-indigo-300">৳{{ number_format($effectiveFee, 0) }}</span>
-                                @if($hasCustomFee)
-                                    <span class="text-xs text-gray-500 dark:text-gray-400">(ডিফল্ট ৳{{ number_format($defaultFee, 0) }})</span>
+            <!-- Payment Term Card -->
+            <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 rounded-none sm:rounded-lg">
+                <div class="p-3 sm:p-5">
+                    <div class="flex items-start justify-between gap-3 flex-wrap">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">পেমেন্ট টার্ম</h3>
+                                @if($hasCustomTerm)
+                                    <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-amber-800 bg-amber-100 dark:bg-amber-900 dark:text-amber-200 rounded-full">কাস্টম</span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 rounded-full">ডিফল্ট</span>
                                 @endif
                             </div>
-                        @else
-                            <div class="mt-3 space-y-2">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm text-gray-600 dark:text-gray-400">৳</span>
-                                    <input type="number" min="0" step="1" inputmode="numeric"
-                                        wire:model.live="customFeeInput"
-                                        placeholder="{{ (int) $defaultFee }} (ডিফল্ট)"
-                                        class="w-36 px-3 py-2 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                </div>
-                                @error('customFeeInput') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
-                                <p class="text-[11px] text-gray-500 dark:text-gray-400">
-                                    ফাঁকা বা ০ রাখলে সেটিংসের ডিফল্ট ৳{{ number_format($defaultFee, 0) }} কার্যকর হবে।
-                                </p>
-                            </div>
-                        @endif
-                    </div>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                কত পরপর এই সদস্যের ফি সংগ্রহ করা হবে।
+                            </p>
 
-                    <div class="flex flex-col gap-2 shrink-0">
-                        @if(!$editingFee)
-                            <button wire:click="startEditFee"
-                                class="inline-flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 whitespace-nowrap">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                ফি পরিবর্তন
-                            </button>
-                            @if($hasCustomFee)
-                                <button wire:click="resetCustomFee"
-                                    wire:confirm="ডিফল্ট ফি পুনরায় চালু করবেন?"
+                            @if(!$editingTerm)
+                                <div class="mt-3 flex items-baseline gap-2 flex-wrap">
+                                    <span class="text-2xl font-bold {{ $effectiveTerm === 'yearly' ? 'text-blue-700 dark:text-blue-300' : 'text-green-700 dark:text-green-300' }}">
+                                        {{ payment_term_label($effectiveTerm) }}
+                                    </span>
+                                    @if($hasCustomTerm)
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">(ডিফল্ট {{ payment_term_label($defaultTerm) }})</span>
+                                    @endif
+                                </div>
+                            @else
+                                <div class="mt-3 space-y-2">
+                                    <select wire:model.live="customTermInput"
+                                        class="w-full max-w-[220px] px-3 py-2 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-blue-500">
+                                        <option value="">সেটিংস অনুযায়ী ({{ payment_term_label($defaultTerm) }})</option>
+                                        <option value="monthly">মাসিক</option>
+                                        <option value="yearly">বাৎসরিক</option>
+                                    </select>
+                                    @error('customTermInput') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="flex flex-col gap-2 shrink-0">
+                            @if(!$editingTerm)
+                                <button wire:click="startEditTerm"
+                                    class="inline-flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap">
+                                    টার্ম পরিবর্তন
+                                </button>
+                                @if($hasCustomTerm)
+                                    <button wire:click="resetCustomTerm"
+                                        wire:confirm="ডিফল্ট টার্ম পুনরায় চালু করবেন?"
+                                        class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 whitespace-nowrap">
+                                        ডিফল্টে
+                                    </button>
+                                @endif
+                            @else
+                                <button wire:click="saveCustomTerm"
+                                    class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 whitespace-nowrap">
+                                    সংরক্ষণ
+                                </button>
+                                <button wire:click="cancelEditTerm"
                                     class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 whitespace-nowrap">
-                                    ডিফল্টে রিসেট
+                                    বাতিল
                                 </button>
                             @endif
-                        @else
-                            <button wire:click="saveCustomFee"
-                                class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 whitespace-nowrap">
-                                সংরক্ষণ
-                            </button>
-                            <button wire:click="cancelEditFee"
-                                class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 whitespace-nowrap">
-                                বাতিল
-                            </button>
-                        @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Fee Card -->
+            <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 rounded-none sm:rounded-lg">
+                <div class="p-3 sm:p-5">
+                    <div class="flex items-start justify-between gap-3 flex-wrap">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">মাসিক ফি</h3>
+                                @if($hasCustomFee)
+                                    <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-amber-800 bg-amber-100 dark:bg-amber-900 dark:text-amber-200 rounded-full">কাস্টম</span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 rounded-full">ডিফল্ট</span>
+                                @endif
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                এক এককের ফি। @if($effectiveTerm === 'yearly')<span class="font-medium text-blue-700 dark:text-blue-300">বাৎসরিক: ৳{{ number_format($effectivePeriodFee, 0) }}/বছর</span>@endif
+                            </p>
+
+                            @if(!$editingFee)
+                                <div class="mt-3 flex items-baseline gap-2 flex-wrap">
+                                    <span class="text-2xl font-bold text-indigo-700 dark:text-indigo-300">৳{{ number_format($effectiveFee, 0) }}</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">/ মাস</span>
+                                    @if($hasCustomFee)
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">(ডিফল্ট ৳{{ number_format($defaultFee, 0) }})</span>
+                                    @endif
+                                </div>
+                            @else
+                                <div class="mt-3 space-y-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm text-gray-600 dark:text-gray-400">৳</span>
+                                        <input type="number" min="0" step="1" inputmode="numeric"
+                                            wire:model.live="customFeeInput"
+                                            placeholder="{{ (int) $defaultFee }} (ডিফল্ট)"
+                                            class="w-36 px-3 py-2 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    @error('customFeeInput') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
+                                    <p class="text-[11px] text-gray-500 dark:text-gray-400">
+                                        ফাঁকা বা ০ রাখলে সেটিংসের ডিফল্ট ৳{{ number_format($defaultFee, 0) }} কার্যকর হবে।
+                                    </p>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="flex flex-col gap-2 shrink-0">
+                            @if(!$editingFee)
+                                <button wire:click="startEditFee"
+                                    class="inline-flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 whitespace-nowrap">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    ফি পরিবর্তন
+                                </button>
+                                @if($hasCustomFee)
+                                    <button wire:click="resetCustomFee"
+                                        wire:confirm="ডিফল্ট ফি পুনরায় চালু করবেন?"
+                                        class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 whitespace-nowrap">
+                                        ডিফল্টে
+                                    </button>
+                                @endif
+                            @else
+                                <button wire:click="saveCustomFee"
+                                    class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 whitespace-nowrap">
+                                    সংরক্ষণ
+                                </button>
+                                <button wire:click="cancelEditFee"
+                                    class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 whitespace-nowrap">
+                                    বাতিল
+                                </button>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>

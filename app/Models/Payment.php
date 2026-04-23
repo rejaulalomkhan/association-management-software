@@ -12,6 +12,7 @@ class Payment extends Model
         'transaction_id',
         'month',
         'year',
+        'term',
         'amount',
         'method',
         'payment_method_id',
@@ -23,9 +24,29 @@ class Payment extends Model
         'processed_by',
     ];
 
+    protected $attributes = [
+        'term' => \App\Enums\PaymentTerm::MONTHLY,
+    ];
+
     protected $casts = [
         'processed_at' => 'datetime',
     ];
+
+    /**
+     * Scope: only monthly payment rows (current-style per-month).
+     */
+    public function scopeMonthlyTerm($query)
+    {
+        return $query->where('term', \App\Enums\PaymentTerm::MONTHLY);
+    }
+
+    /**
+     * Scope: only yearly-lump payment rows.
+     */
+    public function scopeYearlyTerm($query)
+    {
+        return $query->where('term', \App\Enums\PaymentTerm::YEARLY);
+    }
 
     /**
      * Get the user who made this payment.

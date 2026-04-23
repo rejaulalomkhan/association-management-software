@@ -41,6 +41,7 @@ class User extends Authenticatable
         'nationality',
         'position',
         'monthly_fee',
+        'payment_term',
         'profile_pic',
         'status',
         'joined_at',
@@ -74,6 +75,58 @@ class User extends Authenticatable
     public function hasCustomMonthlyFee(): bool
     {
         return $this->monthly_fee !== null && (float) $this->monthly_fee > 0;
+    }
+
+    /**
+     * Resolve the payment term for this member.
+     *
+     * Priority:
+     *   1. The per-member override on `users.payment_term`
+     *   2. The organization-wide default from `settings.payment_term`
+     *   3. Hard fallback: monthly
+     */
+    public function effectivePaymentTerm(): string
+    {
+        $custom = \App\Enums\PaymentTerm::coerce($this->payment_term);
+        if ($custom !== null) {
+            return $custom;
+        }
+
+        $settingsValue = \App\Enums\PaymentTerm::coerce(
+            (string) app(\App\Services\SettingsService::class)->get('payment_term', \App\Enums\PaymentTerm::MONTHLY)
+        );
+
+        return $settingsValue ?? \App\Enums\PaymentTerm::MONTHLY;
+    }
+
+    /**
+     * True when this member has a payment-term override that differs
+     * from the organization-wide setting.
+     */
+    public function hasCustomPaymentTerm(): bool
+    {
+        return \App\Enums\PaymentTerm::coerce($this->payment_term) !== null;
+    }
+
+    /**
+     * Derived amounts — always computed from the unit monthly fee so the
+     * admin only has to edit a single number per member.
+     */
+    public function effectiveYearlyFee(): float
+    {
+        return $this->effectiveMonthlyFee() * 12;
+    }
+
+    /**
+     * Fee amount for a single billing period under this member's term.
+     * Useful for "৳X per <term>" copy in UI.
+     */
+    public function effectiveTermFee(): float
+    {
+        return match ($this->effectivePaymentTerm()) {
+            \App\Enums\PaymentTerm::YEARLY => $this->effectiveYearlyFee(),
+            default                        => $this->effectiveMonthlyFee(),
+        };
     }
 
     /**

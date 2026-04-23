@@ -108,6 +108,33 @@ if (!function_exists('org_monthly_fee')) {
     }
 }
 
+if (!function_exists('org_payment_term')) {
+    /**
+     * Resolve the effective payment term for a given member (or the
+     * organization-wide default when no user is provided).
+     *
+     * Returns one of: monthly | yearly | lifetime.
+     */
+    function org_payment_term(?\App\Models\User $user = null): string
+    {
+        if ($user instanceof \App\Models\User) {
+            return $user->effectivePaymentTerm();
+        }
+
+        return app(\App\Services\SettingsService::class)->getPaymentTerm();
+    }
+}
+
+if (!function_exists('payment_term_label')) {
+    /**
+     * Bangla human label for a payment-term string.
+     */
+    function payment_term_label(string $term): string
+    {
+        return \App\Enums\PaymentTerm::label($term);
+    }
+}
+
 if (!function_exists('user_role')) {
     /**
      * Get the current user's primary role name

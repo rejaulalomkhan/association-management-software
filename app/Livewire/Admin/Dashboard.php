@@ -54,14 +54,31 @@ class Dashboard extends Component
                 })
                 ->get();
 
-            // Get IDs of members who have APPROVED payments for this specific month/year
-            $paidMemberIds = Payment::where('month', $month)
+            // Members with an approved monthly payment for this month+year.
+            $paidMonthlyIds = Payment::where('month', $month)
                 ->where('year', $year)
                 ->where('status', 'approved')
+                ->where('term', \App\Enums\PaymentTerm::MONTHLY)
                 ->pluck('user_id')
                 ->toArray();
 
-            $unpaidMembers = $allActiveMembers->whereNotIn('id', $paidMemberIds)->take(20);
+            // Members with an approved yearly payment for this year — they've
+            // paid the whole year in advance so they shouldn't appear in the
+            // "monthly due" list at all for any month of this year.
+            $paidYearlyIds = Payment::where('year', $year)
+                ->where('status', 'approved')
+                ->where('term', \App\Enums\PaymentTerm::YEARLY)
+                ->pluck('user_id')
+                ->toArray();
+
+            $paidMemberIds = array_unique(array_merge($paidMonthlyIds, $paidYearlyIds));
+
+            $unpaidMembers = $allActiveMembers
+                ->whereNotIn('id', $paidMemberIds)
+                // Yearly-term members don't belong in a monthly due list —
+                // even when unpaid, their bucket is "years", not "months".
+                ->filter(fn ($m) => $m->effectivePaymentTerm() !== \App\Enums\PaymentTerm::YEARLY)
+                ->take(20);
 
             // Attach due info for unpaid members
             $unpaidMembers = $unpaidMembers->map(function ($member) use ($memberService) {
