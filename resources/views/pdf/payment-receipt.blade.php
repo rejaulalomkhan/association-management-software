@@ -147,6 +147,9 @@
         $orgName = $settingsService->get('organization_name', config('app.name'));
         $orgLogo = $settingsService->get('organization_logo');
         $logoPath = $orgLogo ? storage_path('app/public/' . $orgLogo) : null;
+        $orgEmail = $settingsService->get('organization_email');
+        $orgPhone = $settingsService->get('organization_phone');
+        $orgAddress = $settingsService->get('organization_address');
     @endphp
     
     <div id="invoice">
@@ -221,7 +224,11 @@
                                 </td>
                                 <td style="border: none; padding: 0; vertical-align: middle;">
                                     <h2 style="font-size: 1.3em; margin-bottom: 5px;">{{ $orgName }}</h2>
-                                    <p class="small-text">Email: info@projonmo.org<br>Phone: +880 1XXX-XXXXXX</p>
+                                    <p class="small-text">
+                                        @if($orgEmail)Email: {{ $orgEmail }}@endif
+                                        @if($orgEmail && $orgPhone)<br>@endif
+                                        @if($orgPhone)Phone: {{ $orgPhone }}@endif
+                                    </p>
                                 </td>
                             </tr>
                         </table>

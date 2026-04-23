@@ -57,8 +57,11 @@ class SettingsService
             'organization_logo',
             'organization_address',
             'organization_phone',
+            'organization_email',
             'currency',
             'currency_symbol',
+            'registration_terms',
+            'registration_terms_acceptance_label',
         ]);
     }
 

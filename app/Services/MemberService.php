@@ -141,7 +141,14 @@ class MemberService
         $user->status = 'active';
         $user->joined_at = now();
 
-        return $user->save();
+        $saved = $user->save();
+
+        // Generate a public verification token (used for the member's QR code).
+        if ($saved) {
+            $user->ensureVerificationToken();
+        }
+
+        return $saved;
     }
 
     /**

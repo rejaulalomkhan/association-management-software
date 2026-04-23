@@ -100,7 +100,7 @@ function pwaInstall() {
         async install() {
             if (!this.deferredPrompt) {
                 // Fallback: Show manual instructions
-                alert('অ্যাপ ইনস্টল করতে:\n\nChrome/Edge: Menu (⋮) → "Install প্রজন্ম উন্নয়ন মিশন"\n\niOS Safari: Share (□↑) → "Add to Home Screen"\n\nAndroid Chrome: Menu (⋮) → "Add to Home screen"');
+                alert('অ্যাপ ইনস্টল করতে:\n\nChrome/Edge: Menu (⋮) → "Install {{ org_name() }}"\n\niOS Safari: Share (□↑) → "Add to Home Screen"\n\nAndroid Chrome: Menu (⋮) → "Add to Home screen"');
                 return;
             }
             

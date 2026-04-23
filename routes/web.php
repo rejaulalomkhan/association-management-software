@@ -2,6 +2,7 @@
 
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\PendingStatus;
+use App\Livewire\VerifyMember;
 use App\Livewire\Member\Dashboard as MemberDashboard;
 use App\Livewire\Member\EditProfile;
 use App\Livewire\Member\Profile;
@@ -39,6 +40,72 @@ Route::get('/', function () {
 
 Route::get('/register', Register::class)->name('register');
 Route::get('/pending-status/{phone?}', PendingStatus::class)->name('pending-status');
+
+// Dynamic PWA manifest — reads name/short-name from the organization settings
+// so that when admin changes the org name/logo the installed PWA identity
+// stays aligned. Any icon file that doesn't exist on disk is filtered out.
+Route::get('/manifest.json', function () {
+    $name = org_name();
+    $shortNameDefault = mb_substr($name, 0, 12);
+    $shortName = (string) org_settings()->get('organization_short_name', $shortNameDefault);
+
+    $logoPath = org_logo_path();
+    $iconSizes = ['72x72', '96x96', '128x128', '144x144', '152x152', '192x192', '384x384', '512x512'];
+    $icons = [];
+    foreach ($iconSizes as $size) {
+        $relPath = "/images/icons/icon-{$size}.png";
+        if (file_exists(public_path($relPath))) {
+            $icons[] = [
+                'src'     => $relPath,
+                'sizes'   => $size,
+                'type'    => 'image/png',
+                'purpose' => 'any',
+            ];
+            if (in_array($size, ['192x192', '512x512'], true)) {
+                $icons[] = [
+                    'src'     => $relPath,
+                    'sizes'   => $size,
+                    'type'    => 'image/png',
+                    'purpose' => 'maskable',
+                ];
+            }
+        }
+    }
+
+    // Prefer the uploaded org logo as the primary icon (browsers will still
+    // fall back to the PNGs above for install prompts that need specific sizes).
+    if ($logoPath && file_exists(storage_path('app/public/' . $logoPath))) {
+        array_unshift($icons, [
+            'src'     => asset('storage/' . $logoPath),
+            'sizes'   => 'any',
+            'type'    => 'image/png',
+            'purpose' => 'any',
+        ]);
+    }
+
+    $manifest = [
+        'name'             => $name,
+        'short_name'       => $shortName,
+        'description'      => $name . ' - সদস্য ব্যবস্থাপনা সিস্টেম',
+        'start_url'        => '/',
+        'display'          => 'standalone',
+        'background_color' => '#ffffff',
+        'theme_color'      => '#3b82f6',
+        'orientation'      => 'portrait-primary',
+        'icons'            => $icons,
+    ];
+
+    return response()->json($manifest, 200, [
+        'Content-Type'  => 'application/manifest+json',
+        'Cache-Control' => 'public, max-age=300',
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+})->name('pwa.manifest');
+
+// Public membership verification — opened when someone scans a member's QR code.
+// No auth required so anyone (shop, bank, police, etc.) can verify on the spot.
+Route::get('/verify/{token}', VerifyMember::class)
+    ->where('token', '[a-fA-F0-9]{32}')
+    ->name('member.verify');
 
 Route::middleware(['auth', 'roles:member,accountant,admin'])->prefix('member')->name('member.')->group(function () {
     Route::get('/dashboard', MemberDashboard::class)->name('dashboard');

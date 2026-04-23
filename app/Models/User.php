@@ -30,6 +30,7 @@ class User extends Authenticatable
         'phone',
         'password',
         'membership_id',
+        'verification_token',
         'father_name',
         'dob',
         'permanent_address',
@@ -43,6 +44,36 @@ class User extends Authenticatable
         'status',
         'joined_at',
     ];
+
+    /**
+     * Ensure the user has a unique verification token and return it.
+     * Safe to call repeatedly – only generates a token if one is missing.
+     */
+    public function ensureVerificationToken(): string
+    {
+        if (empty($this->verification_token)) {
+            do {
+                $token = bin2hex(random_bytes(16)); // 32-char hex, hard to guess
+            } while (static::where('verification_token', $token)->exists());
+
+            $this->verification_token = $token;
+            $this->save();
+        }
+
+        return $this->verification_token;
+    }
+
+    /**
+     * Public URL that will open this member's verification certificate.
+     */
+    public function verificationUrl(): ?string
+    {
+        if (empty($this->verification_token)) {
+            return null;
+        }
+
+        return route('member.verify', ['token' => $this->verification_token]);
+    }
 
     public function payments()
     {

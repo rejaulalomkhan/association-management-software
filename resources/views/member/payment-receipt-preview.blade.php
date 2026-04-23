@@ -9,6 +9,8 @@
     $orgName = $settingsService->get('organization_name', config('app.name'));
     $orgLogo = $settingsService->get('organization_logo');
     $logoPath = $orgLogo ? asset('storage/' . $orgLogo) : null;
+    $orgEmail = $settingsService->get('organization_email');
+    $orgPhone = $settingsService->get('organization_phone');
     $profilePic = $payment->user->profile_pic;
     $profilePath = $profilePic ? asset('storage/' . $profilePic) : null;
 @endphp
@@ -81,8 +83,8 @@
                         <div>
                             <h2 class="mb-1 font-medium" style="font-size: 1.3em; color: #222;">{{ $orgName }}</h2>
                             <p class="text-gray-600" style="font-size: 0.95em;">
-                                Email: info@projonmo.org<br>
-                                Phone: +880 1XXX-XXXXXX
+                                @if($orgEmail) Email: {{ $orgEmail }}<br>@endif
+                                @if($orgPhone) Phone: {{ $orgPhone }}@endif
                             </p>
                         </div>
                     </div>

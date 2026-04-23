@@ -132,7 +132,7 @@
 <body>
     <div class="receipt-container">
         <div class="header">
-            <h1>{{ config('app.name', 'প্রজন্ম উন্নয়ন মিশন') }}</h1>
+            <h1>{{ org_name() }}</h1>
             <h2>পেমেন্ট রসিদ</h2>
         </div>
 
@@ -222,7 +222,7 @@
 
         <div class="footer">
             <p><strong>ধন্যবাদ আপনার পেমেন্টের জন্য!</strong></p>
-            <p style="margin-top: 10px;">যোগাযোগ: {{ config('app.name', 'প্রজন্ম উন্নয়ন মিশন') }}</p>
+            <p style="margin-top: 10px;">যোগাযোগ: {{ org_name() }}@if(org_phone()) — {{ org_phone() }}@endif @if(org_email()) | {{ org_email() }}@endif</p>
         </div>
 
         <div class="watermark">

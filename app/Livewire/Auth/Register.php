@@ -108,10 +108,11 @@ class Register extends Component
             $user->assignRole($memberRole);
         }
 
-        session()->flash('message', 'Registration successful! Please wait for admin approval.');
+        session()->flash('message', 'আপনার আবেদন সফলভাবে জমা হয়েছে। অনুগ্রহ করে অনুমোদনের জন্য অপেক্ষা করুন।');
 
-        // Redirect to login or pending page
-        return redirect()->route('tyro-login.login');
+        // Send the applicant to the pending-status page so they can see the
+        // submitted information and track approval status using their phone.
+        return redirect()->route('pending-status', ['phone' => $user->phone]);
     }
 
     public function render()

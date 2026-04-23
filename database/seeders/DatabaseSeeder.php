@@ -17,8 +17,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             \HasinHayder\Tyro\Database\Seeders\TyroSeeder::class,
+            ApplicationRolesSeeder::class,
             SettingsSeeder::class,
+            OrganizationSettingsSeeder::class,
             PaymentMethodsSeeder::class,
+            RegistrationTermsSeeder::class,
         ]);
     }
 }

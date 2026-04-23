@@ -113,8 +113,16 @@ class AddMember extends Component
         // Create user
         $user = User::create($data);
 
-        // Assign member role (role_id = 9)
-        $user->roles()->attach(9);
+        // Assign the "member" role (looked up by slug so we don't depend on a hard-coded id).
+        $memberRole = \HasinHayder\Tyro\Models\Role::where('slug', 'member')->first();
+        if ($memberRole) {
+            $user->assignRole($memberRole);
+        }
+
+        // If auto-approved, issue a public verification token so the QR code works immediately.
+        if ($this->auto_approve) {
+            $user->ensureVerificationToken();
+        }
 
         session()->flash('success', $this->auto_approve
             ? 'সদস্য সফলভাবে যুক্ত হয়েছে! সদস্য নম্বর: ' . $user->membership_id

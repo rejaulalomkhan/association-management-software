@@ -22,14 +22,16 @@ class PaymentMethodsSeeder extends Seeder
         ];
 
         foreach ($methods as $method) {
-            DB::table('payment_methods')->insert([
-                'name' => $method['name'],
-                'name_bn' => $method['name_bn'],
-                'is_active' => $method['is_active'],
-                'order' => $method['order'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            DB::table('payment_methods')->updateOrInsert(
+                ['name' => $method['name']],
+                [
+                    'name_bn' => $method['name_bn'],
+                    'is_active' => $method['is_active'],
+                    'order' => $method['order'],
+                    'updated_at' => now(),
+                    'created_at' => now(),
+                ]
+            );
         }
     }
 }

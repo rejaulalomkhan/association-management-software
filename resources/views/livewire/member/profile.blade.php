@@ -324,6 +324,13 @@
             </div>
         </div>
 
+        <!-- Verification QR Card -->
+        @if(auth()->user()->verification_token)
+            <div class="mb-4 w-full px-2 sm:px-0">
+                <x-member-qr-card :member="auth()->user()" />
+            </div>
+        @endif
+
         <!-- Due Payment Card -->
         <div class="mb-4 w-full">
             <livewire:member.due-payment-card />
