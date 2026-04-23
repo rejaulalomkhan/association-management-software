@@ -320,7 +320,18 @@
                                         </div>
                                     @endif
                                     <div class="ml-3">
-                                        <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $member->name }}</p>
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                            <span>{{ $member->name }}</span>
+                                            @if(($member->due_term ?? 'monthly') === 'yearly')
+                                                <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-300">
+                                                    বাৎসরিক
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-green-700 bg-green-100 rounded-full dark:bg-green-900/30 dark:text-green-300">
+                                                    মাসিক
+                                                </span>
+                                            @endif
+                                        </p>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ $member->phone }}</p>
                                     </div>
                                 </div>
@@ -339,7 +350,8 @@
                                         if (!str_starts_with($phoneForWa, '88')) {
                                             $phoneForWa = '88' . $phoneForWa;
                                         }
-                                        $message = urlencode("প্রিয় {$member->name},\nআপনার মোট {$member->due_months} মাসের বকেয়া রয়েছে। মোট বকেয়া: ৳" . number_format($member->due_amount, 2) . "।\n\n- " . $orgName);
+                                        $termText = ($member->due_term ?? 'monthly') === 'yearly' ? 'বাৎসরিক' : 'মাসিক';
+                                        $message = urlencode("প্রিয় {$member->name},\n({$termText} টার্ম) আপনার মোট {$member->due_months} মাসের বকেয়া রয়েছে। মোট বকেয়া: ৳" . number_format($member->due_amount, 2) . "।\n\n- " . $orgName);
                                     @endphp
                                     <a href="https://wa.me/{{ $phoneForWa }}?text={{ $message }}" target="_blank"
                                        class="inline-flex items-center justify-center w-8 h-8 text-white transition-all transform bg-green-500 rounded-lg hover:bg-green-600 hover:scale-110 shadow-md hover:shadow-lg"

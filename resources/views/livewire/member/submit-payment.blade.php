@@ -51,10 +51,17 @@
                             </svg>
                             <div>
                                 <p class="text-sm font-semibold text-orange-800 dark:text-orange-200">
-                                    <span class="font-bold">{{ $selectedUserName }}</span> এর পূর্বের
-                                    <span class="font-bold">{{ $overdueMonths }} {{ ($paymentTerm ?? 'monthly') === 'yearly' ? 'বছরের' : 'মাসের' }}</span>
-                                    <span class="font-bold">৳{{ number_format($overdueAmount, 0) }}</span>
-                                    টাকা বকেয়া রয়েছে
+                                    @if(($paymentTerm ?? 'monthly') === 'yearly')
+                                        <span class="font-bold">{{ $selectedUserName }}</span> এর
+                                        <span class="font-bold">{{ $overdueMonths }} মাসের</span>
+                                        <span class="font-bold">৳{{ number_format($overdueAmount, 0) }}</span>
+                                        বকেয়া রয়েছে
+                                    @else
+                                        <span class="font-bold">{{ $selectedUserName }}</span> এর পূর্বের
+                                        <span class="font-bold">{{ $overdueMonths }} মাসের</span>
+                                        <span class="font-bold">৳{{ number_format($overdueAmount, 0) }}</span>
+                                        টাকা বকেয়া রয়েছে
+                                    @endif
                                 </p>
                                 <p class="mt-1 text-xs text-orange-600 dark:text-orange-400">
                                     @if(($paymentTerm ?? 'monthly') === 'yearly')

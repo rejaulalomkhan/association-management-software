@@ -62,31 +62,33 @@ class Dashboard extends Component
                 ->pluck('user_id')
                 ->toArray();
 
-            // Members with an approved yearly payment for this year — they've
-            // paid the whole year in advance so they shouldn't appear in the
-            // "monthly due" list at all for any month of this year.
-            $paidYearlyIds = Payment::where('year', $year)
-                ->where('status', 'approved')
-                ->where('term', \App\Enums\PaymentTerm::YEARLY)
-                ->pluck('user_id')
-                ->toArray();
-
-            $paidMemberIds = array_unique(array_merge($paidMonthlyIds, $paidYearlyIds));
-
+            // Build due list term-aware:
+            //  - monthly term: unpaid for selected month+year if no approved monthly row
+            //  - yearly term:  show if selected year appears in yearly dues window
             $unpaidMembers = $allActiveMembers
-                ->whereNotIn('id', $paidMemberIds)
-                // Yearly-term members don't belong in a monthly due list —
-                // even when unpaid, their bucket is "years", not "months".
-                ->filter(fn ($m) => $m->effectivePaymentTerm() !== \App\Enums\PaymentTerm::YEARLY)
-                ->take(20);
+                ->map(function ($member) use ($memberService, $paidMonthlyIds, $year) {
+                    $dues = $memberService->calculateOutstandingDues($member);
+                    $term = $member->effectivePaymentTerm();
 
-            // Attach due info for unpaid members
-            $unpaidMembers = $unpaidMembers->map(function ($member) use ($memberService) {
-                $dues = $memberService->calculateOutstandingDues($member);
-                $member->due_months = $dues['unpaid_months'];
-                $member->due_amount = $dues['total_due'];
-                return $member;
-            });
+                    $isUnpaid = false;
+                    if ($term === \App\Enums\PaymentTerm::YEARLY) {
+                        $isUnpaid = in_array((int) $year, array_map('intval', $dues['unpaid_years'] ?? []), true);
+                    } else {
+                        $isUnpaid = !in_array((int) $member->id, $paidMonthlyIds, true);
+                    }
+
+                    if (!$isUnpaid) {
+                        return null;
+                    }
+
+                    $member->due_months = (int) ($dues['unpaid_months'] ?? 0);
+                    $member->due_amount = (float) ($dues['total_due'] ?? 0);
+                    $member->due_term = $term;
+                    return $member;
+                })
+                ->filter()
+                ->take(20)
+                ->values();
         }
 
         // Bank deposits stats
