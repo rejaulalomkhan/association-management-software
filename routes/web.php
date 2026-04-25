@@ -115,9 +115,9 @@ Route::middleware(['auth', 'roles:member,accountant,admin'])->prefix('member')->
     Route::get('/history', PaymentHistory::class)->name('history');
     Route::get('/bank-deposits', \App\Livewire\Member\BankDeposits::class)->name('bank-deposits');
     Route::get('/notifications', Notifications::class)->name('notifications');
-    Route::get('/payments/{payment}/receipt-preview', [PaymentReceiptController::class, 'preview'])
+    Route::get('/payments/{paymentId}/receipt-preview', [PaymentReceiptController::class, 'preview'])
         ->name('payments.receipt.preview');
-    Route::get('/payments/{payment}/receipt-download', [PaymentReceiptController::class, 'download'])
+    Route::get('/payments/{paymentId}/receipt-download', [PaymentReceiptController::class, 'download'])
         ->name('payments.receipt.download');
 });
 

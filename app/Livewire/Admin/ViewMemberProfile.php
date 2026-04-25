@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\User;
 use App\Models\Payment;
 use App\Services\MemberService;
+use App\Services\PdfService;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -158,6 +159,20 @@ class ViewMemberProfile extends Component
         $this->customTermInput = '';
         $this->editingTerm = false;
         session()->flash('message', 'ডিফল্ট পেমেন্ট টার্ম পুনরায় চালু করা হয়েছে।');
+    }
+
+    public function downloadReceipt($paymentId, PdfService $pdfService)
+    {
+        $payment = Payment::with(['user', 'paymentMethod', 'approver'])
+            ->where('user_id', $this->member->id)
+            ->findOrFail($paymentId);
+
+        if ($payment->status !== 'approved') {
+            session()->flash('message', 'শুধু অনুমোদিত পেমেন্টের রিসিপ্ট ডাউনলোড করা যাবে।');
+            return;
+        }
+
+        return $pdfService->generatePaymentReceipt($payment);
     }
 
     public function render()

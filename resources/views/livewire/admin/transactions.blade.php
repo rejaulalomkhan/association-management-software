@@ -209,13 +209,14 @@
                                     </button>
                                     @if ($transaction->status === 'approved')
                                         <!-- Download receipt for approved payments -->
-                                        <button wire:click="downloadReceipt({{ $transaction->id }})"
-                                                class="text-green-700 cursor-pointer hover:text-green-900"
-                                                title="রিসিপ্ট ডাউনলোড করুন">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <a href="{{ route('member.payments.receipt.download', $transaction->id) }}"
+                                           target="_blank"
+                                           class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-green-700 bg-green-100 hover:bg-green-600 hover:text-white rounded-lg transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
+                                           title="রিসিপ্ট ডাউনলোড করুন">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
                                             </svg>
-                                        </button>
+                                        </a>
                                     @endif
                                 </div>
                             </td>
