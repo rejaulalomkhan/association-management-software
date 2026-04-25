@@ -21,6 +21,7 @@
             overflow: visible;
             min-height: 297mm;
             position: relative;
+            padding-bottom: 80px;
         }
         .section-title {
             color: #1976D2;
@@ -68,8 +69,6 @@
         }
         .content-wrap {
             padding: 30px;
-            /* Keep room for footer block */
-            padding-bottom: 110px;
         }
         .details-table {
             width: 100%;
@@ -108,7 +107,8 @@
             font-size: 14px;
         }
         .approver-wrap {
-            margin-bottom: 10px;
+            margin-bottom: 0;
+            padding: 0 30px;
         }
         .approver-block {
             width: 260px;
@@ -119,14 +119,21 @@
             width: 100%;
         }
         .footer-wrap {
-            position: absolute;
+            position: fixed;
             left: 0;
             right: 0;
             bottom: 0;
             z-index: 30;
             padding: 16px 30px;
+            margin: 0;
             border-top: 2px solid #bfdbfe;
             background: #f8fafc;
+        }
+        .footer-wrap p {
+            margin: 0;
+        }
+        .footer-wrap .muted {
+            margin: 4px 0 0 0;
         }
         .muted { color: #6b7280; font-size: 14px; }
     </style>
@@ -312,23 +319,24 @@
                 </div>
             </div>
         @endif
-        <div class="footer-wrap">            
-            <table class="table-reset">
-                <tr>
-                    <td style="width:60%; vertical-align:top;">
-                        <p style="font-size: 15px; font-weight: 600; color: #1e3a8a;">{{ $orgName }}</p>
-                        <p class="muted" style="margin-top:4px;">
-                            @if($orgPhone) ফোন: {{ $orgPhone }} @endif
-                            @if($orgEmail) | ইমেইল: {{ $orgEmail }} @endif
-                        </p>
-                    </td>
-                    <td style="width:40%; vertical-align:top; text-align:right;">
-                        <p class="muted">রিসিপ্ট আইডি: #{{ $payment->id }}</p>
-                        <p class="muted" style="margin-top:4px;">প্রিন্ট সময়: {{ now()->format('d M, Y h:i A') }}</p>
-                    </td>
-                </tr>
-            </table>
-        </div>
+    </div>
+
+    <div class="footer-wrap">
+        <table class="table-reset">
+            <tr>
+                <td style="width:60%; vertical-align:top;">
+                    <p style="font-size: 15px; font-weight: 600; color: #1e3a8a;">{{ $orgName }}</p>
+                    <p class="muted">
+                        @if($orgPhone) ফোন: {{ $orgPhone }} @endif
+                        @if($orgEmail) | ইমেইল: {{ $orgEmail }} @endif
+                    </p>
+                </td>
+                <td style="width:40%; vertical-align:top; text-align:right;">
+                    <p class="muted">রিসিপ্ট আইডি: #{{ $payment->id }}</p>
+                    <p class="muted">প্রিন্ট সময়: {{ now()->format('d M, Y h:i A') }}</p>
+                </td>
+            </tr>
+        </table>
     </div>
 </body>
 </html>
