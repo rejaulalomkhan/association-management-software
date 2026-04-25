@@ -596,15 +596,6 @@ class SubmitPayment extends Component
             return $this->submitYearlyPayment();
         }
 
-        // Debug logging
-        \Log::info('Payment submission started', [
-            'payment_type' => $this->payment_type,
-            'paymentYear' => $this->paymentYear,
-            'selectedMonths' => $this->selectedMonths,
-            'payment_amount' => $this->payment_amount,
-            'payment_method_id' => $this->payment_method_id,
-        ]);
-
         // Prevent submitting payment for current month if already paid
         if ($this->payment_type === 'current') {
             $currentMonth = (int) date('n');
@@ -652,8 +643,6 @@ class SubmitPayment extends Component
             'payment_proof.image' => 'স্ক্রিনশট বা ছবি ফরম্যাট ভুল হয়েছে।',
             'payment_proof.max' => 'স্ক্রিনশট সর্বোচ্চ ২ এমবি হতে পারবে।',
         ]);
-
-        \Log::info('Validation passed');
 
         // If Hand Cash (ID = 1) is selected, auto-generate transaction ID
         if ($this->payment_method_id == 1) {
