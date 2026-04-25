@@ -518,7 +518,7 @@ class SubmitPayment extends Component
             'selectedYears.*'   => 'integer|min:2000|max:2100',
             'payment_reference' => 'nullable|string|max:255',
             'payment_note'      => 'nullable|string|max:500',
-            'payment_proof'     => 'nullable|image|max:2048',
+            'payment_proof'     => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
             'selectedUserId.required'     => 'কোন সদস্যের জন্য পেমেন্ট দিচ্ছেন তা নির্বাচন করুন।',
             'payment_amount.required'     => 'পেমেন্ট এর পরিমাণ প্রয়োজন।',
@@ -620,7 +620,7 @@ class SubmitPayment extends Component
             'selectedMonths' => 'required|array|min:1',
             'payment_reference' => 'nullable|string|max:255',
             'payment_note' => 'nullable|string|max:500',
-            'payment_proof' => 'nullable|image|max:2048',
+            'payment_proof' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
 
         // Add paymentYear validation for overdue and advance payments

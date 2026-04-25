@@ -47,7 +47,7 @@ class Register extends Component
         'religion' => 'required|string',
         'nationality' => 'required|string',
         'position' => 'nullable|string',
-        'profile_pic' => 'nullable|image|max:2048', // 2MB Max
+        'profile_pic' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB Max
     ];
 
     public function acceptTerms()

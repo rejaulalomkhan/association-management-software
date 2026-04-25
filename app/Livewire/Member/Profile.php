@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Member;
 
+use App\Services\PdfService;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
@@ -161,7 +162,7 @@ class Profile extends Component
         $this->closePasswordModal();
     }
 
-    public function downloadReceipt($paymentId)
+    public function downloadReceipt($paymentId, PdfService $pdfService)
     {
         $payment = Payment::with(['paymentMethod'])->where('user_id', auth()->id())->findOrFail($paymentId);
 
@@ -170,36 +171,7 @@ class Profile extends Component
             return;
         }
 
-        // Configure mPDF with Bangla font support
-        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
-        $fontDirs = $defaultConfig['fontDir'];
-
-        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
-        $fontData = $defaultFontConfig['fontdata'];
-
-        $path = public_path() . "/fonts";
-        
-        $mpdf = new \Mpdf\Mpdf([
-            'format' => 'A4',
-            'orientation' => 'P',
-            'fontDir' => array_merge($fontDirs, [$path]),
-            'fontdata' => $fontData + [
-                'solaimanlipi' => [
-                    'R' => 'SolaimanLipi.ttf',
-                    'useOTL' => 0xFF,
-                ],
-            ],
-            'default_font' => 'solaimanlipi'
-        ]);
-
-        $html = view('pdf.payment-receipt', ['payment' => $payment])->render();
-        $mpdf->WriteHTML($html);
-
-        $fileName = 'receipt-' . ($payment->transaction_id ?: ($payment->id)) . '.pdf';
-
-        return response()->streamDownload(function () use ($mpdf) {
-            echo $mpdf->Output('', 'S');
-        }, $fileName);
+        return $pdfService->generatePaymentReceipt($payment);
     }
 
     public function render()

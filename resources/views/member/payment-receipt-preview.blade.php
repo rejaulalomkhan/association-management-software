@@ -39,6 +39,13 @@
                 <div class="text-right" style="width: 40%;">
                     <p class="text-gray-600" style="font-size: 0.95em;">ইস্যু তারিখ: {{ optional($payment->created_at)->format('d M, Y') }}</p>
                     <p class="text-gray-600" style="font-size: 0.95em; margin-top: 3px;">অনুমোদনের তারিখ: {{ optional($payment->processed_at)->format('d M, Y') ?? 'পেন্ডিং' }}</p>
+                    @if($payment->status === 'approved')
+                        <a href="{{ route('member.payments.receipt.download', $payment->id) }}"
+                           class="inline-block px-4 py-2 mt-3 text-sm font-medium text-white transition rounded-md"
+                           style="background: #2563eb;">
+                            PDF Download
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>
@@ -181,11 +188,35 @@
             @endif
 
             <div class="mt-6 text-center">
-                <p style="color: #1976D2; font-size: 1.05em;"><strong>ধন্যবাদ!</strong> আপনার পেমেন্ট সফলভাবে গৃহীত এবং অনুমোদিত হয়েছে। 
-                @if($payment->approver)
-                    অনুমোদনকারী: {{ $payment->approver->name }}
-                @endif
-                </p>
+                <p style="color: #1976D2; font-size: 1.05em;"><strong>ধন্যবাদ!</strong> আপনার পেমেন্ট সফলভাবে গৃহীত এবং অনুমোদিত হয়েছে।</p>
+            </div>
+
+            @if($payment->status === 'approved')
+            <div class="mt-16">
+                <div class="text-left" style="max-width: 260px;">
+                    <p style="font-size: 1em; color: #111827; margin-bottom: 8px; text-align: center;">
+                        {{ $payment->approver?->name ?? 'N/A' }}
+                    </p>
+                    <div style="border-top: 1px solid #111827; width: 100%;"></div>
+                    <p style="font-size: 0.95em; color: #4b5563; margin-top: 6px; text-align: center;">অনুমোদনকারী</p>
+                </div>
+            </div>
+            @endif
+        </div>
+
+        <div class="px-8 py-5 border-t-2 rounded-b-lg" style="background: #f8fafc; border-color: #bfdbfe;">
+            <div class="flex items-start justify-between gap-6 text-sm" style="color: #475569;">
+                <div style="width: 60%;">
+                    <p style="font-weight: 600; color: #1e3a8a;">{{ $orgName }}</p>
+                    <p style="margin-top: 4px;">
+                        @if($orgPhone) ফোন: {{ $orgPhone }} @endif
+                        @if($orgEmail) | ইমেইল: {{ $orgEmail }} @endif
+                    </p>
+                </div>
+                <div class="text-right" style="width: 40%;">
+                    <p>রিসিপ্ট আইডি: #{{ $payment->id }}</p>
+                    <p style="margin-top: 4px;">প্রিন্ট সময়: {{ now()->format('d M, Y h:i A') }}</p>
+                </div>
             </div>
         </div>
     </div>

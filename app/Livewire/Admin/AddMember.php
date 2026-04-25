@@ -67,7 +67,7 @@ class AddMember extends Component
             'religion' => 'nullable|string|max:50',
             'nationality' => 'nullable|string|max:50',
             'position' => 'nullable|string|max:255',
-            'profile_pic' => 'nullable|image|max:2048',
+            'profile_pic' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'auto_approve' => 'boolean',
         ];
     }

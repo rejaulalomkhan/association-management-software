@@ -29,8 +29,8 @@ class BankDepositForm extends Component
         'month' => 'required|integer|min:1|max:12',
         'year' => 'required|integer',
         'amount' => 'required|numeric|min:0.01',
-        'bankMessage' => 'required|image|max:5120', // 5MB
-        'bankReceipt' => 'nullable|image|max:5120',
+        'bankMessage' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB
+        'bankReceipt' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
         'notes' => 'nullable|string|max:1000',
     ];
 

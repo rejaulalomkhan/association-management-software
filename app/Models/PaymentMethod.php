@@ -2,11 +2,21 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * PaymentMethod model for storing available payment methods.
+ *
+ * @property string $name Payment method name (English)
+ * @property string|null $name_bn Payment method name (Bengali)
+ * @property bool $is_active Whether the method is active
+ * @property int $order Display order
+ */
 class PaymentMethod extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'name',
         'name_bn',

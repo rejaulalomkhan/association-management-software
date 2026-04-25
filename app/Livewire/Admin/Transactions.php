@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Payment;
 use App\Models\User;
 use App\Helpers\NotificationHelper;
+use App\Services\PdfService;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -128,7 +129,7 @@ class Transactions extends Component
         session()->flash('success', 'পেমেন্ট প্রত্যাখ্যান করা হয়েছে');
     }
 
-    public function exportReport()
+    public function exportReport(PdfService $pdfService)
     {
         $query = Payment::with(['user', 'paymentMethod']);
 
@@ -152,36 +153,11 @@ class Transactions extends Component
 
         $transactions = $query->orderBy('created_at', 'desc')->get();
 
-        // Configure mPDF
-        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
-        $fontDirs = $defaultConfig['fontDir'];
-        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
-        $fontData = $defaultFontConfig['fontdata'];
-        $path = public_path() . "/fonts";
-        
-        $mpdf = new \Mpdf\Mpdf([
-            'format' => 'A4',
-            'orientation' => 'P',
-            'fontDir' => array_merge($fontDirs, [$path]),
-            'fontdata' => $fontData + [
-                'solaimanlipi' => [
-                    'R' => 'SolaimanLipi.ttf',
-                    'useOTL' => 0xFF,
-                ],
-            ],
-            'default_font' => 'solaimanlipi'
-        ]);
-
-        $html = view('pdf.transactions-report', [
-            'transactions' => $transactions,
-            'month' => $this->selectedMonth,
-            'year' => $this->selectedYear,
-        ])->render();
-        $mpdf->WriteHTML($html);
-
-        return response()->streamDownload(function() use ($mpdf) {
-            echo $mpdf->Output('', 'S');
-        }, 'transactions-report-' . date('Y-m-d') . '.pdf');
+        return $pdfService->generateTransactionsReport(
+            $transactions,
+            $this->selectedMonth ? date('F', mktime(0, 0, 0, (int) $this->selectedMonth, 1)) : null,
+            $this->selectedYear ? (int) $this->selectedYear : null
+        );
     }
 
     public function viewPayment($paymentId)
@@ -190,7 +166,7 @@ class Transactions extends Component
         $this->dispatch('open-view-modal');
     }
 
-    public function downloadReceipt($paymentId)
+    public function downloadReceipt($paymentId, PdfService $pdfService)
     {
         $payment = Payment::with(['user', 'paymentMethod', 'approver'])->findOrFail($paymentId);
 
@@ -199,34 +175,7 @@ class Transactions extends Component
             return;
         }
 
-        // Configure mPDF
-        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
-        $fontDirs = $defaultConfig['fontDir'];
-        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
-        $fontData = $defaultFontConfig['fontdata'];
-        $path = public_path() . "/fonts";
-        
-        $mpdf = new \Mpdf\Mpdf([
-            'format' => 'A4',
-            'orientation' => 'P',
-            'fontDir' => array_merge($fontDirs, [$path]),
-            'fontdata' => $fontData + [
-                'solaimanlipi' => [
-                    'R' => 'SolaimanLipi.ttf',
-                    'useOTL' => 0xFF,
-                ],
-            ],
-            'default_font' => 'solaimanlipi'
-        ]);
-
-        $html = view('pdf.payment-receipt', ['payment' => $payment])->render();
-        $mpdf->WriteHTML($html);
-
-        $fileName = 'receipt-' . ($payment->transaction_id ?: ($payment->id)) . '.pdf';
-
-        return response()->streamDownload(function () use ($mpdf) {
-            echo $mpdf->Output('', 'S');
-        }, $fileName);
+        return $pdfService->generatePaymentReceipt($payment);
     }
 
     public function render()

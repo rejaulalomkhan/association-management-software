@@ -6,14 +6,30 @@ use App\Enums\PaymentTerm;
 use App\Models\User;
 use Carbon\Carbon;
 
+/**
+ * Service for member management and dues calculation.
+ *
+ * Handles membership ID generation, dues calculation (monthly/yearly),
+ * member approval/rejection, and unpaid month tracking.
+ */
 class MemberService
 {
+    /**
+     * Create a new MemberService instance.
+     *
+     * @param SettingsService $settingsService The settings service instance
+     */
     public function __construct(
         private SettingsService $settingsService
     ) {}
 
     /**
      * Generate unique membership ID.
+     *
+     * Format: PUM-YY-XXXX (e.g., PUM-26-0001)
+     * Where YY is the current year and XXXX is a sequential number.
+     *
+     * @return string The generated membership ID
      */
     public function generateMembershipId(): string
     {
@@ -46,6 +62,9 @@ class MemberService
      *  - yearly  → iterate year-by-year, each year is "paid" when a
      *              yearly-term approved payment exists for that year OR
      *              all 12 months are covered by monthly-term payments.
+     *
+     * @param User $user The member to calculate dues for
+     * @return array Dues information including unpaid_months, total_due, etc.
      */
     public function calculateOutstandingDues(User $user): array
     {
@@ -309,9 +328,11 @@ class MemberService
     /**
      * Get list of unpaid months for a member.
      *
-     * For yearly members we return one "virtual" entry per unpaid year
-     * instead of iterating 12 months — the payment submission page
-     * renders a year picker for yearly users anyway.
+     * For yearly members returns one "virtual" entry per unpaid year.
+     * For monthly members returns month-by-month unpaid entries.
+     *
+     * @param User $user The member to get unpaid months for
+     * @return array Array of unpaid periods with month, year, amount
      */
     public function getUnpaidMonths(User $user): array
     {
@@ -387,7 +408,12 @@ class MemberService
     }
 
     /**
-     * Approve a member.
+     * Approve a pending member.
+     *
+     * Sets status to active, generates membership ID and verification token.
+     *
+     * @param User $user The member to approve
+     * @return bool True if approval was successful
      */
     public function approveMember(User $user): bool
     {
@@ -409,7 +435,12 @@ class MemberService
     }
 
     /**
-     * Reject a member.
+     * Reject a pending member.
+     *
+     * Sets status to inactive.
+     *
+     * @param User $user The member to reject
+     * @return bool True if rejection was successful
      */
     public function rejectMember(User $user): bool
     {

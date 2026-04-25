@@ -2,18 +2,20 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
     /**
-     * A basic test example.
+     * Test that the home route redirects unauthenticated users to login.
+     * This is the correct behavior - home should not be accessible without auth.
      */
-    public function test_the_application_returns_a_successful_response(): void
+    public function test_home_redirects_to_login_when_not_authenticated(): void
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        // Home route should redirect to login for unauthenticated users
+        $response->assertStatus(302);
+        $response->assertRedirect(route('tyro-login.login'));
     }
 }

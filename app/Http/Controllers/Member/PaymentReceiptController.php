@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
-use Illuminate\Http\Request;
+use App\Services\PdfService;
 
 class PaymentReceiptController extends Controller
 {
@@ -27,6 +27,22 @@ class PaymentReceiptController extends Controller
             abort(403, 'রসিদ শুধুমাত্র অনুমোদিত পেমেন্টের জন্য পাওয়া যায়।');
         }
 
-        return redirect()->route('member.payments.receipt.preview', $payment->id);
+        $fileName = 'receipt-' . ($payment->transaction_id ?: $payment->id) . '.pdf';
+
+        return app(PdfService::class)->downloadFromView(
+            'pdf.payment-receipt',
+            ['payment' => $payment],
+            $fileName,
+            'A4',
+            'P',
+            [
+                'margin_left' => 0,
+                'margin_right' => 0,
+                'margin_top' => 0,
+                'margin_bottom' => 0,
+                'margin_header' => 0,
+                'margin_footer' => 0,
+            ]
+        );
     }
 }

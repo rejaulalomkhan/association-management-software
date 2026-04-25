@@ -216,13 +216,28 @@
             @endif
         </div>
 
-        <div class="footer-note">
+        <div class="footer-note" style="display: block; background-color: #fef3c7; border-left: 4px solid #f59e0b; color: #78350f; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
             <strong>দ্রষ্টব্য:</strong> এই রসিদটি কম্পিউটার দ্বারা স্বয়ংক্রিয়ভাবে তৈরি করা হয়েছে এবং কোন স্বাক্ষর প্রয়োজন নেই।
         </div>
+
+        @if($payment->status === 'approved')
+        <div style="margin-top: 45px; margin-bottom: 20px; text-align: left;">
+            <div style="width: 220px;">
+                <p style="font-size: 14px; color: #111827; margin-bottom: 8px; text-align: center;">
+                    {{ $payment->approver?->name ?? 'N/A' }}
+                </p>
+                <div style="border-top: 1px solid #111827; width: 100%;"></div>
+                <p style="font-size: 13px; color: #4b5563; margin-top: 6px; text-align: center;">অনুমোদনকারী</p>
+            </div>
+        </div>
+        @endif
 
         <div class="footer">
             <p><strong>ধন্যবাদ আপনার পেমেন্টের জন্য!</strong></p>
             <p style="margin-top: 10px;">যোগাযোগ: {{ org_name() }}@if(org_phone()) — {{ org_phone() }}@endif @if(org_email()) | {{ org_email() }}@endif</p>
+            <p style="margin-top: 8px; font-size: 11px;">
+                রিসিপ্ট আইডি: #{{ $payment->id }} | প্রস্তুত: {{ now()->format('d/m/Y h:i A') }}
+            </p>
         </div>
 
         <div class="watermark">
