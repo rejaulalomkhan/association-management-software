@@ -17,6 +17,7 @@
                         'bank'           => ['label' => 'ব্যাংক একাউন্ট', 'icon' => 'M4 10h16M4 6h16l-2 4H6L4 6zm2 4v7a2 2 0 002 2h8a2 2 0 002-2v-7'],
                         'payment-methods'=> ['label' => 'পেমেন্ট মাধ্যম', 'icon' => 'M3 10h18M5 6h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z'],
                         'terms'          => ['label' => 'শর্তাবলী', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+                        'pwa'            => ['label' => 'PWA সেটিংস', 'icon' => 'M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z'],
                     ];
                 @endphp
 
@@ -320,6 +321,119 @@
                     <button type="submit"
                         class="px-6 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         শর্তাবলী সংরক্ষণ করুন
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {{-- ================ PWA Settings Tab ================ --}}
+        <div class="p-6 {{ $activeTab === 'pwa' ? '' : 'hidden' }}">
+            <h2 class="mb-2 text-xl font-semibold text-gray-800">PWA (Progressive Web App) সেটিংস</h2>
+            <p class="mb-4 text-sm text-gray-500">
+                এই সেটিংস মোবাইল অ্যাপ আইকন, নাম এবং কালার নির্ধারণ করে। সদস্য যখন অ্যাপ ইনস্টল করবে, এই নাম এবং আইকন দেখাবে।
+            </p>
+
+            <form wire:submit.prevent="savePwaSettings" class="space-y-5">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                        <label class="block mb-1 text-sm font-medium text-gray-700">অ্যাপের ছোট নাম (Short Name)</label>
+                        <input type="text" wire:model="pwa_short_name" maxlength="20"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            placeholder="যেমন: প্রজন্ম">
+                        <p class="mt-1 text-xs text-gray-500">মোবাইল হোম স্ক্রিনে আইকনের নিচে দেখাবে (সর্বোচ্চ ২০ অক্ষর)।</p>
+                        @error('pwa_short_name') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block mb-1 text-sm font-medium text-gray-700">অ্যাপের সম্পূর্ণ নাম</label>
+                        <input type="text" value="{{ $organization_name }}" disabled
+                            class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-600">
+                        <p class="mt-1 text-xs text-gray-500">সংগঠনের নাম থেকে আসে (সংগঠন ট্যাব থেকে পরিবর্তন করুন)।</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                        <label class="block mb-1 text-sm font-medium text-gray-700">Theme Color</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" wire:model="pwa_theme_color"
+                                class="w-12 h-10 border border-gray-300 rounded cursor-pointer">
+                            <input type="text" wire:model="pwa_theme_color" maxlength="7"
+                                class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                placeholder="#3b82f6">
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">অ্যাপের টুলবার এবং স্ট্যাটাস বারের কালার।</p>
+                        @error('pwa_theme_color') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block mb-1 text-sm font-medium text-gray-700">Background Color</label>
+                        <div class="flex items-center gap-2">
+                            <input type="color" wire:model="pwa_background_color"
+                                class="w-12 h-10 border border-gray-300 rounded cursor-pointer">
+                            <input type="text" wire:model="pwa_background_color" maxlength="7"
+                                class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                placeholder="#ffffff">
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">স্পল্শ স্ক্রিনের ব্যাকগ্রাউন্ড কালার।</p>
+                        @error('pwa_background_color') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                        <label class="block mb-1 text-sm font-medium text-gray-700">App Icon (192x192)</label>
+                        @if($pwa_current_icon_192)
+                            <div class="mb-2">
+                                <img src="{{ asset('storage/' . $pwa_current_icon_192) }}" alt="Icon 192" class="object-cover w-20 h-20 rounded-lg border">
+                            </div>
+                        @endif
+                        <input type="file" wire:model="pwa_new_icon_192" accept="image/png"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <p class="mt-1 text-xs text-gray-500">PNG format only. 192x192 pixels recommended for Android.</p>
+                        @error('pwa_new_icon_192') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block mb-1 text-sm font-medium text-gray-700">App Icon (512x512)</label>
+                        @if($pwa_current_icon_512)
+                            <div class="mb-2">
+                                <img src="{{ asset('storage/' . $pwa_current_icon_512) }}" alt="Icon 512" class="object-cover w-20 h-20 rounded-lg border">
+                            </div>
+                        @endif
+                        <input type="file" wire:model="pwa_new_icon_512" accept="image/png"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <p class="mt-1 text-xs text-gray-500">PNG format only. 512x512 pixels recommended for high-res displays.</p>
+                        @error('pwa_new_icon_512') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <h3 class="mb-2 text-sm font-medium text-gray-700">Preview</h3>
+                    <div class="flex items-center gap-4">
+                        <div class="flex flex-col items-center">
+                            @if($pwa_current_icon_192)
+                                <img src="{{ asset('storage/' . $pwa_current_icon_192) }}" alt="Icon" class="w-12 h-12 rounded-lg">
+                            @else
+                                <div class="w-12 h-12 bg-gray-300 rounded-lg flex items-center justify-center text-gray-500 text-xs">Icon</div>
+                            @endif
+                            <span class="mt-1 text-xs text-gray-600">{{ $pwa_short_name }}</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            @if($pwa_current_icon_512)
+                                <img src="{{ asset('storage/' . $pwa_current_icon_512) }}" alt="Icon" class="w-16 h-16 rounded-lg">
+                            @else
+                                <div class="w-16 h-16 bg-gray-300 rounded-lg flex items-center justify-center text-gray-500 text-xs">Icon</div>
+                            @endif
+                            <span class="mt-1 text-xs text-gray-600">{{ $pwa_short_name }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="submit"
+                        class="px-6 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        PWA সেটিংস সংরক্ষণ করুন
                     </button>
                 </div>
             </form>

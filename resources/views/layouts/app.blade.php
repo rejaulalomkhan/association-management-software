@@ -8,13 +8,9 @@
     <title>{{ org_name() }}</title>
 
     <!-- Favicon -->
-    @php
-        $faviconLogo = org_logo_path();
-    @endphp
-    @if($faviconLogo && file_exists(storage_path('app/public/' . $faviconLogo)))
-        <link rel="icon" type="image/png" href="{{ asset('storage/' . $faviconLogo) }}">
-        <link rel="shortcut icon" type="image/png" href="{{ asset('storage/' . $faviconLogo) }}">
-    @endif
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,10 +36,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="{{ org_name() }}">
-    <link rel="apple-touch-icon" href="/images/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
     
     <!-- Theme Color -->
-    <meta name="theme-color" content="#3b82f6">
+    @php
+        $themeColor = app(\App\Services\SettingsService::class)->get('pwa_theme_color', '#3b82f6');
+    @endphp
+    <meta name="theme-color" content="{{ $themeColor }}">
 </head>
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
     <!-- Global Livewire Loading Indicator -->

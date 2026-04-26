@@ -1,18 +1,21 @@
 {{-- Dynamic manifest is served by our own route in routes/web.php (reads from settings). --}}
 <link rel="manifest" href="{{ url('/manifest.json') }}">
 <!-- Chrome for Android theme color -->
-<meta name="theme-color" content="{{ $config['theme_color'] }}">
+@php
+    $themeColor = app(\App\Services\SettingsService::class)->get('pwa_theme_color', $config['theme_color'] ?? '#3b82f6');
+@endphp
+<meta name="theme-color" content="{{ $themeColor }}">
 
 <!-- Add to homescreen for Chrome on Android -->
 <meta name="mobile-web-app-capable" content="{{ $config['display'] == 'standalone' ? 'yes' : 'no' }}">
 <meta name="application-name" content="{{ org_name($config['short_name']) }}">
-<link rel="icon" sizes="{{ data_get(end($config['icons']), 'sizes') }}" href="{{ org_logo_url() ?? data_get(end($config['icons']), 'src') }}">
+<link rel="icon" sizes="192x192" href="{{ asset('images/icons/icon-192x192.png') }}">
 
 <!-- Add to homescreen for Safari on iOS -->
 <meta name="apple-mobile-web-app-capable" content="{{ $config['display'] == 'standalone' ? 'yes' : 'no' }}">
 <meta name="apple-mobile-web-app-status-bar-style" content="{{  $config['status_bar'] }}">
 <meta name="apple-mobile-web-app-title" content="{{ org_name($config['short_name']) }}">
-<link rel="apple-touch-icon" href="{{ org_logo_url() ?? data_get(end($config['icons']), 'src') }}">
+<link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
 
 
 <link href="{{ $config['splash']['640x1136'] }}" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
@@ -28,7 +31,7 @@
 
 <!-- Tile for Win8 -->
 <meta name="msapplication-TileColor" content="{{ $config['background_color'] }}">
-<meta name="msapplication-TileImage" content="{{ data_get(end($config['icons']), 'src') }}">
+<meta name="msapplication-TileImage" content="{{ asset('images/icons/icon-192x192.png') }}">
 
 <script type="text/javascript">
     // Initialize the service worker

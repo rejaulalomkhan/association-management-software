@@ -33,11 +33,20 @@ class Settings extends Component
     public $registration_terms;
     public $registration_terms_acceptance_label;
 
+    // PWA Settings
+    public $pwa_short_name;
+    public $pwa_theme_color;
+    public $pwa_background_color;
+    public $pwa_new_icon_192;
+    public $pwa_new_icon_512;
+    public $pwa_current_icon_192;
+    public $pwa_current_icon_512;
+
     public $paymentMethods = [];
     public $newMethodName = '';
     public $newMethodNameBn = '';
 
-    // UI state: currently active tab (organization | bank | payment-methods | terms)
+    // UI state: currently active tab (organization | bank | payment-methods | terms | pwa)
     public string $activeTab = 'organization';
 
     public $successMessage = '';
@@ -71,6 +80,13 @@ class Settings extends Component
             'আমি উপরের সকল শর্তাবলী পড়েছি এবং সম্মত হয়েছি।'
         );
 
+        // PWA Settings
+        $this->pwa_short_name = $settingsService->get('pwa_short_name', mb_substr($this->organization_name, 0, 12));
+        $this->pwa_theme_color = $settingsService->get('pwa_theme_color', '#3b82f6');
+        $this->pwa_background_color = $settingsService->get('pwa_background_color', '#ffffff');
+        $this->pwa_current_icon_192 = $settingsService->get('pwa_icon_192', '');
+        $this->pwa_current_icon_512 = $settingsService->get('pwa_icon_512', '');
+
         $this->loadPaymentMethods();
     }
 
@@ -79,7 +95,7 @@ class Settings extends Component
      */
     public function setTab(string $tab): void
     {
-        $this->activeTab = in_array($tab, ['organization', 'bank', 'payment-methods', 'terms'], true)
+        $this->activeTab = in_array($tab, ['organization', 'bank', 'payment-methods', 'terms', 'pwa'], true)
             ? $tab
             : 'organization';
     }
@@ -174,6 +190,52 @@ class Settings extends Component
         );
 
         $this->successMessage = 'শর্তাবলী ডিফল্টে রিসেট করা হয়েছে।';
+    }
+
+    /**
+     * Save PWA settings (app name, colors, icons).
+     */
+    public function savePwaSettings(SettingsService $settingsService): void
+    {
+        $this->validate([
+            'pwa_short_name' => 'required|string|max:20',
+            'pwa_theme_color' => 'required|string|regex:/^#[a-fA-F0-9]{6}$/',
+            'pwa_background_color' => 'required|string|regex:/^#[a-fA-F0-9]{6}$/',
+            'pwa_new_icon_192' => 'nullable|image|max:512|mimes:png',
+            'pwa_new_icon_512' => 'nullable|image|max:2048|mimes:png',
+        ], [
+            'pwa_theme_color.regex' => 'Theme color must be a valid hex color (e.g., #3b82f6)',
+            'pwa_background_color.regex' => 'Background color must be a valid hex color (e.g., #ffffff)',
+        ], [
+            'pwa_short_name' => 'Short Name',
+            'pwa_theme_color' => 'Theme Color',
+            'pwa_background_color' => 'Background Color',
+            'pwa_new_icon_192' => 'Icon 192x192',
+            'pwa_new_icon_512' => 'Icon 512x512',
+        ]);
+
+        // Save text settings
+        $settingsService->set('pwa_short_name', $this->pwa_short_name);
+        $settingsService->set('pwa_theme_color', $this->pwa_theme_color);
+        $settingsService->set('pwa_background_color', $this->pwa_background_color);
+
+        // Upload and save 192x192 icon
+        if ($this->pwa_new_icon_192) {
+            $icon192Path = $this->pwa_new_icon_192->store('pwa-icons', 'public');
+            $settingsService->set('pwa_icon_192', $icon192Path);
+            $this->pwa_current_icon_192 = $icon192Path;
+        }
+
+        // Upload and save 512x512 icon
+        if ($this->pwa_new_icon_512) {
+            $icon512Path = $this->pwa_new_icon_512->store('pwa-icons', 'public');
+            $settingsService->set('pwa_icon_512', $icon512Path);
+            $this->pwa_current_icon_512 = $icon512Path;
+        }
+
+        $this->successMessage = 'PWA সেটিংস সফলভাবে সংরক্ষিত হয়েছে!';
+        $this->pwa_new_icon_192 = null;
+        $this->pwa_new_icon_512 = null;
     }
 
     public function addPaymentMethod()

@@ -41,17 +41,25 @@ Route::get('/', function () {
 Route::get('/register', Register::class)->name('register');
 Route::get('/pending-status/{phone?}', PendingStatus::class)->name('pending-status');
 
-// Dynamic PWA manifest — reads name/short-name from the organization settings
-// so that when admin changes the org name/logo the installed PWA identity
+// Dynamic PWA manifest — reads name/short-name/colors from the organization settings
+// so that when admin changes the org name/logo/colors the installed PWA identity
 // stays aligned. Any icon file that doesn't exist on disk is filtered out.
 Route::get('/manifest.json', function () {
+    $settingsService = app(\App\Services\SettingsService::class);
+
     $name = org_name();
     $shortNameDefault = mb_substr($name, 0, 12);
-    $shortName = (string) org_settings()->get('organization_short_name', $shortNameDefault);
+    $shortName = (string) $settingsService->get('pwa_short_name', $shortNameDefault);
+    $themeColor = $settingsService->get('pwa_theme_color', '#3b82f6');
+    $backgroundColor = $settingsService->get('pwa_background_color', '#ffffff');
 
     $logoPath = org_logo_path();
+    $pwaIcon192 = $settingsService->get('pwa_icon_192', '');
+    $pwaIcon512 = $settingsService->get('pwa_icon_512', '');
+
     $iconSizes = ['72x72', '96x96', '128x128', '144x144', '152x152', '192x192', '384x384', '512x512'];
     $icons = [];
+
     foreach ($iconSizes as $size) {
         $relPath = "/images/icons/icon-{$size}.png";
         if (file_exists(public_path($relPath))) {
@@ -72,6 +80,29 @@ Route::get('/manifest.json', function () {
         }
     }
 
+    // Add custom PWA icons from settings (these take precedence)
+    if ($pwaIcon192 && file_exists(storage_path('app/public/' . $pwaIcon192))) {
+        // Remove default 192x192 icons and add custom one at the beginning
+        $icons = array_filter($icons, fn($icon) => $icon['sizes'] !== '192x192');
+        array_unshift($icons, [
+            'src'     => asset('storage/' . $pwaIcon192),
+            'sizes'   => '192x192',
+            'type'    => 'image/png',
+            'purpose' => 'any maskable',
+        ]);
+    }
+
+    if ($pwaIcon512 && file_exists(storage_path('app/public/' . $pwaIcon512))) {
+        // Remove default 512x512 icons and add custom one at the beginning
+        $icons = array_filter($icons, fn($icon) => $icon['sizes'] !== '512x512');
+        array_unshift($icons, [
+            'src'     => asset('storage/' . $pwaIcon512),
+            'sizes'   => '512x512',
+            'type'    => 'image/png',
+            'purpose' => 'any maskable',
+        ]);
+    }
+
     // Prefer the uploaded org logo as the primary icon (browsers will still
     // fall back to the PNGs above for install prompts that need specific sizes).
     if ($logoPath && file_exists(storage_path('app/public/' . $logoPath))) {
@@ -89,10 +120,10 @@ Route::get('/manifest.json', function () {
         'description'      => $name . ' - সদস্য ব্যবস্থাপনা সিস্টেম',
         'start_url'        => '/',
         'display'          => 'standalone',
-        'background_color' => '#ffffff',
-        'theme_color'      => '#3b82f6',
+        'background_color' => $backgroundColor,
+        'theme_color'      => $themeColor,
         'orientation'      => 'portrait-primary',
-        'icons'            => $icons,
+        'icons'            => array_values($icons),
     ];
 
     return response()->json($manifest, 200, [

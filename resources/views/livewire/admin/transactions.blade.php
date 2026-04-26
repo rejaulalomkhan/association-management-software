@@ -310,7 +310,24 @@
                                 $phoneForWa = '88' . $phoneForWa;
                             }
                             $monthName = \App\Helpers\BanglaHelper::getBanglaMonth($selectedPaymentForApprove->month);
-                            $message = urlencode("প্রিয় {$selectedPaymentForApprove->user->name},\nআপনার {$monthName} {$selectedPaymentForApprove->year} মাসের পেমেন্ট (৳" . number_format($selectedPaymentForApprove->amount, 2) . ") সফলভাবে অনুমোদিত হয়েছে। ধন্যবাদ।\n\n- " . $orgName);
+                            $previewUrl = route('member.payments.receipt.preview', $selectedPaymentForApprove->id);
+                            $downloadUrl = route('member.payments.receipt.download', $selectedPaymentForApprove->id);
+                            $messageLines = [
+                                "প্রিয় {$selectedPaymentForApprove->user->name},",
+                                "",
+                                "আপনার {$monthName} {$selectedPaymentForApprove->year} মাসের পেমেন্ট (৳" . number_format($selectedPaymentForApprove->amount, 2) . ") সফলভাবে অনুমোদিত হয়েছে।",
+                                "",
+                                "📄 রিসিপ্ট প্রিভিউ:",
+                                $previewUrl,
+                                "",
+                                "📥 রিসিপ্ট ডাউনলোড:",
+                                $downloadUrl,
+                                "",
+                                "ধন্যবাদ!",
+                                "",
+                                "- " . $orgName
+                            ];
+                            $message = urlencode(implode("\n", $messageLines));
                         @endphp
                         <div class="mb-6 text-center">
                             <a href="https://wa.me/{{ $phoneForWa }}?text={{ $message }}" target="_blank"
