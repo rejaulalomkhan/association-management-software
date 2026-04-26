@@ -24,10 +24,19 @@ class Transactions extends Component
 
     public function mount()
     {
-        // Initialize with current month and year as default
-        // Use string type to match select option values
-        $this->selectedMonth = date('n'); // Current month (1-12) as string
-        $this->selectedYear = date('Y');  // Current year as string
+        // Check if there are pending transactions
+        $pendingCount = Payment::where('status', 'pending')->count();
+
+        // If pending transactions exist, show them by default
+        if ($pendingCount > 0) {
+            $this->selectedStatus = 'pending';
+            $this->selectedMonth = '';
+            $this->selectedYear = '';
+        } else {
+            // Otherwise, show current month and year as default
+            $this->selectedMonth = date('n'); // Current month (1-12)
+            $this->selectedYear = date('Y');  // Current year
+        }
     }
 
     public function updatingSelectedMonth()
@@ -176,6 +185,21 @@ class Transactions extends Component
         }
 
         return $pdfService->generatePaymentReceipt($payment);
+    }
+
+    public function deletePayment($paymentId)
+    {
+        $payment = Payment::findOrFail($paymentId);
+
+        // Only pending payments can be deleted
+        if ($payment->status !== 'pending') {
+            session()->flash('success', 'শুধু অপেক্ষমান পেমেন্ট মুছে ফেলা যায়।');
+            return;
+        }
+
+        $payment->delete();
+
+        session()->flash('success', 'পেমেন্ট সফলভাবে মুছে ফেলা হয়েছে।');
     }
 
     public function render()

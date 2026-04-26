@@ -64,6 +64,26 @@ class PendingRegistrations extends Component
         }
     }
 
+    public function deleteRegistration($userId)
+    {
+        $user = User::find($userId);
+
+        if (!$user) {
+            session()->flash('error', 'নিবন্ধন পাওয়া যায়নি।');
+            return;
+        }
+
+        // Only pending registrations can be deleted
+        if ($user->status !== 'pending') {
+            session()->flash('error', 'শুধু অপেক্ষমান নিবন্ধন মুছে ফেলা যায়।');
+            return;
+        }
+
+        $user->delete();
+
+        session()->flash('success', 'নিবন্ধন সফলভাবে মুছে ফেলা হয়েছে।');
+    }
+
     public function render()
     {
         $pendingUsers = User::where('status', 'pending')

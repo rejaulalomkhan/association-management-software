@@ -58,6 +58,11 @@
                                 class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
                                 অনুমোদন
                             </button>
+                            <button wire:click="deleteRegistration({{ $user->id }})"
+                                wire:confirm="আপনি কি নিশ্চিত যে এই নিবন্ধন মুছে ফেলতে চান? এটি পুনরুদ্ধার করা যাবে না।"
+                                class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700">
+                                মুছুন
+                            </button>
                         </td>
                     </tr>
                     @endforeach
