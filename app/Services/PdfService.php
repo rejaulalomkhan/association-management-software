@@ -50,7 +50,11 @@ class PdfService
                     'useOTL' => 0xFF,
                 ],
             ],
-            'default_font' => 'solaimanlipi'
+            'default_font' => 'solaimanlipi',
+            // Optimization settings for smaller PDF size
+            'img_dpi' => 72,           // Lower DPI for smaller images
+            'mode' => 'c',             // Compact mode - smaller PDF output
+            'allow_charset_conversion' => false,
         ], $mpdfConfig));
     }
 
@@ -105,7 +109,23 @@ class PdfService
     {
         $fileName = 'receipt-' . ($payment->transaction_id ?: $payment->id) . '.pdf';
 
-        return $this->downloadFromView('pdf.payment-receipt', ['payment' => $payment], $fileName);
+        return $this->downloadFromView(
+            'pdf.payment-receipt',
+            ['payment' => $payment],
+            $fileName,
+            'A4',
+            'P',
+            [
+                'margin_left' => 0,
+                'margin_right' => 0,
+                'margin_top' => 0,
+                'margin_bottom' => 0,
+                'margin_header' => 0,
+                'margin_footer' => 0,
+                'img_dpi' => 72,
+                'mode' => 'c',
+            ]
+        );
     }
 
     /**

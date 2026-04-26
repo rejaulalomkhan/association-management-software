@@ -54,6 +54,8 @@ class PaymentReceiptController extends Controller
                 'margin_bottom' => 0,
                 'margin_header' => 0,
                 'margin_footer' => 0,
+                'img_dpi' => 72,
+                'mode' => 'c',
             ]
         );
     }

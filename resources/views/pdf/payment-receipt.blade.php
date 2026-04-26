@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <title>পেমেন্ট রিসিপ্ট</title>
     <style>
-        @import url(https://fonts.googleapis.com/css?family=Roboto:300,400,500,700);
         @page {
             margin: 0;
         }
         body {
             background: #ffffff;
-            font-family: 'Roboto', 'solaimanlipi', sans-serif;
+            font-family: 'solaimanlipi', sans-serif;
             margin: 0;
             padding: 0;
         }
