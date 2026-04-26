@@ -2,20 +2,29 @@
 <link rel="manifest" href="{{ url('/manifest.json') }}">
 <!-- Chrome for Android theme color -->
 @php
+    $settingsService = app(\App\Services\SettingsService::class);
     $themeColor = app(\App\Services\SettingsService::class)->get('pwa_theme_color', $config['theme_color'] ?? '#3b82f6');
+    $metaPwaIcon = (string) $settingsService->get('pwa_icon_192', '');
+    $metaOrgLogo = (string) $settingsService->get('organization_logo', '');
+    $metaIconUrl = null;
+    if ($metaPwaIcon && file_exists(storage_path('app/public/' . $metaPwaIcon))) {
+        $metaIconUrl = asset('storage/' . $metaPwaIcon);
+    } elseif ($metaOrgLogo && file_exists(storage_path('app/public/' . $metaOrgLogo))) {
+        $metaIconUrl = asset('storage/' . $metaOrgLogo);
+    }
 @endphp
 <meta name="theme-color" content="{{ $themeColor }}">
 
 <!-- Add to homescreen for Chrome on Android -->
 <meta name="mobile-web-app-capable" content="{{ $config['display'] == 'standalone' ? 'yes' : 'no' }}">
 <meta name="application-name" content="{{ org_name($config['short_name']) }}">
-<link rel="icon" sizes="192x192" href="{{ asset('images/icons/icon-192x192.png') }}">
+<link rel="icon" sizes="192x192" href="{{ $metaIconUrl ?: asset('images/icons/icon-192x192.png') }}">
 
 <!-- Add to homescreen for Safari on iOS -->
 <meta name="apple-mobile-web-app-capable" content="{{ $config['display'] == 'standalone' ? 'yes' : 'no' }}">
 <meta name="apple-mobile-web-app-status-bar-style" content="{{  $config['status_bar'] }}">
 <meta name="apple-mobile-web-app-title" content="{{ org_name($config['short_name']) }}">
-<link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+<link rel="apple-touch-icon" href="{{ $metaIconUrl ?: asset('apple-touch-icon.png') }}">
 
 
 <link href="{{ $config['splash']['640x1136'] }}" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
@@ -31,7 +40,7 @@
 
 <!-- Tile for Win8 -->
 <meta name="msapplication-TileColor" content="{{ $config['background_color'] }}">
-<meta name="msapplication-TileImage" content="{{ asset('images/icons/icon-192x192.png') }}">
+<meta name="msapplication-TileImage" content="{{ $metaIconUrl ?: asset('images/icons/icon-192x192.png') }}">
 
 <script type="text/javascript">
     // Initialize the service worker

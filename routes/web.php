@@ -54,64 +54,61 @@ Route::get('/manifest.json', function () {
     $backgroundColor = $settingsService->get('pwa_background_color', '#ffffff');
 
     $logoPath = org_logo_path();
-    $pwaIcon192 = $settingsService->get('pwa_icon_192', '');
-    $pwaIcon512 = $settingsService->get('pwa_icon_512', '');
+    $pwaIcon192 = (string) $settingsService->get('pwa_icon_192', '');
+    $pwaIcon512 = (string) $settingsService->get('pwa_icon_512', '');
 
-    $iconSizes = ['72x72', '96x96', '128x128', '144x144', '152x152', '192x192', '384x384', '512x512'];
     $icons = [];
 
-    foreach ($iconSizes as $size) {
-        $relPath = "/images/icons/icon-{$size}.png";
-        if (file_exists(public_path($relPath))) {
-            $icons[] = [
-                'src'     => $relPath,
-                'sizes'   => $size,
-                'type'    => 'image/png',
-                'purpose' => 'any',
-            ];
-            if (in_array($size, ['192x192', '512x512'], true)) {
-                $icons[] = [
-                    'src'     => $relPath,
-                    'sizes'   => $size,
-                    'type'    => 'image/png',
-                    'purpose' => 'maskable',
-                ];
-            }
-        }
-    }
-
-    // Add custom PWA icons from settings (these take precedence)
+    // 1) Highest priority: explicitly uploaded PWA icons from Settings.
     if ($pwaIcon192 && file_exists(storage_path('app/public/' . $pwaIcon192))) {
-        // Remove default 192x192 icons and add custom one at the beginning
-        $icons = array_filter($icons, fn($icon) => $icon['sizes'] !== '192x192');
-        array_unshift($icons, [
+        $icons[] = [
             'src'     => asset('storage/' . $pwaIcon192),
             'sizes'   => '192x192',
             'type'    => 'image/png',
             'purpose' => 'any maskable',
-        ]);
+        ];
     }
-
     if ($pwaIcon512 && file_exists(storage_path('app/public/' . $pwaIcon512))) {
-        // Remove default 512x512 icons and add custom one at the beginning
-        $icons = array_filter($icons, fn($icon) => $icon['sizes'] !== '512x512');
-        array_unshift($icons, [
+        $icons[] = [
             'src'     => asset('storage/' . $pwaIcon512),
             'sizes'   => '512x512',
             'type'    => 'image/png',
             'purpose' => 'any maskable',
-        ]);
+        ];
     }
 
-    // Prefer the uploaded org logo as the primary icon (browsers will still
-    // fall back to the PNGs above for install prompts that need specific sizes).
-    if ($logoPath && file_exists(storage_path('app/public/' . $logoPath))) {
-        array_unshift($icons, [
-            'src'     => asset('storage/' . $logoPath),
-            'sizes'   => 'any',
+    // 2) Fallback: organization logo from Settings (for both required sizes).
+    if (empty($icons) && $logoPath && file_exists(storage_path('app/public/' . $logoPath))) {
+        $logoUrl = asset('storage/' . $logoPath);
+        $icons[] = [
+            'src'     => $logoUrl,
+            'sizes'   => '192x192',
             'type'    => 'image/png',
-            'purpose' => 'any',
-        ]);
+            'purpose' => 'any maskable',
+        ];
+        $icons[] = [
+            'src'     => $logoUrl,
+            'sizes'   => '512x512',
+            'type'    => 'image/png',
+            'purpose' => 'any maskable',
+        ];
+    }
+
+    // 3) Last fallback: static bundled icons.
+    if (empty($icons)) {
+        $iconSizes = ['72x72', '96x96', '128x128', '144x144', '152x152', '192x192', '384x384', '512x512'];
+        foreach ($iconSizes as $size) {
+            $relPath = "/images/icons/icon-{$size}.png";
+            if (!file_exists(public_path($relPath))) {
+                continue;
+            }
+            $icons[] = [
+                'src'     => $relPath,
+                'sizes'   => $size,
+                'type'    => 'image/png',
+                'purpose' => in_array($size, ['192x192', '512x512'], true) ? 'any maskable' : 'any',
+            ];
+        }
     }
 
     $manifest = [

@@ -7,10 +7,21 @@
 
     <title>{{ org_name() }}</title>
 
+    @php
+        $settingsService = app(\App\Services\SettingsService::class);
+        $headPwaIcon = (string) $settingsService->get('pwa_icon_192', '');
+        $headOrgLogo = (string) $settingsService->get('organization_logo', '');
+        $headIconUrl = null;
+        if ($headPwaIcon && file_exists(storage_path('app/public/' . $headPwaIcon))) {
+            $headIconUrl = asset('storage/' . $headPwaIcon);
+        } elseif ($headOrgLogo && file_exists(storage_path('app/public/' . $headOrgLogo))) {
+            $headIconUrl = asset('storage/' . $headOrgLogo);
+        }
+    @endphp
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ $headIconUrl ?: asset('favicon-16x16.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ $headIconUrl ?: asset('favicon-32x32.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ $headIconUrl ?: asset('apple-touch-icon.png') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,11 +47,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="{{ org_name() }}">
-    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ $headIconUrl ?: asset('apple-touch-icon.png') }}">
     
     <!-- Theme Color -->
     @php
-        $themeColor = app(\App\Services\SettingsService::class)->get('pwa_theme_color', '#3b82f6');
+        $themeColor = $settingsService->get('pwa_theme_color', '#3b82f6');
     @endphp
     <meta name="theme-color" content="{{ $themeColor }}">
 </head>
