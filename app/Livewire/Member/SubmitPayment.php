@@ -594,7 +594,7 @@ class SubmitPayment extends Component
 
         session()->flash('success', 'বাৎসরিক পেমেন্ট সফলভাবে জমা দেওয়া হয়েছে! অনুমোদনের জন্য অপেক্ষা করুন।');
 
-        return redirect()->route('member.profile');
+        return $this->paymentRedirect();
     }
 
     public function submitPayment()
@@ -707,6 +707,24 @@ class SubmitPayment extends Component
         }
 
         session()->flash('success', 'পেমেন্ট সফলভাবে জমা দেওয়া হয়েছে! অনুমোদনের জন্য অপেক্ষা করুন।');
+
+        return $this->paymentRedirect();
+    }
+
+    /**
+     * Redirect after payment submission.
+     * Admins submitting for another member go to that member's profile;
+     * everyone else goes to their own profile.
+     */
+    private function paymentRedirect()
+    {
+        $currentUser = auth()->user();
+        $roleSlugs   = collect($currentUser?->tyroRoleSlugs() ?? []);
+        $isAdminOrAccountant = $roleSlugs->contains(fn ($slug) => in_array($slug, ['admin', 'super-admin', 'accountant']));
+
+        if ($isAdminOrAccountant && $this->selectedUserId && $this->selectedUserId != $currentUser->id) {
+            return redirect()->route('admin.members.view', ['memberId' => $this->selectedUserId]);
+        }
 
         return redirect()->route('member.profile');
     }
