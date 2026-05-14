@@ -11,10 +11,28 @@ use Carbon\Carbon;
 
 class DuePaymentCard extends Component
 {
+    // When null, the card targets the currently-authenticated user.
+    // When set (e.g. by an admin viewing a member profile), it targets
+    // the specified user so the card shows *their* dues, not the viewer's.
+    public ?int $userId = null;
+
     public function render()
     {
         $memberService = app(MemberService::class);
-        $user = auth()->user();
+        $user = $this->userId ? \App\Models\User::find($this->userId) : auth()->user();
+
+        if (!$user) {
+            return view('livewire.member.due-payment-card', [
+                'totalMonths' => 0,
+                'paidMonths' => 0,
+                'dueMonths' => 0,
+                'dueAmount' => 0,
+                'monthlyFee' => 0,
+                'hasDue' => false,
+                'onlyCurrentMonthDue' => false,
+                'allCleared' => true,
+            ]);
+        }
 
         $dues = $memberService->calculateOutstandingDues($user);
 
@@ -36,6 +54,7 @@ class DuePaymentCard extends Component
             'hasDue' => $hasDue,
             'onlyCurrentMonthDue' => $onlyCurrentMonthDue,
             'allCleared' => $allCleared,
+            'targetUserId' => $this->userId,
         ]);
     }
 }

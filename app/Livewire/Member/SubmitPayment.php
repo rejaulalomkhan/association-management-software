@@ -80,10 +80,19 @@ class SubmitPayment extends Component
         $roleSlugs = collect($currentUser->tyroRoleSlugs() ?? []);
         $isAdminOrAccountant = $roleSlugs->contains(fn ($slug) => in_array($slug, ['admin', 'super-admin', 'accountant']));
 
+        // Check if a specific member was requested via query string (e.g. from
+        // the admin member-profile "Payment Submit" button).
+        $requestedUserId = request()->query('user_id');
+
         if ($isAdminOrAccountant) {
             // Admin / Accountant can select any active user
             $this->availableUsers = User::orderBy('name')->get(['id', 'name', 'membership_id']);
-            $this->selectedUserId = $currentUser->id; // default to self
+
+            if ($requestedUserId && User::where('id', $requestedUserId)->exists()) {
+                $this->selectedUserId = (int) $requestedUserId;
+            } else {
+                $this->selectedUserId = $currentUser->id; // default to self
+            }
         } else {
             // Normal member can only submit for themselves
             $this->availableUsers = [$currentUser];
@@ -92,7 +101,7 @@ class SubmitPayment extends Component
 
         // Smartly determine default payment type
         $this->payment_type = $this->determineDefaultPaymentType();
-        
+
         // Trigger update logic to set initial state (year, months)
         $this->updatedPaymentType();
     }
