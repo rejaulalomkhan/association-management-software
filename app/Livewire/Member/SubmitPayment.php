@@ -86,7 +86,7 @@ class SubmitPayment extends Component
 
         if ($isAdminOrAccountant) {
             // Admin / Accountant can select any active user
-            $this->availableUsers = User::orderBy('name')->get(['id', 'name', 'membership_id']);
+            $this->availableUsers = User::orderBy('name')->get(['id', 'name', 'membership_id', 'profile_pic']);
 
             if ($requestedUserId && User::where('id', $requestedUserId)->exists()) {
                 $this->selectedUserId = (int) $requestedUserId;
