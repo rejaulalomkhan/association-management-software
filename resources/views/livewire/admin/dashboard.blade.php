@@ -321,7 +321,9 @@
                                     @endif
                                     <div class="ml-3">
                                         <p class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                            <span>{{ $member->name }}</span>
+                                            <a href="{{ route('admin.members.view', $member->id) }}" wire:navigate class="hover:text-blue-600 dark:hover:text-blue-400 hover:underline">
+                                                {{ $member->name }}
+                                            </a>
                                             @if(($member->due_term ?? 'monthly') === 'yearly')
                                                 <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-300">
                                                     বাৎসরিক

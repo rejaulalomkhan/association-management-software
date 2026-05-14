@@ -29,6 +29,8 @@ return new class extends Migration
             $table->string('religion')->nullable();
             $table->string('nationality')->nullable();
             $table->string('position')->nullable();
+            $table->decimal('monthly_fee', 10, 2)->nullable();
+            $table->string('payment_term', 20)->nullable();
             $table->string('profile_pic')->nullable();
             $table->enum('status', ['pending', 'active', 'inactive'])->default('pending');
             $table->timestamp('joined_at')->nullable();
