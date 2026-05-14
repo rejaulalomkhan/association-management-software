@@ -324,10 +324,27 @@
             </div>
         </div>
 
-        <!-- Verification QR Card -->
+        <!-- Verification QR Card (Collapsible) -->
         @if(auth()->user()->verification_token)
-            <div class="mb-4 w-full px-2 sm:px-0">
-                <x-member-qr-card :member="auth()->user()" />
+            <div class="mb-4 w-full px-2 sm:px-0" x-data="{ open: false }">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                    <button type="button" @click="open = !open"
+                        class="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 transition-colors">
+                        <span class="font-semibold text-base flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                            </svg>
+                            সদস্য ভেরিফিকেশন QR
+                        </span>
+                        <svg class="w-5 h-5 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-collapse>
+                        <x-member-qr-card :member="auth()->user()" class="shadow-none rounded-none border-0" />
+                    </div>
+                </div>
             </div>
         @endif
 
