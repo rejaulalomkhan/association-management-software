@@ -139,7 +139,7 @@ Route::middleware(['auth', 'role:accountant'])->prefix('accountant')->name('acco
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
     Route::get('/profile', Profile::class)->name('profile');
-    Route::get('/profile/edit', AdminProfileEdit::class)->name('profile.edit');
+    Route::get('/profile/edit/{memberId?}', AdminProfileEdit::class)->name('profile.edit');
     Route::get('/pending-registrations', PendingRegistrations::class)->name('pending-registrations');
     Route::get('/members', MemberList::class)->name('members');
     Route::get('/members/add', AddMember::class)->name('members.add');

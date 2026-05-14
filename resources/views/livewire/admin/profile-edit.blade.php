@@ -1,8 +1,14 @@
 <div class="space-y-6">
     <!-- Page Header -->
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-800">প্রোফাইল সম্পাদনা</h1>
-        <a href="{{ route('admin.dashboard') }}" wire:navigate
+        <h1 class="text-2xl font-bold text-gray-800">
+            @if($isEditingOther)
+                {{ $editingMember->name }} — প্রোফাইল সম্পাদনা
+            @else
+                প্রোফাইল সম্পাদনা
+            @endif
+        </h1>
+        <a href="{{ $isEditingOther ? route('admin.members.view', $editingMember->id) : route('admin.dashboard') }}" wire:navigate
             class="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium">
             ← ফিরে যান
         </a>
@@ -214,16 +220,22 @@
                 <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                 </svg>
-                পাসওয়ার্ড পরিবর্তন
+                @if($isEditingOther)
+                    পাসওয়ার্ড রিসেট (অ্যাডমিন)
+                @else
+                    পাসওয়ার্ড পরিবর্তন
+                @endif
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                @if(!$isEditingOther)
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">বর্তমান পাসওয়ার্ড</label>
                     <input type="password" wire:model="current_password"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     @error('current_password') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                 </div>
+                @endif
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">নতুন পাসওয়ার্ড</label>

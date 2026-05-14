@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 14, 2026 at 10:16 AM
+-- Generation Time: May 14, 2026 at 10:44 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.2.29
 
@@ -96,8 +96,10 @@ INSERT INTO `cache` (`key`, `value`, `expiration`) VALUES
 ('projonmo-unnayan-mission-cache-setting_organization_name', 's:53:\"প্রজন্ম উন্নয়ন মিশন\";', 1778756551),
 ('projonmo-unnayan-mission-cache-setting_organization_phone', 's:13:\"8801948391907\";', 1778756944),
 ('projonmo-unnayan-mission-cache-setting_payment_term', 's:7:\"monthly\";', 1778756552),
-('projonmo-unnayan-mission-cache-tyro:user:1:roles', 'a:2:{i:0;s:5:\"admin\";i:1;s:6:\"member\";}', 1778753643),
-('projonmo-unnayan-mission-cache-tyro:user:10:roles', 'a:1:{i:0;s:6:\"member\";}', 1778753364);
+('projonmo-unnayan-mission-cache-tyro:user:1:roles', 'a:2:{i:0;s:5:\"admin\";i:1;s:6:\"member\";}', 1778755410),
+('projonmo-unnayan-mission-cache-tyro:user:10:roles', 'a:1:{i:0;s:6:\"member\";}', 1778755108),
+('projonmo-unnayan-mission-cache-tyro:user:12:roles', 'a:1:{i:0;s:6:\"member\";}', 1778755115),
+('projonmo-unnayan-mission-cache-tyro:user:15:roles', 'a:2:{i:0;s:5:\"admin\";i:1;s:6:\"member\";}', 1778755422);
 
 -- --------------------------------------------------------
 
@@ -901,7 +903,8 @@ INSERT INTO `payments` (`id`, `user_id`, `transaction_id`, `month`, `year`, `ter
 (326, 22, 'CASH-20260511034320-22', 'May', 2026, 'monthly', '500.00', 'Hand Cash', 1, NULL, NULL, NULL, 'approved', '2026-05-11 03:43:30', 5, '2026-05-11 03:43:20', '2026-05-11 03:43:30'),
 (327, 5, 'CASH-20260511034351-5', 'May', 2026, 'monthly', '500.00', 'Hand Cash', 1, NULL, NULL, NULL, 'approved', '2026-05-11 03:44:00', 5, '2026-05-11 03:43:51', '2026-05-11 03:44:00'),
 (328, 13, 'CASH-20260511132058-13', 'May', 2026, 'monthly', '500.00', 'Hand Cash', 1, NULL, NULL, NULL, 'approved', '2026-05-11 13:21:38', 5, '2026-05-11 13:20:58', '2026-05-11 13:21:38'),
-(329, 8, NULL, 'May', 2026, 'monthly', '500.00', 'bKash', 2, 'paid', NULL, NULL, 'approved', '2026-05-12 06:26:56', 1, '2026-05-12 06:23:58', '2026-05-12 06:26:56');
+(329, 8, NULL, 'May', 2026, 'monthly', '500.00', 'bKash', 2, 'paid', NULL, NULL, 'approved', '2026-05-12 06:26:56', 1, '2026-05-12 06:23:58', '2026-05-12 06:26:56'),
+(330, 10, 'asdf46', 'May', 2026, 'monthly', '500.00', 'bKash', 2, NULL, NULL, NULL, 'pending', NULL, NULL, '2026-05-14 04:34:07', '2026-05-14 04:34:07');
 
 -- --------------------------------------------------------
 
@@ -1032,7 +1035,7 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('1dm7rjIVLOzO1O7EgnCm1bLgUh69llktPZbA7t9U', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiWTR2bGI5SU9La0kweE52UjVtelNRVUpxb0RyVWExSFRCVUdvV0FyOSI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NDA6Imh0dHA6Ly9wcm9qb25tby1saXZlLnRlc3QvbWVtYmVyL3BheW1lbnQiO3M6NToicm91dGUiO3M6MTQ6Im1lbWJlci5wYXltZW50Ijt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czoxMDoidHlyby1sb2dpbiI7YToxOntzOjc6ImNhcHRjaGEiO2E6MTp7czo1OiJsb2dpbiI7aTozO319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1778753617),
+('1dm7rjIVLOzO1O7EgnCm1bLgUh69llktPZbA7t9U', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiWTR2bGI5SU9La0kweE52UjVtelNRVUpxb0RyVWExSFRCVUdvV0FyOSI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NDc6Imh0dHA6Ly9wcm9qb25tby1saXZlLnRlc3QvYWRtaW4vbWVtYmVycy92aWV3LzE1IjtzOjU6InJvdXRlIjtzOjE4OiJhZG1pbi5tZW1iZXJzLnZpZXciO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjEwOiJ0eXJvLWxvZ2luIjthOjE6e3M6NzoiY2FwdGNoYSI7YToxOntzOjU6ImxvZ2luIjtpOjM7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1778755124),
 ('kqZkPdWF8XTnbWKQHi8SIadKLJ1YbqGJ3UN3Mq77', 1, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiV1dJTm5ubHY4cXpsTW5UZThHQm5yWXBSWkZKVWs0SzBzbUozNHA1TSI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NTI6Imh0dHA6Ly9sb2NhbGhvc3QvcHJvam9ubW8tbGl2ZS9wdWJsaWMvYWRtaW4vc2V0dGluZ3MiO3M6NToicm91dGUiO3M6MTQ6ImFkbWluLnNldHRpbmdzIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czoxMDoidHlyby1sb2dpbiI7YToxOntzOjc6ImNhcHRjaGEiO2E6MTp7czo1OiJsb2dpbiI7aTo1O319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1778750533);
 
 -- --------------------------------------------------------
@@ -1396,7 +1399,7 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=330;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=331;
 
 --
 -- AUTO_INCREMENT for table `payment_methods`
