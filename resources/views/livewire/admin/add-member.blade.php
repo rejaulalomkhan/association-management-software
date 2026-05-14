@@ -191,6 +191,40 @@
             </div>
         </div>
 
+        <!-- Payment Settings (Custom Fee & Term) -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.657 0 3-.895 3-2s-1.343-2-3-2-3 .895-3 2 1.343 2 3 2zm0 0v1m0-1c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.657 0 3-.895 3-2s-1.343-2-3-2-3 .895-3 2 1.343 2 3 2zm0 0v1m0-1c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.657 0 3-.895 3-2s-1.343-2-3-2-3 .895-3 2 1.343 2 3 2z"/>
+                </svg>
+                পেমেন্ট সেটিংস (ঐচ্ছিক)
+            </h2>
+            <p class="text-xs text-gray-500 mb-4">
+                ফাঁকা রাখলে সেটিংস অনুযায়ী ডিফল্ট মান ব্যবহার হবে।
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">পেমেন্ট টার্ম</label>
+                    <select wire:model="payment_term"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <option value="">সেটিংস অনুযায়ী ({{ \App\Enums\PaymentTerm::label(app(\App\Services\SettingsService::class)->getPaymentTerm()) }})</option>
+                        <option value="monthly">{{ \App\Enums\PaymentTerm::label('monthly') }}</option>
+                        <option value="yearly">{{ \App\Enums\PaymentTerm::label('yearly') }}</option>
+                    </select>
+                    @error('payment_term') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">কাস্টম মাসিক ফি (৳)</label>
+                    <input type="number" wire:model="monthly_fee" step="0.01" min="0"
+                        placeholder="ডিফল্ট: {{ number_format(app(\App\Services\SettingsService::class)->getMonthlyFee(), 0) }} ৳"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    @error('monthly_fee') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
+                </div>
+            </div>
+        </div>
+
         <!-- Address Information -->
         <div class="bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">

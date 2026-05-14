@@ -39,7 +39,7 @@ class Dashboard extends Component
         }
 
         $paidMembers = $paidMembersQuery->orderBy('processed_at', 'desc')
-            ->limit(10)
+            ->limit(20)
             ->get();
 
         // Get unpaid members logic
@@ -54,22 +54,58 @@ class Dashboard extends Component
                 })
                 ->get();
 
-            // Get IDs of members who have APPROVED payments for this specific month/year
-            $paidMemberIds = Payment::where('month', $month)
+            // Members with an approved monthly payment for this month+year.
+            $paidMonthlyIds = Payment::where('month', $month)
                 ->where('year', $year)
                 ->where('status', 'approved')
+                ->where('term', \App\Enums\PaymentTerm::MONTHLY)
                 ->pluck('user_id')
                 ->toArray();
 
-            $unpaidMembers = $allActiveMembers->whereNotIn('id', $paidMemberIds)->take(10);
+            // Build due list term-aware:
+            //  - monthly term: unpaid for selected month+year if no approved monthly row
+            //  - yearly term:  show if selected year appears in yearly dues window
+            $unpaidMembers = $allActiveMembers
+                ->map(function ($member) use ($memberService, $paidMonthlyIds, $year) {
+                    $dues = $memberService->calculateOutstandingDues($member);
+                    $term = $member->effectivePaymentTerm();
 
-            // Attach due info for unpaid members
-            $unpaidMembers = $unpaidMembers->map(function ($member) use ($memberService) {
-                $dues = $memberService->calculateOutstandingDues($member);
-                $member->due_months = $dues['unpaid_months'];
-                $member->due_amount = $dues['total_due'];
-                return $member;
-            });
+                    $isUnpaid = false;
+                    if ($term === \App\Enums\PaymentTerm::YEARLY) {
+                        $isUnpaid = in_array((int) $year, array_map('intval', $dues['unpaid_years'] ?? []), true);
+                    } else {
+                        $isUnpaid = !in_array((int) $member->id, $paidMonthlyIds, true);
+                    }
+
+                    if (!$isUnpaid) {
+                        return null;
+                    }
+
+                    $member->due_months = (int) ($dues['unpaid_months'] ?? 0);
+                    $member->due_amount = (float) ($dues['total_due'] ?? 0);
+                    $member->due_term = $term;
+                    return $member;
+                })
+                ->filter()
+                ->take(20)
+                ->values();
+        }
+
+        // Bank deposits stats
+        $bankDepositsTotal = \App\Models\BankDeposit::sum('amount');
+        $bankDepositsCount = \App\Models\BankDeposit::count();
+        
+        // Filtered bank deposits (for selected month/year)
+        $bankDepositsFiltered = 0;
+        if ($month && $year) {
+            // Get month number from month name
+            $monthNumber = date('n', strtotime($month));
+            $bankDepositsFiltered = \App\Models\BankDeposit::where('year', $year)
+                ->where('month', $monthNumber)
+                ->sum('amount');
+        } elseif ($year) {
+            $bankDepositsFiltered = \App\Models\BankDeposit::where('year', $year)
+                ->sum('amount');
         }
 
         $stats = [
@@ -87,6 +123,10 @@ class Dashboard extends Component
             'pending_count' => $summary['pending_count'],
             'collection_rate' => $summary['collection_rate'],
             'lifetime_collection' => Payment::where('status', 'approved')->sum('amount'),
+            'bank_deposits_total' => $bankDepositsTotal,
+            'bank_deposits_count' => $bankDepositsCount,
+            'bank_deposits_filtered' => $bankDepositsFiltered,
+            'total_documents' => \App\Models\Document::count(),
         ];
 
         return view('livewire.admin.dashboard', [

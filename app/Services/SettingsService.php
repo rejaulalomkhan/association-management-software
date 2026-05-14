@@ -57,8 +57,12 @@ class SettingsService
             'organization_logo',
             'organization_address',
             'organization_phone',
+            'organization_email',
             'currency',
             'currency_symbol',
+            'registration_terms',
+            'registration_terms_acceptance_label',
+            'payment_term',
         ]);
     }
 
@@ -68,6 +72,17 @@ class SettingsService
     public function getMonthlyFee(): float
     {
         return (float) $this->get('monthly_fee', 500);
+    }
+
+    /**
+     * Get the organization-wide default payment term.
+     * Returns one of: monthly | yearly.
+     */
+    public function getPaymentTerm(): string
+    {
+        return \App\Enums\PaymentTerm::coerce(
+            (string) $this->get('payment_term', \App\Enums\PaymentTerm::MONTHLY)
+        ) ?? \App\Enums\PaymentTerm::MONTHLY;
     }
 
     /**

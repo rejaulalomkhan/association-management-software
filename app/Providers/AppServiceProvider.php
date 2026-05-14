@@ -22,6 +22,45 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Override config values from the organization settings so that
+        // the browser tab title, PWA manifest, tyro-login branding, etc.
+        // all follow whatever the admin sets in /admin/settings.
+        //
+        // Wrapped in try/catch so that `artisan` commands run fine before
+        // the database/settings table exists (e.g. during initial install).
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+                $settings = app(\App\Services\SettingsService::class);
+                $orgName = $settings->get('organization_name');
+                $orgLogoPath = $settings->get('organization_logo');
+
+                if (!empty($orgName)) {
+                    config(['app.name' => $orgName]);
+
+                    // Keep tyro-login branding in sync
+                    if (config()->has('tyro-login.branding')) {
+                        config(['tyro-login.branding.app_name' => $orgName]);
+                    }
+                    config(['tyro-login.name' => $orgName]);
+
+                    // PWA manifest (laravelpwa package) — keep the installed
+                    // app name aligned with the current org name too.
+                    if (config()->has('laravelpwa.manifest')) {
+                        config(['laravelpwa.manifest.name' => $orgName]);
+                    }
+                }
+
+                if (!empty($orgLogoPath)) {
+                    $logoUrl = asset('storage/' . $orgLogoPath);
+                    if (config()->has('tyro-login.branding')) {
+                        config(['tyro-login.branding.logo' => $logoUrl]);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // Settings table not ready yet — fall back to config/.env values.
+        }
+
         // Custom validator to allow phone numbers in email field
         \Illuminate\Support\Facades\Validator::extend('email_or_phone', function ($attribute, $value, $parameters, $validator) {
             // Check if it's a valid email

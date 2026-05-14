@@ -1,59 +1,205 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Association Management Software
+
+<p align="center"><strong>সমার্থনের হিসাব ব্যবস্থাপনা সফটোয়ার</strong></p>
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+A complete <b>Laravel 12 + Livewire</b> based association/organization management system with multi-role support, payment tracking, receipt generation, and member management — fully localized in <b>Bangla (বাংলা)</b>.
 </p>
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## সার্ভিত | Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### ভূমিকা | Role Management
+- <b>Admin</b> — Full control: members, payments, settings, reports
+- <b>Accountant</b> — Payment approval, transaction management
+- <b>Member</b> — Profile, payment submission, history, receipts
+- Powered by <b>Tyro</b> role system
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### পেমেন্ট ব্যবস্থাপনা | Payment System
+- <b>Monthly & Yearly</b> payment terms (organization-wide or per-member)
+- <b>Custom monthly fee</b> per member (override default)
+- Payment types: <b>Current, Overdue, Advance</b>
+- Multiple payment methods (Cash, Bank, bKash, Nagad, etc.)
+- Payment proof upload (screenshot/image)
+- Admin/Accountant approval workflow
+- Automatic receipt generation (PDF)
 
-## Learning Laravel
+### ড্যাশবোর্ড | Dashboard
+- Real-time statistics (members, payments, collection rate)
+- Monthly/Yearly filter support
+- Bank deposit tracking
+- Unpaid member list with term-aware logic
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### সদস্য প্রোফাইল | Member Profile
+- Personal info, contact, address
+- Payment history with year filter
+- Monthly payment calendar view
+- QR code based verification certificate
+- Profile photo upload
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### সেটিঙ্স | Settings
+- Organization name, logo, address
+- Established year & month
+- Default monthly fee & payment term
+- Bank account details
+- Payment methods management
+- Registration terms & conditions
+- Dark/Light mode toggle
 
-## Laravel Sponsors
+### পিডিএ | PWA Support
+- Installable as mobile app
+- Offline-ready capabilities
+- Push notification ready
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## টেক স্টেক | Tech Stack
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **Laravel** | 12.x | Backend framework |
+| **Livewire** | 3.x | Reactive UI components |
+| **Tailwind CSS** | 3.x | Styling |
+| **Alpine.js** | 3.x | Frontend interactions |
+| **Tyro** | ^1.1 | Role-based access control |
+| **Tyro Login** | ^1.3 | Authentication (Email/Phone) |
+| **DOMPDF** | ^3.1 | PDF receipt generation |
+| **Laravel PWA** | ^2.0 | Progressive Web App |
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## ইনস্টল করুন | Installation
 
-## Code of Conduct
+### Requirements
+- PHP >= 8.2
+- MySQL / MariaDB / SQLite
+- Composer
+- Node.js & NPM (for asset building)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Step 1: Clone & Install
 
-## Security Vulnerabilities
+```bash
+git clone https://github.com/rejaulalomkhan/association-management-software.git
+cd association-management-software
+composer install
+npm install
+npm run build
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Step 2: Environment Setup
 
-## License
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Edit `.env` and configure your database:
+
+```env
+APP_NAME="Your Organization"
+APP_URL=http://localhost
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database
+DB_USERNAME=root
+DB_PASSWORD=your_password
+```
+
+### Step 3: Database Setup
+
+```bash
+php artisan migrate
+php artisan db:seed
+```
+
+### Step 4: Storage Link
+
+```bash
+php artisan storage:link
+```
+
+### Step 5: Run
+
+```bash
+php artisan serve
+```
+
+Visit `http://localhost:8000`
+
+---
+
+## ডিফল্ট লগিন | Default Login
+
+After seeding, default admin credentials:
+
+| Field | Value |
+|-------|-------|
+| **Phone** | `01700000000` |
+| **Password** | `password` |
+
+> প্রোডাকশন সেটিংস থেকে প্রথমে ব্যবহার করুন। | Change password from settings immediately.
+
+---
+
+## প্রোজেক্ট গঠন | Project Structure
+
+```
+association-management-software/
+├── app/
+│   ├── Enums/
+│   │   └── PaymentTerm.php          # monthly | yearly
+│   ├── Helpers/
+│   │   └── helpers.php                # org_name(), org_monthly_fee(), etc.
+│   ├── Livewire/
+│   │   ├── Admin/                    # Dashboard, Settings, MemberList, etc.
+│   │   ├── Member/                   # Profile, SubmitPayment, PaymentHistory
+│   │   └── Auth/                     # Register, Login (via Tyro)
+│   ├── Models/
+│   │   ├── User.php                  # effectiveMonthlyFee(), effectivePaymentTerm()
+│   │   ├── Payment.php               # term-aware payment records
+│   │   └── ...
+│   └── Services/
+│       ├── MemberService.php         # Dues calculation (monthly/yearly)
+│       ├── SettingsService.php         # Dynamic organization settings
+│       ├── TransactionService.php      # Payment CRUD & stats
+│       └── PdfService.php             # Receipt generation
+├── database/
+│   ├── migrations/
+│   │   └── ...add_payment_fields_to_users_table.php
+│   └── seeders/
+├── resources/
+│   └── views/
+│       └── livewire/
+│           ├── admin/
+│           ├── member/
+│           └── ...
+├── routes/
+│   └── web.php                        # Role-based route groups
+└── config/
+    ├── tyro-login.php                  # Auth config
+    └── livewire.php                     # Livewire settings
+```
+
+---
+
+## লাইসেন্স | License
+
+This project is open-source software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+---
+
+## ধন্যবাদ | Acknowledgements
+
+- [Laravel](https://laravel.com) — The PHP Framework for Web Artisans
+- [Livewire](https://livewire.laravel.com) — Reactive UI for Laravel
+- [Tailwind CSS](https://tailwindcss.com) — Utility-first CSS framework
+- [Tyro](https://github.com/hasinhayder/tyro) — Role management for Laravel
+
+---
+
+<p align="center">
+Built with ❤️ by <a href="https://github.com/rejaulalomkhan">rejaulalomkhan</a>
+</p>

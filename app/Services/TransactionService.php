@@ -6,14 +6,29 @@ use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Support\Str;
 
+/**
+ * Service for handling payment transactions.
+ *
+ * This service manages payment creation, approval, rejection,
+ * and statistics generation for the payment system.
+ */
 class TransactionService
 {
+    /**
+     * Create a new TransactionService instance.
+     *
+     * @param SettingsService $settingsService The settings service instance
+     */
     public function __construct(
         private SettingsService $settingsService
     ) {}
 
     /**
      * Create a new payment transaction.
+     *
+     * @param User $user The user making the payment
+     * @param array $data Payment data including amount, method, month, year
+     * @return Payment The created payment record
      */
     public function createPayment(User $user, array $data): Payment
     {
@@ -26,6 +41,10 @@ class TransactionService
 
     /**
      * Generate unique transaction ID.
+     *
+     * Format: TXN-YYYYMMDDHHMMSS-XXXX (e.g., TXN-20260425143000-A1B2)
+     *
+     * @return string The generated transaction ID
      */
     public function generateTransactionId(): string
     {
@@ -34,6 +53,11 @@ class TransactionService
 
     /**
      * Approve a payment.
+     *
+     * @param Payment $payment The payment to approve
+     * @param User $approver The admin/accountant approving the payment
+     * @param string|null $note Optional admin note for the approval
+     * @return bool True if approval was successful
      */
     public function approvePayment(Payment $payment, User $approver, ?string $note = null): bool
     {
@@ -50,6 +74,11 @@ class TransactionService
 
     /**
      * Reject a payment.
+     *
+     * @param Payment $payment The payment to reject
+     * @param User $approver The admin/accountant rejecting the payment
+     * @param string $reason The reason for rejection
+     * @return bool True if rejection was successful
      */
     public function rejectPayment(Payment $payment, User $approver, string $reason): bool
     {
@@ -62,10 +91,14 @@ class TransactionService
     }
 
     /**
-     * Get monthly summary statistics.
-     */
-    /**
      * Get summary statistics based on filters.
+     *
+     * Returns paid/pending/rejected amounts and counts, plus collection rate
+     * when a specific month and year are provided.
+     *
+     * @param string|null $month Month name filter (e.g., 'January')
+     * @param int|null $year Year filter
+     * @return array Statistics array with keys: total_paid, total_pending, etc.
      */
     public function getStatsSummary(?string $month = null, ?int $year = null): array
     {
@@ -118,6 +151,9 @@ class TransactionService
 
     /**
      * Get yearly summary statistics.
+     *
+     * @param int|null $year Year filter (defaults to current year)
+     * @return array Statistics array for the specified year
      */
     public function getYearlySummary(int $year = null): array
     {
@@ -147,7 +183,11 @@ class TransactionService
     }
 
     /**
-     * Get member transactions.
+     * Get member transactions with optional filters.
+     *
+     * @param User $user The user to get transactions for
+     * @param array $filters Optional filters: month, year, status
+     * @return \Illuminate\Database\Eloquent\Collection Collection of Payment models
      */
     public function getMemberTransactions(User $user, array $filters = []): \Illuminate\Database\Eloquent\Collection
     {

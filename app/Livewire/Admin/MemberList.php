@@ -12,24 +12,10 @@ class MemberList extends Component
 
     public $search = '';
     public $statusFilter = 'active';
-    public $selectedMember = null;
-    public $showMemberProfile = false;
 
     public function updatingSearch()
     {
         $this->resetPage();
-    }
-
-    public function viewMemberProfile($userId)
-    {
-        $this->selectedMember = User::with(['payments', 'roles'])->find($userId);
-        $this->showMemberProfile = true;
-    }
-
-    public function closeProfile()
-    {
-        $this->showMemberProfile = false;
-        $this->selectedMember = null;
     }
 
     public function render()
@@ -49,8 +35,14 @@ class MemberList extends Component
             ->orderBy('joined_at', 'desc')
             ->paginate(15);
 
+        // Get total members count (all active members regardless of search/filter)
+        $totalMembers = User::whereHas('roles', function($query) {
+            $query->where('name', 'member');
+        })->where('status', 'active')->count();
+
         return view('livewire.admin.member-list', [
             'members' => $members,
+            'totalMembers' => $totalMembers,
         ])->layout('layouts.app');
     }
 }

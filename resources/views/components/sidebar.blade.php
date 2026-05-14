@@ -1,6 +1,6 @@
 <div class="flex flex-col h-full">
     <div class="flex-1 overflow-y-auto py-4">
-        <nav class="space-y-1 px-2" x-data="{ settingsOpen: {{ request()->routeIs('admin.settings', 'admin.roles', 'admin.privileges', 'admin.user-roles') ? 'true' : 'false' }} }">
+        <nav class="space-y-1 px-2" x-data="{ settingsOpen: {{ request()->routeIs('admin.settings', 'admin.roles', 'admin.privileges', 'admin.user-roles', 'admin.roadmap') ? 'true' : 'false' }} }">
             
             @if(request()->routeIs('admin.*') && auth()->user()->hasRole('admin'))
             <!-- Admin Section -->
@@ -23,7 +23,15 @@
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                অপেক্ষমাণ রেজিস্ট্রেশন
+                <span class="flex-1">অপেক্ষমাণ রেজিস্ট্রেশন</span>
+                @php
+                    $pendingCount = \App\Models\User::where('status', 'pending')->count();
+                @endphp
+                @if($pendingCount > 0)
+                    <span class="flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-600 rounded-full shadow-md">
+                        {{ $pendingCount > 9 ? '9+' : $pendingCount }}
+                    </span>
+                @endif
             </a>
 
             <a href="{{ route('admin.members') }}" wire:navigate
@@ -41,7 +49,51 @@
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
-                লেনদেন
+                <span class="flex-1">লেনদেন</span>
+                @php
+                    $pendingPayments = \App\Models\Payment::where('status', 'pending')->count();
+                @endphp
+                @if($pendingPayments > 0)
+                    <span class="flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-600 rounded-full shadow-md">
+                        {{ $pendingPayments > 9 ? '9+' : $pendingPayments }}
+                    </span>
+                @endif
+            </a>
+
+            <a href="{{ route('admin.bank-deposits') }}" wire:navigate
+               class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150
+                      {{ request()->routeIs('admin.bank-deposits') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
+                <span class="flex-1">ব্যাংক জমা</span>
+            </a>
+
+            <a href="{{ route('member.payment') }}" wire:navigate
+               class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150
+                      {{ request()->routeIs('member.payment') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="flex-1">টাকা জমা দেয়া</span>
+            </a>
+
+            <a href="{{ route('documents.list') }}" wire:navigate
+               class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150
+                      {{ request()->routeIs('documents.*') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span class="flex-1">নথি সমূহ</span>
+            </a>
+
+            <a href="{{ route('admin.user-roles') }}" wire:navigate
+               class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150
+                      {{ request()->routeIs('admin.user-roles') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <span class="flex-1">ব্যবহারকারী রোল</span>
             </a>
 
             <!-- Separator -->
@@ -51,7 +103,7 @@
             <div class="relative">
                 <button @click="settingsOpen = !settingsOpen"
                         class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150
-                               {{ request()->routeIs('admin.settings', 'admin.roles', 'admin.privileges', 'admin.user-roles') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                               {{ request()->routeIs('admin.settings', 'admin.roles', 'admin.privileges', 'admin.roadmap') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
@@ -80,10 +132,11 @@
                               {{ request()->routeIs('admin.privileges') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
                         প্রিভিলেজ
                     </a>
-                    <a href="{{ route('admin.user-roles') }}"
+                    <a href="{{ route('admin.roadmap') }}" wire:navigate
                        class="flex items-center px-3 py-2 text-sm rounded-lg transition-colors duration-150
-                              {{ request()->routeIs('admin.user-roles') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
-                        ইউজার রোল
+                              {{ request()->routeIs('admin.roadmap') ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                        <span class="flex-1">রোডম্যাপ / প্লান</span>
+                        <span class="inline-flex items-center px-1.5 py-0.5 text-[9px] font-bold text-indigo-700 bg-indigo-100 rounded dark:bg-indigo-900 dark:text-indigo-200">নতুন</span>
                     </a>
                 </div>
             </div>
@@ -110,7 +163,24 @@
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
-                লেনদেন
+                <span class="flex-1">লেনদেন</span>
+                @php
+                    $pendingPayments = \App\Models\Payment::where('status', 'pending')->count();
+                @endphp
+                @if($pendingPayments > 0)
+                    <span class="flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-600 rounded-full shadow-md">
+                        {{ $pendingPayments > 9 ? '9+' : $pendingPayments }}
+                    </span>
+                @endif
+            </a>
+
+            <a href="{{ route('accountant.bank-deposits') }}" wire:navigate
+               class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150
+                      {{ request()->routeIs('accountant.bank-deposits') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
+                <span class="flex-1">ব্যাংক জমা</span>
             </a>
             @endif
 
@@ -145,6 +215,24 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 পেমেন্ট করুন
+            </a>
+
+            <a href="{{ route('member.bank-deposits') }}" wire:navigate
+               class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150
+                      {{ request()->routeIs('member.bank-deposits') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>
+                </svg>
+                ব্যাংক ট্রানজেকশন
+            </a>
+
+            <a href="{{ route('documents.list') }}" wire:navigate
+               class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-150
+                      {{ request()->routeIs('documents.*') ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100' }}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                নথি সমূহ
             </a>
 
             <a href="{{ route('member.history') }}" wire:navigate

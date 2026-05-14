@@ -1,5 +1,5 @@
 <div class="py-6">
-    <div class="max-w-4xl px-4 mx-auto sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         <!-- Page Header -->
         <div class="mb-6">
             <div class="flex items-center justify-between">
@@ -7,8 +7,10 @@
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 md:text-3xl">পেমেন্ট সাবমিট করুন</h1>
                     <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">আপনার পেমেন্ট তথ্য প্রদান করুন। অনুমোদনের পর মূল হিসেবে যুক্ত হবে।</p>
                 </div>
-                <a href="{{ route('member.profile') }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
-                    ← ফিরে যান
+                <a href="{{ route('member.profile') }}" class="flex items-center justify-center w-10 h-10 text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600" title="ফিরে যান">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
                 </a>
             </div>
         </div>
@@ -24,38 +26,89 @@
         <div class="overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
             <div class="p-6">
                 <!-- Overdue Information -->
-                @php
-                    $overdueMonths = (int) ($overdueInfo['months'] ?? 0);
-                    $overdueAmount = (float) ($overdueInfo['amount'] ?? 0);
-                @endphp
-                @if($overdueMonths > 0)
-                    <div class="p-4 mb-6 border-l-4 border-orange-500 bg-orange-50 dark:bg-orange-900 dark:border-orange-600">
+                <div wire:loading wire:target="selectedUserId,payment_type" wire:key="overdue-skeleton" class="p-4 mb-6 border-l-4 border-gray-300 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 animate-pulse">
+                    <div class="flex items-start">
+                        <div class="w-5 h-5 mr-2 bg-gray-300 rounded dark:bg-gray-600"></div>
+                        <div class="flex-1 space-y-2">
+                            <div class="h-4 bg-gray-300 rounded dark:bg-gray-600 w-3/4"></div>
+                            <div class="h-3 bg-gray-300 rounded dark:bg-gray-600 w-1/2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div wire:loading.remove wire:target="selectedUserId,payment_type" wire:key="overdue-content">
+                    @php
+                        $overdueMonths = (int) ($overdueInfo['months'] ?? 0);
+                        $overdueAmount = (float) ($overdueInfo['amount'] ?? 0);
+                        $selectedUser = collect($availableUsers)->firstWhere('id', $selectedUserId);
+                        $selectedUserName = $selectedUser ? $selectedUser->name : 'আপনার';
+                    @endphp
+                    @if($overdueMonths > 0)
+                        <div class="p-4 mb-6 border-l-4 border-orange-500 bg-orange-50 dark:bg-orange-900 dark:border-orange-600">
                         <div class="flex items-start">
                             <svg class="w-5 h-5 mr-2 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             <div>
                                 <p class="text-sm font-semibold text-orange-800 dark:text-orange-200">
-                                    আপনার পূর্বের
-                                    <span class="font-bold">{{ $overdueMonths }} মাসের</span>
-                                    <span class="font-bold">৳{{ number_format($overdueAmount, 0) }}</span>
-                                    টাকা বকেয়া রয়েছে
+                                    @if(($paymentTerm ?? 'monthly') === 'yearly')
+                                        <span class="font-bold">{{ $selectedUserName }}</span> এর
+                                        <span class="font-bold">{{ $overdueMonths }} মাসের</span>
+                                        <span class="font-bold">৳{{ number_format($overdueAmount, 0) }}</span>
+                                        বকেয়া রয়েছে
+                                    @else
+                                        <span class="font-bold">{{ $selectedUserName }}</span> এর পূর্বের
+                                        <span class="font-bold">{{ $overdueMonths }} মাসের</span>
+                                        <span class="font-bold">৳{{ number_format($overdueAmount, 0) }}</span>
+                                        টাকা বকেয়া রয়েছে
+                                    @endif
                                 </p>
                                 <p class="mt-1 text-xs text-orange-600 dark:text-orange-400">
-                                    বকেয়া পরিশোধের জন্য নিচে "বকেয়া পরিশোধ" অপশন নির্বাচন করুন
+                                    @if(($paymentTerm ?? 'monthly') === 'yearly')
+                                        নিচে বছর নির্বাচন করে পরিশোধ করুন
+                                    @else
+                                        বকেয়া পরিশোধের জন্য নিচে "বকেয়া" অপশন নির্বাচন করুন
+                                    @endif
                                 </p>
                             </div>
                         </div>
-                    </div>
-                @else
-                    <div class="p-4 mb-6 border-l-4 border-green-500 bg-green-50 dark:bg-green-900 dark:border-green-600">
+                        </div>
+                    @else
+                        <div class="p-4 mb-6 border-l-4 border-green-500 bg-green-50 dark:bg-green-900 dark:border-green-600">
                         <div class="flex items-start">
                             <svg class="w-5 h-5 mr-2 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             <p class="text-sm font-semibold text-green-800 dark:text-green-200">
-                                আপনার পূর্বের কোনো বকেয়া নেই
+                                <span class="font-bold">{{ $selectedUserName }}</span> এর পূর্বের কোনো বকেয়া নেই
                             </p>
+                        </div>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Validation Errors Summary -->
+                @if ($errors->any())
+                    <div x-data="{ show: true }" 
+                         x-init="$nextTick(() => { 
+                             if (show) { 
+                                 $el.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
+                                 window.scrollBy(0, -20);
+                             } 
+                         })"
+                         class="p-4 mb-6 border-l-4 border-red-500 bg-red-50 dark:bg-red-900/30 dark:border-red-600">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 mr-2 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="mb-2 text-sm font-semibold text-red-800 dark:text-red-200">ফর্ম সাবমিট করতে সমস্যা হয়েছে। নিচের ত্রুটিগুলো সংশোধন করুন:</p>
+                                <ul class="space-y-1 text-xs text-red-700 list-disc list-inside dark:text-red-300">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 @endif
@@ -66,16 +119,45 @@
                         <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">কোন সদস্যের জন্য পেমেন্ট? *</label>
 
                         @if($isAdminOrAccountant)
-                            <select wire:model="selectedUserId" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                                @foreach($availableUsers as $user)
-                                    <option value="{{ $user->id }}">
-                                        {{ $user->name }}
-                                        @if(!empty($user->membership_id))
-                                            (ID: {{ $user->membership_id }})
+                            @php
+                                $selectedUser = collect($availableUsers)->firstWhere('id', $selectedUserId);
+                            @endphp
+                            
+                            <!-- Responsive Grid Layout: Side by side on desktop -->
+                            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                                <!-- Dropdown -->
+                                <div>
+                                    <select wire:model.live="selectedUserId" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                        @foreach($availableUsers as $user)
+                                            <option value="{{ $user->id }}">
+                                                {{ $user->name }}
+                                                @if(!empty($user->membership_id))
+                                                    (ID: {{ $user->membership_id }})
+                                                @endif
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Selected User Display with Photo -->
+                                <div class="flex items-center gap-3 p-3 border-2 border-green-500 rounded-lg bg-green-50 dark:bg-green-900/30 dark:border-green-600">
+                                    @if($selectedUser)
+                                        @if($selectedUser->profile_pic)
+                                            <img src="{{ asset('storage/' . $selectedUser->profile_pic) }}" alt="{{ $selectedUser->name }}" class="object-cover w-12 h-12 rounded-full ring-2 ring-green-500">
+                                        @else
+                                            <div class="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full ring-2 ring-green-500 dark:bg-green-800">
+                                                <span class="text-lg font-bold text-green-600 dark:text-green-300">{{ substr($selectedUser->name, 0, 2) }}</span>
+                                            </div>
                                         @endif
-                                    </option>
-                                @endforeach
-                            </select>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-semibold text-gray-900 truncate dark:text-gray-100">{{ $selectedUser->name }}</p>
+                                            @if(!empty($selectedUser->membership_id))
+                                                <p class="text-xs text-gray-600 dark:text-gray-400">সদস্য আইডি: {{ $selectedUser->membership_id }}</p>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">এডমিন/একাউন্টেন্ট চাইলে অন্য সদস্যের জন্যও পেমেন্ট সাবমিট করতে পারবেন।</p>
                         @else
                             @php
@@ -90,63 +172,116 @@
                                 </div>
                                 <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full dark:bg-green-900 dark:text-green-200">নিজের পেমেন্ট</span>
                             </div>
-                            <input type="hidden" wire:model="selectedUserId">
+                            <input type="hidden" wire:model="selectedUserId" name="selectedUserId">
                         @endif
                         @error('selectedUserId') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                     </div>
 
+                    @if(($paymentTerm ?? 'monthly') === 'yearly')
+                    <!-- =========================================
+                         Yearly-term panel
+                         ========================================= -->
+                    <div class="p-4 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900 dark:border-blue-600 rounded-r">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-blue-800 bg-blue-100 dark:bg-blue-900 dark:text-blue-200 rounded-full border border-blue-200 dark:border-blue-700">বাৎসরিক</span>
+                            <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-100">বাৎসরিক পেমেন্ট</h3>
+                            @if($hasCustomTerm ?? false)
+                                <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold text-amber-800 bg-amber-100 dark:bg-amber-900 dark:text-amber-200 rounded-full">কাস্টম টার্ম</span>
+                            @endif
+                        </div>
+                        <p class="text-xs text-blue-800 dark:text-blue-200">
+                            এই সদস্যের জন্য বছরভিত্তিক পেমেন্ট চালু। এক বা একাধিক বছর একসাথে পরিশোধ করতে পারবেন।
+                            নির্বাচিত বছরের বাকি মাস অনুযায়ী প্রোরাটা হিসাব হবে (সর্বোচ্চ প্রতি বছর ৳{{ number_format($yearlyFee ?? 0, 0) }})।
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">কোন বছরের পেমেন্ট? *</label>
+                        @if(empty($unpaidYearsList))
+                            <div class="p-4 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900 dark:border-green-700">
+                                <p class="text-sm font-semibold text-green-800 dark:text-green-200">
+                                    সকল বছরের পেমেন্ট সম্পন্ন হয়েছে। কোনো বাৎসরিক বকেয়া নেই।
+                                </p>
+                            </div>
+                        @else
+                            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                                @foreach($unpaidYearsList as $yr)
+                                    @php $isFuture = (int) $yr > (int) date('Y'); @endphp
+                                    <label class="flex items-center justify-between px-3 py-2.5 border-2 rounded-lg cursor-pointer transition-all
+                                        {{ in_array((int) $yr, array_map('intval', $selectedYears)) ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 shadow-sm' : 'border-gray-300 dark:border-gray-600 hover:border-blue-300' }}">
+                                        <span class="flex items-center gap-2">
+                                            <input type="checkbox" wire:model.live="selectedYears" value="{{ $yr }}"
+                                                class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                            <span class="text-sm font-semibold {{ in_array((int) $yr, array_map('intval', $selectedYears)) ? 'text-blue-700 dark:text-blue-200' : 'text-gray-700 dark:text-gray-300' }}">
+                                                {{ $yr }}
+                                            </span>
+                                        </span>
+                                        @if($isFuture)
+                                            <span class="text-[10px] font-semibold text-purple-700 bg-purple-100 dark:bg-purple-900 dark:text-purple-200 px-1.5 py-0.5 rounded">অগ্রিম</span>
+                                        @endif
+                                    </label>
+                                @endforeach
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                নির্বাচিত: <span class="font-semibold text-blue-600">{{ count($selectedYears) }} টি বছর</span>
+                            </p>
+                        @endif
+                        @error('selectedYears') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    </div>
+                    @else
+                    <!-- =========================================
+                         Monthly-term panel (original)
+                         ========================================= -->
                     <!-- Payment Type Selection -->
                     <div>
-                        <label class="block mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">পেমেন্ট ধরন *</label>
-                        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-                            <label class="relative flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer transition-all {{ $payment_type === 'current' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900' : 'border-gray-300 hover:border-blue-300 dark:border-gray-600' }} {{ $isCurrentMonthAlreadyPaid ? 'opacity-60 cursor-not-allowed' : '' }}">
-                                <input type="radio" wire:model.live="payment_type" value="current" class="sr-only" {{ $isCurrentMonthAlreadyPaid ? 'disabled' : '' }}>
-                                <svg class="w-8 h-8 mb-2 {{ $payment_type === 'current' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">পেমেন্ট ধরন *</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <label class="relative flex flex-col items-center px-3 py-2.5 border-2 rounded-lg cursor-pointer transition-all {{ $payment_type === 'current' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 shadow-sm' : 'border-gray-300 hover:border-blue-300 dark:border-gray-600' }} {{ $isCurrentMonthAlreadyPaid ? 'opacity-60 cursor-not-allowed' : '' }}">
+                                <input type="radio" wire:model.live="payment_type" name="payment_type" id="payment_type_current" value="current" class="sr-only" {{ $isCurrentMonthAlreadyPaid ? 'disabled' : '' }}>
+                                <svg class="w-5 h-5 mb-1 {{ $payment_type === 'current' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
-                                <span class="text-sm font-medium text-center {{ $payment_type === 'current' ? 'text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-400' }}">
+                                <span class="text-xs font-medium text-center {{ $payment_type === 'current' ? 'text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-400' }}">
                                     @if($isCurrentMonthAlreadyPaid)
-                                        চলতি মাস (জমা দেওয়া হয়েছে)
+                                        চলতি মাস ✓
                                     @else
                                         চলতি মাস
                                     @endif
                                 </span>
-                                @if($isCurrentMonthAlreadyPaid)
-                                    <span class="mt-1 text-xs font-medium text-green-700">এই মাসের পেমেন্ট জমা দেওয়া হয়েছে</span>
-                                @endif
                             </label>
 
-                            <label class="relative flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer transition-all {{ $payment_type === 'overdue' ? 'border-orange-500 bg-orange-50 dark:bg-orange-900' : 'border-gray-300 hover:border-orange-300 dark:border-gray-600' }} {{ $overdueInfo['months'] == 0 ? 'opacity-50 cursor-not-allowed' : '' }}">
-                                <input type="radio" wire:model.live="payment_type" value="overdue" class="sr-only" {{ $overdueInfo['months'] == 0 ? 'disabled' : '' }}>
-                                <svg class="w-8 h-8 mb-2 {{ $payment_type === 'overdue' ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <label class="relative flex flex-col items-center px-3 py-2.5 border-2 rounded-lg cursor-pointer transition-all {{ $payment_type === 'overdue' ? 'border-orange-500 bg-orange-50 dark:bg-orange-900 shadow-sm' : 'border-gray-300 hover:border-orange-300 dark:border-gray-600' }} {{ $overdueInfo['months'] == 0 ? 'opacity-50 cursor-not-allowed' : '' }}">
+                                <input type="radio" wire:model.live="payment_type" name="payment_type" id="payment_type_overdue" value="overdue" class="sr-only" {{ $overdueInfo['months'] == 0 ? 'disabled' : '' }}>
+                                <svg class="w-5 h-5 mb-1 {{ $payment_type === 'overdue' ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                <span class="text-sm font-medium text-center {{ $payment_type === 'overdue' ? 'text-orange-700 dark:text-orange-300' : 'text-gray-600 dark:text-gray-400' }}">বকেয়া পরিশোধ</span>
+                                <span class="text-xs font-medium text-center {{ $payment_type === 'overdue' ? 'text-orange-700 dark:text-orange-300' : 'text-gray-600 dark:text-gray-400' }}">বকেয়া</span>
                             </label>
 
-                            <label class="relative flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer transition-all {{ $payment_type === 'advance' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900' : 'border-gray-300 hover:border-purple-300 dark:border-gray-600' }}">
-                                <input type="radio" wire:model.live="payment_type" value="advance" class="sr-only">
-                                <svg class="w-8 h-8 mb-2 {{ $payment_type === 'advance' ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <label class="relative flex flex-col items-center px-3 py-2.5 border-2 rounded-lg cursor-pointer transition-all {{ $payment_type === 'advance' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900 shadow-sm' : 'border-gray-300 hover:border-purple-300 dark:border-gray-600' }}">
+                                <input type="radio" wire:model.live="payment_type" name="payment_type" id="payment_type_advance" value="advance" class="sr-only">
+                                <svg class="w-5 h-5 mb-1 {{ $payment_type === 'advance' ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                                 </svg>
-                                <span class="text-sm font-medium text-center {{ $payment_type === 'advance' ? 'text-purple-700 dark:text-purple-300' : 'text-gray-600 dark:text-gray-400' }}">অগ্রিম</span>
+                                <span class="text-xs font-medium text-center {{ $payment_type === 'advance' ? 'text-purple-700 dark:text-purple-300' : 'text-gray-600 dark:text-gray-400' }}">অগ্রিম</span>
                             </label>
                         </div>
                     </div>
 
                     <!-- Year + Month Selection (for overdue and advance) -->
                     @if($payment_type !== 'current')
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-[3fr_5fr]">
                         <!-- Year Selection -->
                         <div wire:loading.class="opacity-50 pointer-events-none" wire:loading.attr="aria-busy" wire:target="payment_type">
                             <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">সাল নির্বাচন করুন *</label>
                             <div class="relative">
                                 <select wire:model.live="paymentYear" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                    <option value="">সাল সিলেক্ট করুন</option>
                                     @foreach($paymentYears as $year)
                                         <option value="{{ $year }}">{{ $year }}</option>
                                     @endforeach
                                 </select>
-                                <div wire:loading wire:target="payment_type" class="absolute inset-0 flex items-center justify-center rounded-lg bg-white/60 dark:bg-gray-800/60">
+                                <div wire:loading wire:target="payment_type" wire:key="year-spinner" class="absolute inset-0 flex items-center justify-center rounded-lg bg-white/60 dark:bg-gray-800/60">
                                     <svg class="w-5 h-5 text-green-600 animate-spin" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -157,11 +292,10 @@
 
                         <!-- Month Selection Dropdown -->
                         <div x-data="{ open: false }"
-                            wire:key="month-dropdown-{{ $payment_type }}-{{ $paymentYear }}"
                             @payment-type-changed.window="open = false"
                             x-init="$watch('$wire.paymentYear', () => open = false); $watch('$wire.payment_type', () => open = false)"
                             wire:loading.class="opacity-50 pointer-events-none" wire:loading.attr="aria-busy" wire:target="payment_type,paymentYear">
-                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">কোন মাসের পেমেন্ট? * <span class="text-xs text-gray-500">(একাধিক নির্বাচন করতে পারবেন)</span></label>
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">কোন মাসের পেমেন্ট? *</label>
 
                             <!-- Dropdown Button -->
                             <div @click="open = !open" class="relative">
@@ -213,82 +347,123 @@
                         </div>
                     </div>
                     @endif
+                    @endif {{-- end monthly/yearly term branch --}}
 
-                    <!-- Payment Amount Display -->
-                    <div class="p-4 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900 dark:border-green-800" wire:loading.class="opacity-50" wire:target="payment_type">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-700 dark:text-gray-200">পেমেন্ট পরিমাণ</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ count($selectedMonths) }} মাস × ৳{{ number_format($monthlyFee, 0) }}</p>
+                    <!-- Payment Details Section with Padding -->
+                    <div class="p-4 space-y-6 bg-gray-50 rounded-lg dark:bg-gray-700/30 sm:p-6">
+                        <!-- Payment Amount Display -->
+                        <!-- Loading skeleton -->
+                        <div wire:loading wire:target="payment_type,selectedMonths,selectedYears,paymentYear,selectedUserId" wire:key="amount-skeleton" class="relative p-5 overflow-hidden border-2 border-gray-200 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 dark:border-gray-600 animate-pulse">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="w-24 h-4 mb-2 bg-gray-300 rounded dark:bg-gray-600"></div>
+                                    <div class="w-32 h-3 bg-gray-300 rounded dark:bg-gray-600"></div>
+                                </div>
+                                <div class="w-32 h-12 bg-gray-300 rounded dark:bg-gray-600"></div>
                             </div>
-                            <p class="text-3xl font-bold text-green-600 dark:text-green-400">৳{{ number_format($payment_amount, 0) }}</p>
-                        </div>
-                    </div>
-
-                    <!-- Payment Method -->
-                    <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">পেমেন্ট মাধ্যম *</label>
-                        <select wire:model="payment_method_id" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                            <option value="">নির্বাচন করুন</option>
-                            @foreach($paymentMethods as $method)
-                                <option value="{{ $method->id }}">{{ $method->name_bn ?? $method->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('payment_method_id') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                    </div>
-
-                    <!-- Reference Number -->
-                    <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">রেফারেন্স নাম্বার</label>
-                        <input type="text" wire:model="payment_reference" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="ট্রানজেকশন আইডি বা রেফারেন্স নাম্বার">
-                        @error('payment_reference') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                    </div>
-
-                    <!-- Proof Screenshot (Optional) -->
-                    <div x-data="{ fileName: '', previewUrl: '' }">
-                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">স্ক্রিনশট / ছবি (ঐচ্ছিক)</label>
-
-                        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                            <label class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                <input type="file" wire:model="payment_proof" accept="image/*" class="hidden" x-on:change="fileName = $event.target.files[0]?.name || ''; previewUrl = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : ''">
-                                <span x-text="fileName || 'ফাইল নির্বাচন করুন / Choose file'"></span>
-                            </label>
-
-                            <label class="inline-flex items-center px-3 py-2 text-xs font-medium text-white bg-green-600 border border-green-600 rounded-lg cursor-pointer hover:bg-green-700">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a2 2 0 012-2h3.28a1 1 0 01.948.684L10.5 6H21a1 1 0 011 1v11a2 2 0 01-2 2H5a2 2 0 01-2-2V4z" />
-                                </svg>
-                                <span>ক্যামেরা থেকে নিন</span>
-                                <input type="file" wire:model="payment_proof" accept="image/*" capture="environment" class="hidden" x-on:change="fileName = $event.target.files[0]?.name || 'Camera photo'; previewUrl = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : ''">
-                            </label>
                         </div>
 
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">পেমেন্টের স্ক্রিনশট বা ছবি তুলুন / আপলোড করুন (সর্বোচ্চ ২ এমবি, শুধু ছবি)।</p>
-
-                        <div x-show="previewUrl" class="mt-3">
-                            <p class="mb-1 text-xs font-medium text-gray-600 dark:text-gray-300">প্রিভিউ:</p>
-                            <img :src="previewUrl" alt="Payment proof preview" class="object-contain w-full border border-gray-200 rounded-lg max-h-56 dark:border-gray-600">
+                        <!-- Actual content -->
+                        <div wire:loading.remove wire:target="payment_type,selectedMonths,selectedYears,paymentYear,selectedUserId" wire:key="amount-content" class="relative p-5 overflow-hidden border-2 {{ ($paymentTerm ?? 'monthly') === 'yearly' ? 'border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 dark:border-blue-700' : 'border-green-300 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 dark:border-green-700' }} rounded-xl shadow-sm">
+                            <div class="absolute top-0 right-0 w-32 h-32 rounded-full opacity-20 -mr-16 -mt-16 {{ ($paymentTerm ?? 'monthly') === 'yearly' ? 'bg-blue-200 dark:bg-blue-700' : 'bg-green-200 dark:bg-green-700' }}"></div>
+                            <div class="relative flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold {{ ($paymentTerm ?? 'monthly') === 'yearly' ? 'text-blue-800 dark:text-blue-200' : 'text-green-800 dark:text-green-200' }}">পেমেন্ট পরিমাণ</p>
+                                    @if(($paymentTerm ?? 'monthly') === 'yearly')
+                                        <p class="text-xs mt-0.5 text-blue-600 dark:text-blue-400">{{ count($selectedYears) }} বছরের বকেয়া (প্রোরাটা)</p>
+                                    @else
+                                        <p class="text-xs mt-0.5 text-green-600 dark:text-green-400">{{ count($selectedMonths) }} মাস × ৳{{ number_format($monthlyFee, 0) }}</p>
+                                    @endif
+                                    @if($hasCustomFee)
+                                        <span class="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 text-[10px] font-semibold text-amber-800 bg-amber-100 dark:bg-amber-900 dark:text-amber-200 rounded-full">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                                            কাস্টম ফি (ডিফল্ট ৳{{ number_format($defaultMonthlyFee, 0) }})
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-4xl font-bold {{ ($paymentTerm ?? 'monthly') === 'yearly' ? 'text-blue-600 dark:text-blue-300' : 'text-green-600 dark:text-green-300' }}">৳{{ number_format($payment_amount, 0) }}</p>
+                                </div>
+                            </div>
                         </div>
 
-                        @error('payment_proof') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                    </div>
+                        <!-- Payment Method -->
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">পেমেন্ট মাধ্যম *</label>
+                            <select wire:model.live="payment_method_id" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                <option value="">নির্বাচন করুন</option>
+                                @foreach($paymentMethods as $method)
+                                    <option value="{{ $method->id }}">{{ $method->name_bn ?? $method->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('payment_method_id') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                        </div>
 
-                    <!-- Notes -->
-                    <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">নোট (ঐচ্ছিক)</label>
-                        <textarea wire:model="payment_note" rows="3" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="অতিরিক্ত কোন তথ্য থাকলে লিখুন..."></textarea>
-                        @error('payment_note') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                    </div>
+                        <!-- Reference Number (Hidden for Hand Cash) -->
+                        @if($payment_method_id != 1)
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">ট্রানজেকশন আইডি / রেফারেন্স নাম্বার</label>
+                            <input type="text" wire:model="payment_reference" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="ট্রানজেকশন আইডি বা রেফারেন্স নাম্বার লিখুন">
+                            @error('payment_reference') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                        </div>
+                        @endif
 
-                    <!-- Submit Button -->
-                    <div class="flex gap-3">
-                        <button type="submit" class="flex-1 px-6 py-3 text-sm font-medium text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                            <span wire:loading.remove wire:target="submitPayment">পেমেন্ট সাবমিট করুন</span>
-                            <span wire:loading wire:target="submitPayment">সাবমিট হচ্ছে...</span>
-                        </button>
-                        <a href="{{ route('member.profile') }}" class="px-6 py-3 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
-                            বাতিল
-                        </a>
+                        <!-- Proof Screenshot (Optional) -->
+                        <div x-data="{ fileName: '', previewUrl: '' }">
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">স্ক্রিনশট / ছবি (ঐচ্ছিক)</label>
+
+                            <!-- Single hidden file input -->
+                            <input type="file" 
+                                   wire:model="payment_proof" 
+                                   accept="image/*" 
+                                   class="hidden" 
+                                   id="payment_proof_input"
+                                   x-on:change="fileName = $event.target.files[0]?.name || ''; previewUrl = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : ''">
+
+                            <div class="flex gap-2">
+                                <label for="payment_proof_input" class="flex-1 flex items-center justify-center px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border-2 border-gray-300 border-dashed rounded-lg cursor-pointer dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+                                    <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    <span class="truncate" x-text="fileName || 'ফাইল নির্বাচন করুন'"></span>
+                                </label>
+
+                                <label for="payment_proof_input" class="inline-flex items-center px-4 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg cursor-pointer hover:bg-green-700 transition-colors shadow-sm">
+                                    <svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    <span class="hidden sm:inline">ক্যামেরা</span>
+                                </label>
+                            </div>
+
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">পেমেন্টের স্ক্রিনশট বা ছবি তুলুন / আপলোড করুন (সর্বোচ্চ ২ এমবি, শুধু ছবি)।</p>
+
+                            <div x-show="previewUrl" class="mt-3">
+                                <p class="mb-1 text-xs font-medium text-gray-600 dark:text-gray-300">প্রিভিউ:</p>
+                                <img :src="previewUrl" alt="Payment proof preview" class="object-contain w-full border border-gray-200 rounded-lg max-h-56 dark:border-gray-600">
+                            </div>
+
+                            @error('payment_proof') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                        </div>
+
+                        <!-- Notes -->
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">নোট (ঐচ্ছিক)</label>
+                            <textarea wire:model="payment_note" rows="3" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="অতিরিক্ত কোন তথ্য থাকলে লিখুন..."></textarea>
+                            @error('payment_note') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="flex gap-3">
+                            <button type="submit" class="flex-1 px-6 py-3 text-sm font-medium text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                                <span wire:loading.remove wire:target="submitPayment" wire:key="submit-text">পেমেন্ট সাবমিট করুন</span>
+                                <span wire:loading wire:target="submitPayment" wire:key="submit-loading">সাবমিট হচ্ছে...</span>
+                            </button>
+                            <a href="{{ route('member.profile') }}" class="px-6 py-3 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
+                                বাতিল
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>

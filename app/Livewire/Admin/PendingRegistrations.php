@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Helpers\NotificationHelper;
 use App\Models\User;
 use App\Services\MemberService;
 use Livewire\Component;
@@ -33,6 +34,8 @@ class PendingRegistrations extends Component
         $user = User::find($userId);
 
         if ($user && $memberService->approveMember($user)) {
+            // Send approval notification to the user
+            app(NotificationHelper::class)->sendMembershipApprovalNotification($user);
             session()->flash('success', 'সদস্য সফলভাবে অনুমোদিত হয়েছে! সদস্য নম্বর: ' . $user->membership_id);
             $this->closeModal();
         } else {
@@ -52,12 +55,33 @@ class PendingRegistrations extends Component
         $user = User::find($userId);
 
         if ($user && $memberService->rejectMember($user)) {
-            // TODO: Send notification with reason
+            // Send rejection notification to the user
+            app(NotificationHelper::class)->sendMembershipRejectionNotification($user, $this->rejectionReason);
             session()->flash('success', 'সদস্য প্রত্যাখ্যান করা হয়েছে।');
             $this->closeModal();
         } else {
             session()->flash('error', 'সদস্য প্রত্যাখ্যান করতে সমস্যা হয়েছে।');
         }
+    }
+
+    public function deleteRegistration($userId)
+    {
+        $user = User::find($userId);
+
+        if (!$user) {
+            session()->flash('error', 'নিবন্ধন পাওয়া যায়নি।');
+            return;
+        }
+
+        // Only pending registrations can be deleted
+        if ($user->status !== 'pending') {
+            session()->flash('error', 'শুধু অপেক্ষমান নিবন্ধন মুছে ফেলা যায়।');
+            return;
+        }
+
+        $user->delete();
+
+        session()->flash('success', 'নিবন্ধন সফলভাবে মুছে ফেলা হয়েছে।');
     }
 
     public function render()

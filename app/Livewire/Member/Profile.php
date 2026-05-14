@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Member;
 
+use App\Services\PdfService;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
@@ -11,7 +12,6 @@ use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Services\SettingsService;
 use App\Services\MemberService;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class Profile extends Component
 {
@@ -110,32 +110,19 @@ class Profile extends Component
         $this->reset(['current_password', 'new_password', 'new_password_confirmation']);
     }
 
+    /**
+     * Get total overdue information using the unified MemberService
+     * so that custom payment terms and fees are respected.
+     */
     public function getTotalOverdueInfo()
     {
-        $settingsService = app(SettingsService::class);
-        $establishedYear = (int) $settingsService->get('organization_established_year', 2024);
-        $establishedMonth = (int) $settingsService->get('organization_established_month', 1);
-        $monthlyFee = (float) $settingsService->get('monthly_fee', 500);
-        $currentYear = (int) date('Y');
-        $currentMonth = (int) date('n');
-
-        // Calculate total months from establishment to previous month
-        $establishmentDate = \Carbon\Carbon::create($establishedYear, $establishedMonth, 1);
-        $lastMonthDate = \Carbon\Carbon::now()->subMonth()->endOfMonth();
-        $totalMonthsShouldPay = $establishmentDate->diffInMonths($lastMonthDate) + 1;
-
-        // Count paid months
-        $paidMonths = Payment::where('user_id', auth()->id())
-            ->where('status', 'approved')
-            ->where('created_at', '<', \Carbon\Carbon::now()->startOfMonth())
-            ->count();
-
-        $overdueMonths = max(0, $totalMonthsShouldPay - $paidMonths);
-        $overdueAmount = $overdueMonths * $monthlyFee;
+        $user = auth()->user();
+        $memberService = app(MemberService::class);
+        $dues = $memberService->calculateOutstandingDues($user);
 
         return [
-            'months' => $overdueMonths,
-            'amount' => $overdueAmount
+            'months' => (int) $dues['unpaid_months'],
+            'amount' => (float) $dues['total_due'],
         ];
     }
 
@@ -162,7 +149,7 @@ class Profile extends Component
         $this->closePasswordModal();
     }
 
-    public function downloadReceipt($paymentId)
+    public function downloadReceipt($paymentId, PdfService $pdfService)
     {
         $payment = Payment::with(['paymentMethod'])->where('user_id', auth()->id())->findOrFail($paymentId);
 
@@ -171,15 +158,7 @@ class Profile extends Component
             return;
         }
 
-        $pdf = Pdf::loadView('pdf.payment-receipt', [
-            'payment' => $payment,
-        ]);
-
-        $fileName = 'receipt-' . ($payment->transaction_id ?: ($payment->id)) . '.pdf';
-
-        return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->output();
-        }, $fileName);
+        return $pdfService->generatePaymentReceipt($payment);
     }
 
     public function render()
@@ -216,6 +195,9 @@ class Profile extends Component
         $pendingMonths = Payment::where('user_id', auth()->id())
             ->where('status', 'pending')
             ->count();
+
+        // Get bank balance
+        $bankBalance = \App\Models\BankDeposit::getTotalBalance();
 
         // Get organization established year from settings
         $settingsService = app(SettingsService::class);
@@ -269,6 +251,7 @@ class Profile extends Component
             'dueMonths' => $dueMonths,
             'pendingAmount' => $pendingAmount,
             'pendingMonths' => $pendingMonths,
+            'bankBalance' => $bankBalance,
             'years' => $years,
             'monthlyData' => $monthlyData,
         ])->layout('layouts.app');

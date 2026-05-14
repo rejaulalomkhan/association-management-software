@@ -11,13 +11,17 @@
                 </svg>
             </div>
             <div class="flex-1">
-                <p class="font-semibold text-green-700 dark:text-green-200">অভিনন্দন!</p>
+                <p class="font-semibold text-purple-700 dark:text-purple-200">অভিনন্দন!</p>
                 <p class="mt-1">
-                    আপনার পূর্বের কোনো বকেয়া নেই। এখন পর্যন্ত সকল মাসের পেমেন্ট সঠিক সময়ে পরিশোধ হয়েছে।
-                </p>
-                <p class="mt-1 text-xs text-green-700 dark:text-green-300">
+                    আপনার পূর্বের কোনো বকেয়া নেই। এখন পর্যন্ত সকল মাসের পেমেন্ট সঠিক সময়ে পরিশোধ হয়েছে।                
                     নিয়মিত পেমেন্টের জন্য ধন্যবাদ।
                 </p>
+                <a href="{{ route('member.payment') }}" wire:navigate class="inline-flex items-center px-3 py-1.5 mt-2 text-xs font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    অগ্রীম পেমেন্ট
+                </a>
             </div>
             <button
                 type="button"
@@ -48,6 +52,12 @@
                     <span class="font-semibold text-blue-700 dark:text-blue-200">৳{{ number_format($monthlyFee, 0) }}</span>
                     পরিশোধের অপেক্ষায় আছে।
                 </p>
+                <a href="{{ route('member.payment') }}" wire:navigate class="inline-flex items-center px-3 py-1.5 mt-2 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    পেমেন্ট করুন
+                </a>
             </div>
             <button
                 type="button"
@@ -85,6 +95,12 @@
                 <p class="mt-1 text-xs text-orange-700 dark:text-orange-300">
                     সংগঠন চালু থেকে বর্তমান মাস পর্যন্ত হিসাব।
                 </p>
+                <a href="{{ route('member.payment') }}" wire:navigate class="inline-flex items-center px-3 py-1.5 mt-2 text-xs font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    পেমেন্ট করুন
+                </a>
             </div>
             <button
                 type="button"

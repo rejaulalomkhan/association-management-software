@@ -26,6 +26,8 @@ class AddMember extends Component
     public $religion = 'Islam';
     public $nationality = 'Bangladeshi';
     public $position;
+    public $monthly_fee;
+    public $payment_term = '';
     public $profile_pic;
     public $auto_approve = true;
     public $same_address = false;
@@ -67,7 +69,9 @@ class AddMember extends Component
             'religion' => 'nullable|string|max:50',
             'nationality' => 'nullable|string|max:50',
             'position' => 'nullable|string|max:255',
-            'profile_pic' => 'nullable|image|max:2048',
+            'monthly_fee' => 'nullable|numeric|min:0|max:9999999',
+            'payment_term' => 'nullable|in:,' . implode(',', \App\Enums\PaymentTerm::all()),
+            'profile_pic' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'auto_approve' => 'boolean',
         ];
     }
@@ -95,6 +99,8 @@ class AddMember extends Component
             'religion' => $this->religion,
             'nationality' => $this->nationality,
             'position' => $this->position,
+            'monthly_fee' => $this->monthly_fee > 0 ? (float) $this->monthly_fee : null,
+            'payment_term' => \App\Enums\PaymentTerm::coerce($this->payment_term),
             'status' => $this->auto_approve ? 'active' : 'pending',
         ];
 
@@ -113,8 +119,16 @@ class AddMember extends Component
         // Create user
         $user = User::create($data);
 
-        // Assign member role (role_id = 9)
-        $user->roles()->attach(9);
+        // Assign the "member" role (looked up by slug so we don't depend on a hard-coded id).
+        $memberRole = \HasinHayder\Tyro\Models\Role::where('slug', 'member')->first();
+        if ($memberRole) {
+            $user->assignRole($memberRole);
+        }
+
+        // If auto-approved, issue a public verification token so the QR code works immediately.
+        if ($this->auto_approve) {
+            $user->ensureVerificationToken();
+        }
 
         session()->flash('success', $this->auto_approve
             ? 'সদস্য সফলভাবে যুক্ত হয়েছে! সদস্য নম্বর: ' . $user->membership_id

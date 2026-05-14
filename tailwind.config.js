@@ -6,6 +6,7 @@ export default {
         "./resources/**/*.vue",
         "./vendor/hasinhayder/tyro-login/resources/views/**/*.blade.php",
     ],
+    darkMode: 'class', // Enable class-based dark mode
     theme: {
         extend: {
             fontFamily: {

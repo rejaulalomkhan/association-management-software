@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Member;
 
+use App\Services\PdfService;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Auth;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class PaymentHistory extends Component
 {
@@ -56,7 +56,7 @@ class PaymentHistory extends Component
         $this->selectedPayment = null;
     }
 
-    public function downloadReceipt($paymentId)
+    public function downloadReceipt($paymentId, PdfService $pdfService)
     {
         $payment = Payment::with(['user', 'paymentMethod'])->findOrFail($paymentId);
 
@@ -69,10 +69,7 @@ class PaymentHistory extends Component
             return;
         }
 
-        $pdf = Pdf::loadView('pdf.receipt', ['payment' => $payment]);
-        return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->output();
-        }, 'receipt-' . $payment->transaction_id . '.pdf');
+        return $pdfService->generatePaymentReceipt($payment);
     }
 
     public function editRejectedPayment($paymentId)

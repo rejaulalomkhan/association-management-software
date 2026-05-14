@@ -5,9 +5,9 @@ namespace App\Livewire\Admin;
 use App\Models\Payment;
 use App\Models\User;
 use App\Helpers\NotificationHelper;
+use App\Services\PdfService;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class Transactions extends Component
 {
@@ -24,10 +24,19 @@ class Transactions extends Component
 
     public function mount()
     {
-        // Initialize with current month and year as default
-        // Use string type to match select option values
-        $this->selectedMonth = date('n'); // Current month (1-12) as string
-        $this->selectedYear = date('Y');  // Current year as string
+        // Check if there are pending transactions
+        $pendingCount = Payment::where('status', 'pending')->count();
+
+        // If pending transactions exist, show them by default
+        if ($pendingCount > 0) {
+            $this->selectedStatus = 'pending';
+            $this->selectedMonth = '';
+            $this->selectedYear = '';
+        } else {
+            // Otherwise, show current month and year as default
+            $this->selectedMonth = date('n'); // Current month (1-12)
+            $this->selectedYear = date('Y');  // Current year
+        }
     }
 
     public function updatingSelectedMonth()
@@ -129,7 +138,7 @@ class Transactions extends Component
         session()->flash('success', 'পেমেন্ট প্রত্যাখ্যান করা হয়েছে');
     }
 
-    public function exportReport()
+    public function exportReport(PdfService $pdfService)
     {
         $query = Payment::with(['user', 'paymentMethod']);
 
@@ -153,15 +162,11 @@ class Transactions extends Component
 
         $transactions = $query->orderBy('created_at', 'desc')->get();
 
-        $pdf = Pdf::loadView('pdf.transactions-report', [
-            'transactions' => $transactions,
-            'month' => $this->selectedMonth,
-            'year' => $this->selectedYear,
-        ]);
-
-        return response()->streamDownload(function() use ($pdf) {
-            echo $pdf->stream();
-        }, 'transactions-report-' . date('Y-m-d') . '.pdf');
+        return $pdfService->generateTransactionsReport(
+            $transactions,
+            $this->selectedMonth ? date('F', mktime(0, 0, 0, (int) $this->selectedMonth, 1)) : null,
+            $this->selectedYear ? (int) $this->selectedYear : null
+        );
     }
 
     public function viewPayment($paymentId)
@@ -170,7 +175,7 @@ class Transactions extends Component
         $this->dispatch('open-view-modal');
     }
 
-    public function downloadReceipt($paymentId)
+    public function downloadReceipt($paymentId, PdfService $pdfService)
     {
         $payment = Payment::with(['user', 'paymentMethod', 'approver'])->findOrFail($paymentId);
 
@@ -179,15 +184,22 @@ class Transactions extends Component
             return;
         }
 
-        $pdf = Pdf::loadView('pdf.payment-receipt', [
-            'payment' => $payment,
-        ]);
+        return $pdfService->generatePaymentReceipt($payment);
+    }
 
-        $fileName = 'receipt-' . ($payment->transaction_id ?: ($payment->id)) . '.pdf';
+    public function deletePayment($paymentId)
+    {
+        $payment = Payment::findOrFail($paymentId);
 
-        return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->output();
-        }, $fileName);
+        // Only pending payments can be deleted
+        if ($payment->status !== 'pending') {
+            session()->flash('success', 'শুধু অপেক্ষমান পেমেন্ট মুছে ফেলা যায়।');
+            return;
+        }
+
+        $payment->delete();
+
+        session()->flash('success', 'পেমেন্ট সফলভাবে মুছে ফেলা হয়েছে।');
     }
 
     public function render()

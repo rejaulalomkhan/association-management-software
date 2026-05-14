@@ -1,11 +1,20 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ org_name() }}</title>
+
+    <!-- Favicon -->
+    @php
+        $faviconLogo = org_logo_path();
+    @endphp
+    @if($faviconLogo && file_exists(storage_path('app/public/' . $faviconLogo)))
+        <link rel="icon" type="image/png" href="{{ asset('storage/' . $faviconLogo) }}">
+        <link rel="shortcut icon" type="image/png" href="{{ asset('storage/' . $faviconLogo) }}">
+    @endif
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,6 +31,19 @@
 
     <!-- Livewire Styles -->
     @livewireStyles
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- iOS Specific -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="{{ org_name() }}">
+    <link rel="apple-touch-icon" href="/images/icons/icon-152x152.png">
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#3b82f6">
 </head>
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
     <!-- Global Livewire Loading Indicator -->
@@ -78,22 +100,24 @@
             </div>
 
                 <!-- Profile Dropdown -->
-                <div class="flex items-center space-x-4" x-data="{ profileOpen: false, notificationOpen: false }">
+                <div class="flex items-center space-x-2 sm:space-x-4" x-data="{ profileOpen: false, notificationOpen: false }">
                     <!-- Panel Switcher Button -->
                     @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('accountant'))
                         @if(request()->routeIs('admin.*') || request()->routeIs('accountant.*'))
-                            <a href="{{ route('member.profile') }}" wire:navigate class="hidden sm:inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <a href="{{ route('member.profile') }}" wire:navigate class="inline-flex items-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+                                <svg class="w-4 h-4 mr-1 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
-                                সদস্য প্যানেল
+                                <span class="sm:hidden">সদস্য</span>
+                                <span class="hidden sm:inline">সদস্য প্যানেল</span>
                             </a>
                         @else
-                            <a href="{{ auth()->user()->hasRole('admin') ? route('admin.dashboard') : route('accountant.dashboard') }}" wire:navigate class="hidden sm:inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <a href="{{ auth()->user()->hasRole('admin') ? route('admin.dashboard') : route('accountant.dashboard') }}" wire:navigate class="inline-flex items-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                                <svg class="w-4 h-4 mr-1 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                                 </svg>
-                                {{ auth()->user()->hasRole('admin') ? 'এডমিন প্যানেল' : 'একাউন্টেন্ট প্যানেল' }}
+                                <span class="sm:hidden">{{ auth()->user()->hasRole('admin') ? 'এডমিন' : 'একাউন্টেন্ট' }}</span>
+                                <span class="hidden sm:inline">{{ auth()->user()->hasRole('admin') ? 'এডমিন প্যানেল' : 'একাউন্টেন্ট প্যানেল' }}</span>
                             </a>
                         @endif
                     @endif
@@ -251,6 +275,19 @@
 
                             <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
 
+                            <!-- Theme Toggle -->
+                            <button type="button" @click="toggleTheme()" class="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <svg class="w-4 h-4 mr-3 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                </svg>
+                                <svg class="w-4 h-4 mr-3 moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                                </svg>
+                                <span class="theme-text">ডার্ক মোড</span>
+                            </button>
+
+                            <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+
                             <!-- Logout -->
                             <form method="POST" action="{{ route('tyro-login.logout') }}">
                                 @csrf
@@ -343,7 +380,85 @@
 
     <x-toast />
 
+    <!-- PWA Install Prompt -->
+    <livewire:pwa-install-prompt />
+
     <!-- Livewire Scripts -->
     @livewireScripts
+
+    <!-- Theme Toggle Script -->
+    <script>
+        // Theme management functions (synced with tyro-login)
+        function getTheme() {
+            if (localStorage.getItem('tyro-login-theme')) {
+                return localStorage.getItem('tyro-login-theme');
+            }
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        function setTheme(theme) {
+            localStorage.setItem('tyro-login-theme', theme);
+            document.documentElement.classList.remove('light', 'dark');
+            document.documentElement.classList.add(theme);
+            
+            // Update body class for Tailwind dark mode
+            if (theme === 'dark') {
+                document.body.classList.add('dark');
+            } else {
+                document.body.classList.remove('dark');
+            }
+            
+            updateThemeUI();
+        }
+
+        function toggleTheme() {
+            const currentTheme = getTheme();
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        function updateThemeUI() {
+            const isDark = getTheme() === 'dark';
+            const sunIcons = document.querySelectorAll('.sun-icon');
+            const moonIcons = document.querySelectorAll('.moon-icon');
+            const themeTexts = document.querySelectorAll('.theme-text');
+
+            sunIcons.forEach(icon => {
+                icon.style.display = isDark ? 'block' : 'none';
+            });
+
+            moonIcons.forEach(icon => {
+                icon.style.display = isDark ? 'none' : 'block';
+            });
+
+            themeTexts.forEach(text => {
+                text.textContent = isDark ? 'লাইট মোড' : 'ডার্ক মোড';
+            });
+        }
+
+        // Apply theme on load
+        setTheme(getTheme());
+
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('tyro-login-theme')) {
+                setTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+    </script>
+
+    <style>
+        .sun-icon {
+            display: none;
+        }
+        .moon-icon {
+            display: block;
+        }
+        html.dark .sun-icon {
+            display: block;
+        }
+        html.dark .moon-icon {
+            display: none;
+        }
+    </style>
 </body>
 </html>

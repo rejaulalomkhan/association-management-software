@@ -110,7 +110,7 @@
 <body>
     <div class="header">
         <h1>লেনদেন রিপোর্ট</h1>
-        <p>{{ config('app.name') }}</p>
+        <p>{{ org_name() }}</p>
         <p>রিপোর্ট তৈরির তারিখ: {{ date('d/m/Y') }}</p>
     </div>
 
@@ -197,7 +197,7 @@
     </div>
 
     <div class="footer">
-        <p>এই রিপোর্টটি স্বয়ংক্রিয়ভাবে তৈরি করা হয়েছে - {{ config('app.name') }}</p>
+        <p>এই রিপোর্টটি স্বয়ংক্রিয়ভাবে তৈরি করা হয়েছে - {{ org_name() }}</p>
     </div>
 </body>
 </html>

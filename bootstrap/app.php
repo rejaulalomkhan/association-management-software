@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             \App\Http\Middleware\AllowPhoneAsEmail::class,
+            \App\Http\Middleware\CheckPendingStatus::class,
         ]);
 
         // Redirect unauthenticated users to login page

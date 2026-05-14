@@ -13,6 +13,12 @@ class Register extends Component
 {
     use WithFileUploads;
 
+    public $showTerms = true;
+    public $termsAccepted = false;
+    public $showPassword = false;
+    public $showPasswordConfirmation = false;
+    public $sameAddress = false;
+
     public $name;
     public $phone;
     public $password;
@@ -23,8 +29,8 @@ class Register extends Component
     public $present_address;
     public $blood_group;
     public $profession;
-    public $religion;
-    public $nationality;
+    public $religion = 'ইসলাম';
+    public $nationality = 'Bangladeshi';
     public $position;
     public $profile_pic;
 
@@ -41,8 +47,33 @@ class Register extends Component
         'religion' => 'required|string',
         'nationality' => 'required|string',
         'position' => 'nullable|string',
-        'profile_pic' => 'nullable|image|max:2048', // 2MB Max
+        'profile_pic' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB Max
     ];
+
+    public function acceptTerms()
+    {
+        $this->validate([
+            'termsAccepted' => 'accepted'
+        ], [
+            'termsAccepted.accepted' => 'আপনাকে অবশ্যই শর্তাবলী মেনে নিতে হবে।'
+        ]);
+
+        $this->showTerms = false;
+    }
+
+    public function updatedSameAddress($value)
+    {
+        if ($value) {
+            $this->permanent_address = $this->present_address;
+        }
+    }
+
+    public function updatedPresentAddress($value)
+    {
+        if ($this->sameAddress) {
+            $this->permanent_address = $value;
+        }
+    }
 
     public function register()
     {
@@ -71,13 +102,17 @@ class Register extends Component
             'status' => 'pending',
         ]);
 
-        // Assign default role
-        $user->assignRole('member');
+        // Assign default role - find the role first
+        $memberRole = \HasinHayder\Tyro\Models\Role::where('slug', 'member')->first();
+        if ($memberRole) {
+            $user->assignRole($memberRole);
+        }
 
-        session()->flash('message', 'Registration successful! Please wait for admin approval.');
+        session()->flash('message', 'আপনার আবেদন সফলভাবে জমা হয়েছে। অনুগ্রহ করে অনুমোদনের জন্য অপেক্ষা করুন।');
 
-        // Redirect to login or pending page
-        return redirect()->route('login');
+        // Send the applicant to the pending-status page so they can see the
+        // submitted information and track approval status using their phone.
+        return redirect()->route('pending-status', ['phone' => $user->phone]);
     }
 
     public function render()
