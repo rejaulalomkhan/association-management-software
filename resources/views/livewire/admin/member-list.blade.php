@@ -68,7 +68,8 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ $member->name }}</div>
+                            <a href="{{ route('admin.members.view', $member->id) }}" wire:navigate
+                               class="block text-sm font-medium text-gray-900 hover:text-indigo-600 transition-colors">{{ $member->name }}</a>
                             <div class="text-sm text-gray-500">{{ $member->email }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">

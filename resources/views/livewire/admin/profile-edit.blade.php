@@ -173,6 +173,38 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     @error('nationality') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                 </div>
+
+                @if($isEditingOther)
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">মাসিক ফি (৳)</label>
+                    <input type="number" wire:model="monthly_fee" step="0.01" min="0"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <p class="text-xs text-gray-500 mt-1">খালি রাখলে সিস্টেমের ডিফল্ট ফি প্রযোজ্য হবে</p>
+                    @error('monthly_fee') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">পেমেন্ট টার্ম</label>
+                    <select wire:model="payment_term"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <option value="">সিস্টেম ডিফল্ট</option>
+                        <option value="monthly">মাসিক</option>
+                        <option value="yearly">বাৎসরিক</option>
+                    </select>
+                    @error('payment_term') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">সদস্য স্ট্যাটাস</label>
+                    <select wire:model="status"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <option value="active">সক্রিয়</option>
+                        <option value="pending">অপেক্ষমাণ</option>
+                        <option value="suspended">স্থগিত</option>
+                    </select>
+                    @error('status') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
+                </div>
+                @endif
             </div>
         </div>
 

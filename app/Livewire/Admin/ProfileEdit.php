@@ -30,6 +30,9 @@ class ProfileEdit extends Component
     public $blood_group;
     public $profile_pic;
     public $new_profile_pic;
+    public $monthly_fee;
+    public $payment_term;
+    public $status;
     public $current_password;
     public $new_password;
     public $new_password_confirmation;
@@ -65,6 +68,9 @@ class ProfileEdit extends Component
         $this->position = $this->user->position ?? '';
         $this->blood_group = $this->user->blood_group ?? '';
         $this->profile_pic = $this->user->profile_pic ?? '';
+        $this->monthly_fee = $this->user->monthly_fee ?? '';
+        $this->payment_term = $this->user->payment_term ?? '';
+        $this->status = $this->user->status ?? '';
     }
 
     public function updatedSameAddress($value)
@@ -98,6 +104,9 @@ class ProfileEdit extends Component
             'nationality' => 'nullable|string|max:100',
             'position' => 'nullable|string|max:255',
             'blood_group' => 'nullable|string|max:10',
+            'monthly_fee' => 'nullable|numeric|min:0|max:9999999',
+            'payment_term' => 'nullable|in:monthly,yearly',
+            'status' => 'required|in:active,pending,suspended',
             'new_profile_pic' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:5120', // 5MB
         ]);
 
@@ -118,6 +127,9 @@ class ProfileEdit extends Component
         $this->user->nationality = $this->nationality ?: null;
         $this->user->position = $this->position ?: null;
         $this->user->blood_group = $this->blood_group ?: null;
+        $this->user->monthly_fee = $this->monthly_fee > 0 ? (float) $this->monthly_fee : null;
+        $this->user->payment_term = \App\Enums\PaymentTerm::coerce($this->payment_term);
+        $this->user->status = $this->status ?: 'pending';
 
         // Handle profile picture upload
         if ($this->new_profile_pic) {
@@ -137,10 +149,30 @@ class ProfileEdit extends Component
             }
         }
 
+        // Handle password change if provided
+        if ($this->new_password) {
+            $isEditingOther = $this->memberId && $this->user->id !== auth()->id();
+            if (!$isEditingOther) {
+                $this->validate([
+                    'current_password' => 'required',
+                    'new_password' => 'required|min:8|confirmed',
+                ]);
+                if (!Hash::check($this->current_password, $this->user->password)) {
+                    $this->addError('current_password', 'বর্তমান পাসওয়ার্ড সঠিক নয়।');
+                    return;
+                }
+            } else {
+                $this->validate([
+                    'new_password' => 'required|min:8|confirmed',
+                ]);
+            }
+            $this->user->password = Hash::make($this->new_password);
+        }
+
         $this->user->save();
 
         session()->flash('success', 'প্রোফাইল সফলভাবে আপডেট করা হয়েছে।');
-        $this->reset(['new_profile_pic']);
+        $this->reset(['new_profile_pic', 'current_password', 'new_password', 'new_password_confirmation']);
     }
 
     public function updatePassword()
